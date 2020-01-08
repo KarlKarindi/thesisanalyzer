@@ -1,16 +1,17 @@
-from flask import Flask
+from flask import Flask, request
 import simplejson as json
-import estnltk
+import utils as utils
+import service as service
 
 app = Flask(__name__)
 
-print(estnltk.Text("Hi estnltk"))
+@app.route('/style/', methods=['POST'])
+def style_controller():
+    return service.analyze_style(utils.json_to_text(request))
 
-
-@app.route("/")
-def hello():
-    return "Hello world"
-
+@app.route('/general/', methods=['POST'])
+def general_controller():
+    return service.analyze_general(utils.json_to_text(request))
 
 if __name__ == "__main__":
     app.run(debug=True)

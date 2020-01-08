@@ -2,5 +2,12 @@
   "code-runner.executorMap": {
     "python": "python"
   },
-  "python.pythonPath": "C:\\Users\\Karl\\Miniconda3\\envs\\thesis-env\\python.exe"
+  "code-runner.clearPreviousOutput": true,
+  "python.pythonPath": "C:\\Users\\Karl\\Miniconda3\\envs\\thesis-env\\python.exe",
+  "files.exclude": {
+    "**/.classpath": true,
+    "**/.project": true,
+    "**/.settings": true,
+    "**/.factorypath": true
+  }
 }
