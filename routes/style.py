@@ -1,8 +1,8 @@
 from flask import Blueprint
 
-style_bp = Blueprint('style_bp', __name__)
+mod = Blueprint('style', __name__)
 
-@style_bp.route('/style')
-def style():
+@mod.route('/style')
+def route_style():
    print("I am on style route")
    return "style"

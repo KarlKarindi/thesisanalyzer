@@ -1,13 +1,17 @@
 {
-  "code-runner.executorMap": {
-    "python": "python"
-  },
-  "code-runner.clearPreviousOutput": true,
-  "python.pythonPath": "C:\\Users\\Karl\\Miniconda3\\envs\\thesis-env\\python.exe",
   "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/*.pyc": true,
+    "**/__pycache__": true,
     "**/.classpath": true,
     "**/.project": true,
     "**/.settings": true,
     "**/.factorypath": true
-  }
+  },
+  "code-runner.executorMap": {
+    "python": "python"
+  },
+  "code-runner.clearPreviousOutput": true,
+  "python.pythonPath": "C:\\Users\\Karl\\Miniconda3\\envs\\thesis-env\\python.exe"
 }

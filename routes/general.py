@@ -1,8 +1,12 @@
-from flask import Blueprint
+from flask import Blueprint, request
+from ..services import service as service
 
-gen_bp = Blueprint('gen_bp', __name__)
+mod = Blueprint('general', __name__)
 
-@gen_bp.route('/general')
-def general():
-   print("I am on general route")
-   return "general"
+@mod.route('/')
+def index():
+   return "<h1>Karl Erik Karindi lõputöö analüsaator<h1>"
+
+@mod.route('/general/', methods=['POST'])
+def analyze_general():
+   return service.analyze_general(request)

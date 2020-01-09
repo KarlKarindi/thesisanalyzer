@@ -1,6 +1,6 @@
-from .general import gen_bp
-from .style import style_bp
+from .general import mod as general_mod
+from .style import mod as style_mod
 
 def init_app(app):
-    app.register_blueprint(gen_bp)
-    app.register_blueprint(style_bp)
+    app.register_blueprint(general_mod)
+    app.register_blueprint(style_mod)
