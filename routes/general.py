@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from ..services import service as service
+from ..services import generalService as service
 
 mod = Blueprint('general', __name__)
 

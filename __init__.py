@@ -1,8 +1,12 @@
 from flask import Flask
+from estnltk import Vabamorf
+
+# Initialize vabamorf singleton
+vabamorf = Vabamorf.instance()
 
 def create_app():
     from . import routes, services
     app = Flask(__name__)
     routes.init_app(app)
-    print("App creation successful.")
+    print("App update/creation successful.\n")
     return app
