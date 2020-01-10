@@ -11,9 +11,7 @@ def analyze_style(content):
 
     for sent in sentences:
         analyze_sentence_length_by_verb_count(sent)
-        print("--------------")
-        print("--------------")
-
+    
     return "TODO: make style"
 
 
@@ -49,8 +47,10 @@ def analyze_sentence_length_by_verb_count(sentence):
     analysis = vabamorf.analyze(sentence)
     tags, tags_with_words = tag_words(analysis)
 
-    print(tags)    
-    print(tags_with_words)
-    print()
-    print()
+    verb_count = 0 
+    for i in range(len(tags)):
+        if tags[i] == "V":
+            verb_count += 1
+            print(analysis[i]["text"])
+    
     return True
