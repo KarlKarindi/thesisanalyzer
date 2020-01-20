@@ -5,7 +5,7 @@ from estnltk import Vabamorf
 vabamorf = Vabamorf.instance()
 
 def create_app():
-    from . import routes, services
+    from . import routes, services, model
     app = Flask(__name__)
     routes.init_app(app)
     print("App update/creation successful.\n")
