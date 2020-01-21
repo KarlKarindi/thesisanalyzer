@@ -2,23 +2,25 @@ from flask import Flask, request
 import estnltk
 from estnltk import Text
 
+
+
 PUNCTUATION_MARKS = list('.,-!?"\'/\\[]()')
 
 
 STOP_WORDS = ["ja", "et", "aga", "sest", "kuigi", "vaid", "kuna"]
 
 
-def get_most_frequent_lemmas():
-    data = {}
+def get_most_frequent_lemmas(limit=1000):
+    freq_dict = {}
     lines = 0
     with open("C:\\Users\\Karl\\PythonProjects\\ThesisAnalyzer\\lemma_kahanevas.txt", "r", encoding="utf-8") as file:
-        for line in file:
-            if lines > 500:
-                break
-            print(line)
-            lines += 1
+        lines = file.readlines()
+        for line in lines[:limit]:
+            line = line.split()
+            count, lemma = line[0], line[1]
+            freq_dict[lemma] = count
 
-    return True
+    return freq_dict
 
 
 def json_to_text(req, key="text"):

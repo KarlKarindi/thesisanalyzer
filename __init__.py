@@ -8,5 +8,5 @@ def create_app():
     from . import routes, services, model
     app = Flask(__name__)
     routes.init_app(app)
-    print("App update/creation successful.\n")
+    print("App update/creation successful.\n\n\n")
     return app

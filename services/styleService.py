@@ -10,8 +10,8 @@ def analyze_style(request):
     text = json_to_text(request)
     sentences = Text(text).sentence_texts
 
-    for sent in sentences:
-        analyze_sentence_length_by_verb_count(sent)
+    #for sent in sentences:
+     #   analyze_sentence_length_by_verb_count(sent)
 
     print(get_most_frequent_lemmas())
 
