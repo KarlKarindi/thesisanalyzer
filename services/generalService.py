@@ -3,6 +3,7 @@ from estnltk import Text
 from .utils import *
 import simplejson as json
 import nltk
+from .. import vabamorf
 
 
 def analyze_general(content):
@@ -19,7 +20,7 @@ def analyze_general(content):
     #print("Leksiline tihedus on", "%")
     verb_count = 0
     for i in range(len(w_all)):
-        w = vm.analyze(w_all[i])
+        w = vabamorf.analyze(w_all[i])
         #print("("+  w[0]["text"]+", ", w[0]["analysis"][0]["partofspeech"]+")")
         if w[0]["analysis"][0]["partofspeech"] == "V":
             verb_count += 1
@@ -29,6 +30,7 @@ def analyze_general(content):
 
     # print(most_frequent_words(w_all))
     tag_text(text)
+
     # print(tag_words(text))
     tagged_sents = tag_text(text)
     i = 0

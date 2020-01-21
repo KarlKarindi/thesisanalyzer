@@ -13,5 +13,8 @@
     "python": "source activate thesis-env && python"
   },
   "code-runner.clearPreviousOutput": true,
-  "python.pythonPath": "C:\\Users\\Karl\\Miniconda3\\envs\\thesis-env\\python.exe"
+  "python.pythonPath": "C:\\Users\\Karl\\Miniconda3\\envs\\thesis-env\\python.exe",
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": true,
+  "python.linting.flake8Enabled": false
 }

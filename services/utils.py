@@ -12,6 +12,7 @@ def get_most_frequent_lemmas(limit=1000):
 
     freq_dict = {}
     lines = 0
+
     with open("C:\\Users\\Karl\\PythonProjects\\ThesisAnalyzer\\lemma_kahanevas.txt", "r", encoding="utf-8") as file:
         lines = file.readlines()
         for line in lines[:limit]:
