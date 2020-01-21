@@ -4,6 +4,7 @@ from estnltk import Vabamorf
 # Initialize vabamorf singleton
 vabamorf = Vabamorf.instance()
 
+
 def create_app():
     from . import routes, services, model
     app = Flask(__name__)

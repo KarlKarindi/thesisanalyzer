@@ -9,4 +9,5 @@ def index():
 
 @mod.route('/general/', methods=['POST'])
 def analyze_general():
+   print() # useful for testing
    return service.analyze_general(request)
