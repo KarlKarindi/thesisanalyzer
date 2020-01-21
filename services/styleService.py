@@ -1,34 +1,30 @@
 import estnltk
 import nltk
+import statistics
+import simplejson as json
+
+from flask import jsonify
 from estnltk import Text, EstWordTokenizer, ClauseSegmenter
 from pprint import pprint
 from .utils import *
 from collections import defaultdict
-import simplejson as json
 from .. import vabamorf
+from ..model.styleFeedback import StyleFeedback
+from .config.StyleConfig import MAX_CLAUSE_AMOUNT
 
 
 def analyze_style(request):
+
+    feedback = StyleFeedback()
+
     text = json_to_text(request)
     sentences = Text(text).sentence_texts
 
-    # for sent in sentences:
-    #   analyze_sentence_length_by_verb_count(sent)
+    for sentence in sentences:
+        clauses = segment_clauses_in_sentence(sentence)
+        clauses_feedback = analyze_clauses_in_sentence(clauses, sentence)
 
-    # print(get_most_frequent_lemmas())
-
-    text = "Mees, keda seal kohtasime, oli tuttav ja teretas meid."
-    for s in sentences:
-        print(segment_clauses_in_sentence(s))
-    
-
-    # pprint(list(zip(segmented)))
-
-    # segmented = segmenter.annotate_indices()
-
-    # pprint(list(zip(segmented.words, segmented.clause_indices, segmented.clause_annotations)))
-
-    return "TODO: make style"
+    return jsonify(length=feedback.length)
 
 
 def tag_words(analysis):
@@ -43,7 +39,6 @@ def tag_words(analysis):
     """
 
     tags = []
-    words = []
     tags_with_words = []
 
     for analyzed_sent in analysis:
@@ -73,10 +68,54 @@ def analyze_sentence_length_by_verb_count(sentence):
     return True
 
 
+def analyze_clauses_in_sentence(clauses, sentence):
+    """ Analyzes the clauses in a sentence.
+        Looks at clause word length, sentence word length, clause number,
+        returns feedback accordingly.
+
+        Parameters:
+            clauses - dictionary with clauses
+        Returns:
+            feedback - StyleFeedback object
+    """
+    feedback = StyleFeedback()
+
+    pprint(sentence)
+    pprint(clauses)
+    # Count all the words in clauses
+    total_word_count = 0
+    clause_lengths = []
+    for clause in clauses.values():
+        clause_word_count = len(clause)
+        total_word_count += clause_word_count
+        clause_lengths.append(clause_word_count)
+        print("CLAUSE_LEN", clause_word_count)
+
+    mean_word_count_in_clauses = total_word_count / len(clauses)
+    median_word_count_in_clauses = statistics.mean(clause_lengths)
+
+    print("MEAN_WORD_COUNT_IN_CLAUSE", mean_word_count_in_clauses)
+    print("MEDIAN_WORD_COUNT_IN_CLAUSE", median_word_count_in_clauses)
+    print("WORD_COUNT", total_word_count)
+    print()
+
+    if len(clauses) > MAX_CLAUSE_AMOUNT:
+        feedback.length += 'Lause "'+sentence +\
+            '" tundub liiga pikk. Võimalik, et seda saab lühemaks teha.\n'
+
+    # Äkki on võimalik teha osalause võrdlust? Näiteks vaadata osalausete sõnaarvu mediaani
+    # ning vaadata, kas mingi osalause erineb sellest väga palju.
+
+    return feedback
+
+
 def segment_clauses_in_sentence(sentence):
     """ Segments the clauses (osalausestamine)
+
+        Parameters:
+            sentence - one sentence (as a string)
         Returns:
-            dict with clauses
+            dictionary with clauses
      """
     segmenter = ClauseSegmenter()
 
@@ -84,10 +123,11 @@ def segment_clauses_in_sentence(sentence):
     prepared = vabamorf.analyze(sentence)
     segmented = segmenter.mark_annotations(prepared)
 
+    # Create a dictionary of the clauses and the words they consist of.
     clauses = defaultdict(list)
-    for w in segmented:
-        clause_index = w["clause_index"]
-        text = w["text"]
+    for word in segmented:
+        clause_index = word["clause_index"]
+        text = word["text"]
         clauses[clause_index].append(text)
 
     return clauses
