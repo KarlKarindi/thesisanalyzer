@@ -12,6 +12,8 @@ from .. import vabamorf
 from ..model.styleFeedback import StyleFeedback
 from .config.StyleConfig import MAX_CLAUSE_AMOUNT
 
+ADVERB = "D"
+
 
 def analyze_style(request):
 
@@ -20,19 +22,57 @@ def analyze_style(request):
     text = json_to_text(request)
     sentences = Text(text).sentence_texts
 
+    # Clause analysis
     for sentence in sentences:
         clauses = segment_clauses_in_sentence(sentence)
         clauses_feedback = analyze_clauses_in_sentence(clauses, sentence)
 
+    # Tag analysis
+    analyze_adverbs(sentences)
+
     return jsonify(length=feedback.length)
+
+
+def analyze_adverbs(sentences):
+    """ Tags all the sentences and finds the percentage of adverbs (määrsõnad) """
+
+    adverb_count = 0
+    total_count = 0
+    tags = tag_words_in_sentences(sentences)
+
+    for tag in tags:
+        if tag == ADVERB:
+            adverb_count += 1
+        total_count += 1
+
+    adverb_percentage = round((adverb_count / total_count) * 100, 2)
+    print("Total count:", total_count)
+    print("Adverb count:", adverb_count)
+    print("Adverb percentage is", str(adverb_percentage)+"%")
+
+
+def tag_words_in_sentences(sentences):
+    """ Tag all the words in a list of sentences using vabamorf
+        Parameters:
+            sentences - List of sentences
+        Returns:
+            list of tags
+    """
+
+    tags = []
+    for sentence in sentences:
+        sentence_analysis = vabamorf.analyze(sentence)
+        for word in sentence_analysis:
+            tag = word["analysis"][0]["partofspeech"]
+            tags.append(tag)
+
+    return tags
 
 
 def tag_words(analysis):
     """ Tag all the words in a sentence using vabamorf.
-
         Parameters:
             analysis (list): one analysed sentence
-
         Returns:
             list of tags
             list of tuplets (word, tag)
@@ -80,8 +120,8 @@ def analyze_clauses_in_sentence(clauses, sentence):
     """
     feedback = StyleFeedback()
 
-    pprint(sentence)
-    pprint(clauses)
+    # pprint(sentence)
+    # pprint(clauses)
     # Count all the words in clauses
     total_word_count = 0
     clause_lengths = []
@@ -89,15 +129,15 @@ def analyze_clauses_in_sentence(clauses, sentence):
         clause_word_count = len(clause)
         total_word_count += clause_word_count
         clause_lengths.append(clause_word_count)
-        print("CLAUSE_LEN", clause_word_count)
+        #print("CLAUSE_LEN", clause_word_count)
 
     mean_word_count_in_clauses = total_word_count / len(clauses)
     median_word_count_in_clauses = statistics.mean(clause_lengths)
 
-    print("MEAN_WORD_COUNT_IN_CLAUSE", mean_word_count_in_clauses)
-    print("MEDIAN_WORD_COUNT_IN_CLAUSE", median_word_count_in_clauses)
-    print("WORD_COUNT", total_word_count)
-    print()
+    #print("MEAN_WORD_COUNT_IN_CLAUSE", mean_word_count_in_clauses)
+    #print("MEDIAN_WORD_COUNT_IN_CLAUSE", median_word_count_in_clauses)
+    #print("WORD_COUNT", total_word_count)
+    # print()
 
     if len(clauses) > MAX_CLAUSE_AMOUNT:
         feedback.length += 'Lause "'+sentence +\
