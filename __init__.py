@@ -1,8 +1,14 @@
 from flask import Flask
 from estnltk import Vabamorf
+from program_utils import *
+import csv
 
 # Initialize vabamorf singleton
 vabamorf = Vabamorf.instance()
+
+# Create csv file for lemmas #
+create_csv_file_for_lemmas(
+    "C:\\Users\\Karl\\PythonProjects\\ThesisAnalyzer\\lemma_kahanevas.txt")
 
 
 def create_app():
