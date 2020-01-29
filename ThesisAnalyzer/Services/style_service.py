@@ -6,11 +6,11 @@ import simplejson as json
 from flask import jsonify
 from estnltk import Text, EstWordTokenizer, ClauseSegmenter
 from pprint import pprint
-from .utils import *
+from ThesisAnalyzer.Services.utils import *
 from collections import defaultdict
-from .. import vabamorf
-from ..Models.Feedback import StyleFeedback
-from .Config.StyleConfig import MAX_CLAUSE_AMOUNT
+from ThesisAnalyzer import vabamorf
+from ThesisAnalyzer.Models.Feedback import StyleFeedback
+from ThesisAnalyzer.Services.Config.StyleConfig import MAX_CLAUSE_AMOUNT
 
 ADVERB = "D"
 

@@ -3,6 +3,7 @@ class GeneralFeedback():
     text = ""
     syntax = ""
 
+
 class StyleFeedback():
     length = ""
     word_repeats = ""
