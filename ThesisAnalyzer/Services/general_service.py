@@ -1,9 +1,9 @@
 import estnltk
 from estnltk import Text
-from .utils import *
+from ThesisAnalyzer.Services.utils import *
 import simplejson as json
 import nltk
-from .. import vabamorf
+from ThesisAnalyzer import vabamorf
 
 
 def analyze_general(content):

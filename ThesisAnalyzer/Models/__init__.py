@@ -1,5 +1,5 @@
-from . import Feedback
-from . import Lemma
+from ThesisAnalyzer.Models import Feedback
+from ThesisAnalyzer.Models import Lemma
 
 
 def init_app(app):

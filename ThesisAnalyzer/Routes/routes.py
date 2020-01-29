@@ -1,6 +1,5 @@
 from flask import Blueprint, request
-from ..Services import general_service
-from ..Services import style_service
+from ThesisAnalyzer.Services import general_service, style_service
 
 mod = Blueprint('route', __name__)
 
