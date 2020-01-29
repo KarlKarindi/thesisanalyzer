@@ -1,11 +1,11 @@
 import csv
 
 
-def create_csv_file_for_lemmas(file_loc):
+def create_csv_file_for_lemmas(file_path):
     # Read in the file
     csv_rows = []
     uid = 1
-    with open(file_loc, "r", encoding="utf-8") as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         lines = file.readlines()
         for line in lines:
             line = line.split()
