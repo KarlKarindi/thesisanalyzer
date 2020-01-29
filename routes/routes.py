@@ -1,7 +1,7 @@
 from flask import Blueprint, request
-from ..services import generalService as service
+from ..services import general_service as service
 
-mod = Blueprint('general', __name__)
+mod = Blueprint('routes', __name__)
 
 
 @mod.route('/')
@@ -13,3 +13,9 @@ def index():
 def analyze_general():
     print()  # useful for testing
     return service.analyze_general(request)
+
+
+@mod.route('/style/', methods=['POST'])
+def analyze_style():
+    print()  # useful for testing
+    return service.analyze_style(request)
