@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from estnltk import Vabamorf
-from program_utils import *
+from .program_utils import *
 import csv
 
 # Initialize vabamorf singleton
@@ -22,14 +22,14 @@ create_csv_file_for_lemmas(
 
 
 def create_app():
-    from . import routes, services, model
+    from . import Routes, Models, Services
     app = Flask(__name__)
 
     app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db = SQLAlchemy(app)
 
-    routes.init_app(app)
+    Routes.init_app(app)
 
     print("App update/creation successful.\n\n\n")
     return app
