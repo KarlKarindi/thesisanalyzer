@@ -18,7 +18,7 @@ def create_csv_file_for_lemmas(file_loc):
             uid += 1
 
     # Write info into a csv file
-    with open("lemmad_kahanevas.csv", mode="w", encoding="utf-8") as file:
+    with open("lemmad_kahanevas.csv", mode="w", encoding="utf-8", newline="") as file:
         writer = csv.writer(file, delimiter=",",
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
         writer.writerow(["id", "lemma", "count"])

@@ -39,7 +39,6 @@ def analyze_general(content):
     return "TODO: MAKE"
 
 
-
 def words_without_punctuation(text):
     words_with_punct = Text(text).word_texts
     words_without_punctuation = [w for w in words_with_punct if w.isalpha()]
@@ -60,4 +59,3 @@ def tag_text(text):
 def most_frequent_words(words, until=30):
     """ Creates a frequency distribution by lemmas """
     return nltk.FreqDist(words).most_common()[:until]
-

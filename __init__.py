@@ -1,8 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from estnltk import Vabamorf
-from .program_utils import *
-import csv
+from program_utils import create_csv_file_for_lemmas
 
 # Initialize vabamorf singleton
 vabamorf = Vabamorf.instance()

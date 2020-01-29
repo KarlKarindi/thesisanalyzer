@@ -9,8 +9,8 @@ from pprint import pprint
 from .utils import *
 from collections import defaultdict
 from .. import vabamorf
-from ..Models.styleFeedback import StyleFeedback
-from .config.StyleConfig import MAX_CLAUSE_AMOUNT
+from ..Models.Feedback import StyleFeedback
+from .Config.StyleConfig import MAX_CLAUSE_AMOUNT
 
 ADVERB = "D"
 
