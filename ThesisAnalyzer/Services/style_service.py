@@ -25,7 +25,8 @@ def analyze_style(request):
     # Clause analysis
     for sentence in sentences:
         clauses = segment_clauses_in_sentence(sentence)
-        clauses_feedback = analyze_clauses_in_sentence(clauses, sentence)
+        clauses_feedback = analyze_clauses_in_sentence(
+            clauses, sentence)
 
     # Tag analysis
     analyze_adverbs(sentences)
@@ -45,10 +46,12 @@ def analyze_adverbs(sentences):
             adverb_count += 1
         total_count += 1
 
-    adverb_percentage = round((adverb_count / total_count) * 100, 2)
+    adverb_percentage = round(
+        (adverb_count / total_count) * 100, 2)
     print("Total count:", total_count)
     print("Adverb count:", adverb_count)
-    print("Adverb percentage is", str(adverb_percentage)+"%")
+    print("Adverb percentage is",
+          str(adverb_percentage) + "%")
 
 
 def tag_words_in_sentences(sentences):
@@ -131,8 +134,10 @@ def analyze_clauses_in_sentence(clauses, sentence):
         clause_lengths.append(clause_word_count)
         #print("CLAUSE_LEN", clause_word_count)
 
-    mean_word_count_in_clauses = total_word_count / len(clauses)
-    median_word_count_in_clauses = statistics.mean(clause_lengths)
+    mean_word_count_in_clauses = total_word_count / \
+        len(clauses)
+    median_word_count_in_clauses = statistics.mean(
+        clause_lengths)
 
     #print("MEAN_WORD_COUNT_IN_CLAUSE", mean_word_count_in_clauses)
     #print("MEDIAN_WORD_COUNT_IN_CLAUSE", median_word_count_in_clauses)
@@ -140,7 +145,7 @@ def analyze_clauses_in_sentence(clauses, sentence):
     # print()
 
     if len(clauses) > MAX_CLAUSE_AMOUNT:
-        feedback.length += 'Lause "'+sentence +\
+        feedback.length += 'Lause "' + sentence +\
             '" tundub liiga pikk. Võimalik, et seda saab lühemaks teha.\n'
 
     # Äkki on võimalik teha osalause võrdlust? Näiteks vaadata osalausete sõnaarvu mediaani

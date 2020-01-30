@@ -14,8 +14,11 @@
   },
   "code-runner.clearPreviousOutput": true,
   "python.pythonPath": "C:\\Users\\Karl\\Miniconda3\\envs\\thesis-env\\python.exe",
-  "python.linting.pylintEnabled": true,
-  "python.linting.banditEnabled": false,
   "python.linting.enabled": true,
-  "python.linting.flake8Enabled": false
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": true,
+  "python.linting.pylintPath": "C:\\Users\\Karl\\Miniconda3\\envs\\thesis-env\\Scripts\\pylint.exe",
+  "python.linting.pycodestyleEnabled": false,
+  "python.linting.banditEnabled": false,
+  "python.linting.pylamaEnabled": false,
 }

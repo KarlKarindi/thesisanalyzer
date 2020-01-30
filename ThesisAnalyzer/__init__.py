@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from estnltk import Vabamorf
-import os
+
 
 # Globally accessible libraries
 
@@ -12,7 +12,6 @@ vabamorf = Vabamorf.instance()
 
 
 def create_app():
-    import ThesisAnalyzer.Models as Models
     import ThesisAnalyzer.Routes as Routes
 
     app = Flask(__name__)

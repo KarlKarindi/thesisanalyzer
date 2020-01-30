@@ -1,6 +1,6 @@
 import estnltk
 from estnltk import Text
-from ThesisAnalyzer.Services.utils import *
+from ThesisAnalyzer.Services.utils import json_to_text
 import simplejson as json
 import nltk
 from ThesisAnalyzer import vabamorf
@@ -16,17 +16,16 @@ def analyze_general(content):
     l_unique = set(l_all)
 
     # print(w_all)
-    #print("Töös on kokku", len(w_all), "sõna.")
-    #print("Nendest", len(w_unique), "on unikaalsed")
-    #print("Leksiline tihedus on", "%")
+    # print("Töös on kokku", len(w_all), "sõna.")
+    # print("Nendest", len(w_unique), "on unikaalsed")
+    # print("Leksiline tihedus on", "%")
     verb_count = 0
     for i in range(len(w_all)):
         w = vabamorf.analyze(w_all[i])
-        #print("("+  w[0]["text"]+", ", w[0]["analysis"][0]["partofspeech"]+")")
+        # print("("+  w[0]["text"]+", ", w[0]["analysis"][0]["partofspeech"]+")")
         if w[0]["analysis"][0]["partofspeech"] == "V":
             verb_count += 1
             print(w_all[i], w[0]["text"], w[0]["analysis"][0]["partofspeech"])
-
     print(w_all)
 
     # print(most_frequent_words(w_all))
