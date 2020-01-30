@@ -12,10 +12,10 @@ def index():
 @mod.route('/general/', methods=['POST'])
 def analyze_general():
     print()  # useful for testing
-    return general_service.analyze_general(request)
+    return general_service.analyze(request)
 
 
 @mod.route('/style/', methods=['POST'])
-def analyze_style():
+def analyze_style(): 
     print()  # useful for testing
-    return style_service.analyze_style(request)
+    return style_service.analyze(request)

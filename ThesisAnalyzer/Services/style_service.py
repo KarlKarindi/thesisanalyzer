@@ -11,11 +11,13 @@ from collections import defaultdict
 from ThesisAnalyzer import vabamorf
 from ThesisAnalyzer.Models.Feedback import StyleFeedback
 from ThesisAnalyzer.Services.Config.StyleConfig import MAX_CLAUSE_AMOUNT
+from ThesisAnalyzer.Models.Lemma import Lemma
+from ThesisAnalyzer import db
 
 ADVERB = "D"
 
 
-def analyze_style(request):
+def analyze(request):
 
     feedback = StyleFeedback()
 
@@ -30,6 +32,9 @@ def analyze_style(request):
 
     # Tag analysis
     analyze_adverbs(sentences)
+
+    lemmas = Lemma.query.filter(Lemma.count > 50000).all()
+    print(lemmas[0].lemma)
 
     return jsonify(length=feedback.length)
 
