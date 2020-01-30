@@ -8,6 +8,7 @@ from ThesisAnalyzer import vabamorf
 
 def analyze_general(content):
     """ Analyzes the content and returns general statistics about the text """
+
     text = json_to_text(content)
 
     w_all = words_without_punctuation(text)

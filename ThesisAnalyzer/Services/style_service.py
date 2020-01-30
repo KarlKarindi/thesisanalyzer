@@ -6,7 +6,7 @@ import simplejson as json
 from flask import jsonify
 from estnltk import Text, EstWordTokenizer, ClauseSegmenter
 from pprint import pprint
-from ThesisAnalyzer.Services.utils import *
+from ThesisAnalyzer.Services.utils import json_to_text
 from collections import defaultdict
 from ThesisAnalyzer import vabamorf
 from ThesisAnalyzer.Models.Feedback import StyleFeedback
