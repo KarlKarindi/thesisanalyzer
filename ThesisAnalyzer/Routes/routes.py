@@ -1,7 +1,7 @@
 from flask import Blueprint, request
-from ..services import general_service as service
+from ThesisAnalyzer.Services import general_service, style_service
 
-mod = Blueprint('routes', __name__)
+mod = Blueprint('route', __name__)
 
 
 @mod.route('/')
@@ -12,10 +12,10 @@ def index():
 @mod.route('/general/', methods=['POST'])
 def analyze_general():
     print()  # useful for testing
-    return service.analyze_general(request)
+    return general_service.analyze_general(request)
 
 
 @mod.route('/style/', methods=['POST'])
 def analyze_style():
     print()  # useful for testing
-    return service.analyze_style(request)
+    return style_service.analyze_style(request)
