@@ -1,7 +1,7 @@
 import csv
 
 
-def create_csv_file_for_lemmas(file_path):
+def create_csv_file_for_lemma_frequency(file_path):
     # Read in the file
     csv_rows = []
     uid = 1
