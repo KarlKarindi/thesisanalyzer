@@ -68,26 +68,34 @@ def most_frequent_words(words, until=30):
 
 
 def is_text_impersonal(text):
-    """ Checks if text contains personal or impersonal verbs """
+    """ Checks if text is fully impersonal.
+        Returns: a dictionary of sentences with words that are personal.
+    """
 
-    def find_personal_verbs_in_sentence(sentence):
+    def find_pv_in_sentence(sentence):
         """ Parameters: sentence - String, text of the sentence being analyzed.
             Returns: list of personal verbs in the sentence.
         """
-
         personal_verbs = []
         analyzed_sentence = vabamorf.analyze(sentence)
-        for word in analyzed_sentence:
-            word_analysis = word["analysis"][0]
-            if (word_analysis["partofspeech"] == constants.VERB and
-                    word_analysis["form"] == "n" or word_analysis["root"] == "mina"):
 
-                # TODO: Add check. If word is a quote, do not add to pv list
-                personal_verbs.append(word["text"])
+        for word in analyzed_sentence:
+            # Since a word may have multiple analyses, we must use a loop to iterate over them
+            for w_analysis in word["analysis"]:
+                if (w_analysis["partofspeech"] == constants.VERB and
+                        w_analysis["form"] == "n" or
+                        w_analysis["ending"] == "in" or
+                        w_analysis["ending"] == "sin" or
+                        w_analysis["root"] == "mina"):
+
+                    # TODO: Add check. If word is a quote, do not add to pv list
+                    word_text = word["text"]
+                    if word_text not in personal_verbs:
+                        personal_verbs.append(word_text)
 
         return personal_verbs
 
-    # Dictionary to store sentences and the personal verbs (pv) they have
+    # Dictionary to store sentences and the personal verbs (pv) they have.
     sentences_with_pv = {}
 
     # First divide given text into sentences
@@ -96,12 +104,12 @@ def is_text_impersonal(text):
     # Then analyze singular sentences
     for sentence in sentences:
         sentence_text = sentence["text"]
-        personal_verbs_in_sentence = find_personal_verbs_in_sentence(
+        pv_in_sentence = find_pv_in_sentence(
             sentence_text)
 
-        # If sentence contains personal verbs, add them to dict
-        if len(personal_verbs_in_sentence) > 0:
-            sentences_with_pv[sentence_text] = personal_verbs_in_sentence
+        # If sentence contains personal verbs, add the verbs to dict
+        if len(pv_in_sentence) > 0:
+            sentences_with_pv[sentence_text] = pv_in_sentence
 
     text_is_impersonal = len(sentences_with_pv) == 0
     print("TEXT_IS_IMPERSONAL", text_is_impersonal)
