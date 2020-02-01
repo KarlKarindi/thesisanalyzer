@@ -68,7 +68,7 @@ def most_frequent_words(words, until=30):
 
 
 def is_text_impersonal(text):
-    """ Checks if text is fully impersonal.
+    """ Checks if text is fully impersonal. A text is personal if it contains personal verbs (pv).
         Returns: a dictionary of sentences with words that are personal.
     """
 
@@ -79,8 +79,11 @@ def is_text_impersonal(text):
         personal_verbs = []
         analyzed_sentence = vabamorf.analyze(sentence)
 
+        # TODO: Check whether sentence contains a quote. If personal verb is in a quote, don't add it to pv list.
+
         for word in analyzed_sentence:
             # Since a word may have multiple analyses, we must use a loop to iterate over them
+            # In case of many options, if one of them is personal, add them to the list.
             for w_analysis in word["analysis"]:
                 if (w_analysis["partofspeech"] == constants.VERB and
                         w_analysis["form"] == "n" or
@@ -88,28 +91,26 @@ def is_text_impersonal(text):
                         w_analysis["ending"] == "sin" or
                         w_analysis["root"] == "mina"):
 
-                    # TODO: Add check. If word is a quote, do not add to pv list
                     word_text = word["text"]
                     if word_text not in personal_verbs:
                         personal_verbs.append(word_text)
 
         return personal_verbs
 
-    # Dictionary to store sentences and the personal verbs (pv) they have.
+    # Dictionary to store sentences and the personal verbs (pv) they have
     sentences_with_pv = {}
 
     # First divide given text into sentences
-    sentences = estnltk.Text(text).split_by_sentences()
+    sentences = estnltk.Text(text).sentence_texts
 
     # Then analyze singular sentences
     for sentence in sentences:
-        sentence_text = sentence["text"]
         pv_in_sentence = find_pv_in_sentence(
-            sentence_text)
+            sentence)
 
         # If sentence contains personal verbs, add the verbs to dict
         if len(pv_in_sentence) > 0:
-            sentences_with_pv[sentence_text] = pv_in_sentence
+            sentences_with_pv[sentence] = pv_in_sentence
 
     text_is_impersonal = len(sentences_with_pv) == 0
     print("TEXT_IS_IMPERSONAL", text_is_impersonal)

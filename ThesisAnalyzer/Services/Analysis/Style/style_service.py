@@ -3,16 +3,19 @@ import nltk
 import statistics
 import simplejson as json
 
+# ThesisaAnalyzer imports
+from ThesisAnalyzer.Services.Analysis.Style import word_repeat_analyzer
+from ThesisAnalyzer import vabamorf
+from ThesisAnalyzer.Models.Feedback import StyleFeedback
+from ThesisAnalyzer.Services.Style.config import MAX_CLAUSE_AMOUNT
+from ThesisAnalyzer.Models.Lemma import Lemma
+from ThesisAnalyzer import db
+
 from flask import jsonify
 from estnltk import Text, EstWordTokenizer, ClauseSegmenter
 from pprint import pprint
 from ThesisAnalyzer.Services.utils import json_to_text
 from collections import defaultdict
-from ThesisAnalyzer import vabamorf
-from ThesisAnalyzer.Models.Feedback import StyleFeedback
-from ThesisAnalyzer.Services.Config.StyleConfig import MAX_CLAUSE_AMOUNT
-from ThesisAnalyzer.Models.Lemma import Lemma
-from ThesisAnalyzer import db
 
 ADVERB = "D"
 
