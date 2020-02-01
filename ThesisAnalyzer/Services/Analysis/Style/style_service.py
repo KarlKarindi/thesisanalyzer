@@ -4,10 +4,10 @@ import statistics
 import simplejson as json
 
 # ThesisaAnalyzer imports
-from ThesisAnalyzer.Services.Analysis.Style import word_repeat_analyzer
+from ThesisAnalyzer.Services.Analysis.Style.word_repeat_analyzer import analyze_repeating_words
 from ThesisAnalyzer import vabamorf
 from ThesisAnalyzer.Models.Feedback import StyleFeedback
-from ThesisAnalyzer.Services.Style.config import MAX_CLAUSE_AMOUNT
+from ThesisAnalyzer.Services.Analysis.Style.config import MAX_CLAUSE_AMOUNT
 from ThesisAnalyzer.Models.Lemma import Lemma
 from ThesisAnalyzer import db
 
@@ -21,13 +21,15 @@ ADVERB = "D"
 
 
 def analyze(request):
-
     feedback = StyleFeedback()
-
     text = json_to_text(request)
-    sentences = Text(text).sentence_texts
 
+    # Word repeat analysis
+    analyze_repeating_words(text)
+
+    """
     # Clause analysis
+    sentences = Text(text).sentence_texts
     for sentence in sentences:
         clauses = segment_clauses_in_sentence(sentence)
         clauses_feedback = analyze_clauses_in_sentence(
@@ -37,8 +39,7 @@ def analyze(request):
     analyze_adverbs(sentences)
 
     lemmas = Lemma.query.filter(Lemma.count > 50000).all()
-    print(lemmas[0].lemma)
-
+    """
     return jsonify(length=feedback.length)
 
 
