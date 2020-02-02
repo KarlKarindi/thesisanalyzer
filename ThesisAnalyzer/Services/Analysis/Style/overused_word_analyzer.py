@@ -1,19 +1,37 @@
 from ThesisAnalyzer.Models.LemmaStopword import LemmaStopword
 from ThesisAnalyzer.Models.Lemma import Lemma
+from pprint import pprint
 
 from collections import defaultdict
 from estnltk import Text
 
 
-def analyze_repeating_words(text):
+def analyze_overused_words(text):
     """ Analyzes repeating words using a method described in the Synonimity program """
+
+    def map_lemma_to_word(text, lemmas_all_without_punctuation):
+        """ Returns: defaultdict that maps lemmas to their corresponding words """
+
+        words_all_without_punctuation = [
+            word for word in Text(text).word_texts if word.isalpha()]
+
+        lemma_to_word = defaultdict()
+
+        for word in words_all_without_punctuation:
+            analyses = Text(word).analysis
+            for analysis in analyses:
+                lemma = analysis[0]["lemma"]
+                lemma_to_word[lemma] = word
+
+        return lemma_to_word
 
     def find_repeating_lemmas(lemmas_all):
         """ Returns: repeating lemmas from a list of all lemmas.
             Repeating lemmas do not include stopwords and must be alphabetical.
+            An overused lemma must be used in the text at least 3 times.
         """
         stop_words = [Lemma_sw.name for Lemma_sw in LemmaStopword.query.all()]
-        return [lemma for lemma in lemmas_all if lemmas_all.count(lemma) > 1 and
+        return [lemma for lemma in lemmas_all if lemmas_all.count(lemma) > 2 and
                 lemma not in stop_words and lemma.isalpha()]
 
     def find_lemmas_viable_for_analysis(Lemma_list, lemmas_repeating):
@@ -64,35 +82,22 @@ def analyze_repeating_words(text):
 
         return round(most_used_count / total_count, 3)
 
-    def get_scores_for_lemmas(lemmas_for_analysis, lemma_to_rank_and_count, user_word_count, most_used_occurence):
-        """ Creates scores for lemmas """
-
-        analyzed_lemma_to_score = defaultdict()
-        print(most_used_occurence)
-        for lemma in lemmas_for_analysis:
-            rank_of_lemma = lemma_to_rank_and_count[lemma][0]
-            print(rank_of_lemma)
-            score = int((most_used_occurence / rank_of_lemma) * 1000000)
-            analyzed_lemma_to_score[lemma] = score
-
-        return analyzed_lemma_to_score
-
     # ___________________________ #
+
+    # Query the database for all lemmas that are known. Get list of model Lemma
+    Lemma_list = Lemma.query.all()
 
     # Remove punctuation from the list of lemmas
     lemmas_all_without_punctuation = [
         lemma for lemma in Text(text).lemmas if lemma.isalpha()]
     user_word_count = len(lemmas_all_without_punctuation)
 
-    # Filter out all lemmas that aren't included in the text more than once
-    lemmas_repeating = find_repeating_lemmas(lemmas_all_without_punctuation)
+    lemma_to_word = map_lemma_to_word(text, lemmas_all_without_punctuation)
 
-    # Query the database for all lemmas that are known. Get list of model Lemma
-    Lemma_list = Lemma.query.all()
-
-    # Find lemmas that are viable for analysis from our list of repeating lemmas
+    # First, filter out all lemmas that aren't included in the text more than once,
+    # Then find all the lemmas that are viable for analysis
     lemmas_for_analysis = find_lemmas_viable_for_analysis(
-        Lemma_list, lemmas_repeating)
+        Lemma_list, find_repeating_lemmas(lemmas_all_without_punctuation))
 
     # Create dictionary to store repeating lemmas with their counts in the user text
     lemma_to_count_in_user_text = create_lemma_to_count_in_user_text(
@@ -104,6 +109,7 @@ def analyze_repeating_words(text):
     # Occurence of the most used lemma in Estonian
     most_used_occurence = get_occurence_of_most_used_word(Lemma_list)
 
-    # Estimating the expected use of the word in every-day language from its ranking in the list
-    print(get_scores_for_lemmas(lemmas_for_analysis,
-                                lemma_to_rank_and_count, user_word_count, most_used_occurence))
+    for l in lemmas_for_analysis:
+        print("Lemma:", l, " - Word:", lemma_to_word[l])
+
+    pprint(lemma_to_count_in_user_text)

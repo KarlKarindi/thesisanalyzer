@@ -4,7 +4,7 @@ import statistics
 import simplejson as json
 
 # ThesisaAnalyzer imports
-from ThesisAnalyzer.Services.Analysis.Style.word_repeat_analyzer import analyze_repeating_words
+from ThesisAnalyzer.Services.Analysis.Style.overused_word_analyzer import analyze_overused_words
 from ThesisAnalyzer import vabamorf
 from ThesisAnalyzer.Models.Feedback import StyleFeedback
 from ThesisAnalyzer.Services.Analysis.Style.config import MAX_CLAUSE_AMOUNT
@@ -25,7 +25,7 @@ def analyze(request):
     text = json_to_text(request)
 
     # Word repeat analysis
-    analyze_repeating_words(text)
+    analyze_overused_words(text)
 
     """
     # Clause analysis
