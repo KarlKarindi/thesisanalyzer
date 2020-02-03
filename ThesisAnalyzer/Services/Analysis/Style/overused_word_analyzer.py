@@ -4,16 +4,51 @@ from ThesisAnalyzer.Services.Analysis.Style.config import OVERUSED_MULTIPLIER
 from pprint import pprint
 
 from collections import defaultdict
+from estnltk.wordnet import wn
 from estnltk import Text
 import math
 
 
 class OverusedWordAnalysis(object):
+    """ Container object for word usage analysis """
 
-    def __init__(self, lemma, word, multiplier):
+    def find_best_synonyms_for_words(self):
+        word_synonyms = []
+        for word in self.words:
+            word_synonyms.append(best_synset(word[0], word[1]))
+        return word_synonyms
+
+    def __init__(self, lemma, words_in_text, multiplier):
         self.lemma = lemma
-        self.word = word
+        self.words = words_in_text
+        self.words_synonyms = self.find_best_synonyms_for_words()
+        self.lemma_synonym = wn.synsets(lemma)
         self.multiplier = multiplier
+
+
+def best_synset(word, pos):
+    conversion = {"S": wn.NOUN, "V": wn.VERB, "A": wn.ADJ, "D": wn.ADV}
+
+    if pos not in conversion:
+        return None
+    # What synsets contain this word (taking into account the part of speech)
+    syns = wn.synsets(word, pos=conversion[pos])
+    # If this word isn't in the wordnet, then return none
+    if len(syns) == 0:
+        return None
+    # If there's only one synonym, return it
+    if len(syns) == 1:
+        return syns[0]
+    # If there's more than one, return the one with the smallest number
+    names = [s.name.split('.') for s in syns]
+    best_name = names[0]
+    for n in names:
+        if n[0] == word and best_name[0] != word:
+            best_name = n
+        elif n[0] == word:
+            if n[2] < best_name[2]:
+                best_name = n
+    return syns[names.index(best_name)]
 
 
 def analyze_overused_words(text):
@@ -34,7 +69,8 @@ def analyze_overused_words(text):
             analyses = Text(word).analysis
             for analysis in analyses:
                 lemma = analysis[0]["lemma"]
-                lemma_to_word[lemma].add(word)
+                pos = analysis[0]["partofspeech"]
+                lemma_to_word[lemma].add((word, pos))
 
         return lemma_to_word
 
@@ -142,11 +178,11 @@ def analyze_overused_words(text):
             lemma_to_count_in_user_text[lemma], user_word_count)
         multiplier = math.floor(actual_freq / expected_freq)
 
-        word = lemma_to_word[lemma]
+        words_in_text = lemma_to_word[lemma]
 
         if multiplier > OVERUSED_MULTIPLIER:
-            result = OverusedWordAnalysis(lemma, word, multiplier)
-            results.append(result)
+            results.append(OverusedWordAnalysis(
+                lemma, words_in_text, multiplier))
 
     # Print results
     results = sorted(results, key=lambda x: x.multiplier, reverse=True)
@@ -158,6 +194,8 @@ def analyze_overused_words(text):
 
 def pretty_print_result(overused_w_analysis):
     print("Lemma:", overused_w_analysis.lemma)
-    print("Word:", overused_w_analysis.word)
+    print("Word:", overused_w_analysis.words)
     print("Multiplier:", overused_w_analysis.multiplier)
-    print("\n")
+    print("Word synonyms:", overused_w_analysis.words_synonyms)
+    print("Lemma synonym:", overused_w_analysis.lemma_synonym)
+    print()
