@@ -9,24 +9,46 @@ from estnltk import Text
 import math
 
 
-class OverusedWordAnalysis(object):
+class OverusedWordSummary(object):
     """ Container object for word usage analysis """
 
+    def find_synonyms_for_words_and_lemma(self):
+        """ Finds synonyms for the words and the lemma """
+        # Create a list of synsets corresponding to the words
+        w_syns = self.find_best_synonyms_for_words()
+        w_syns_readable = w_syns
+        w_syns[:] = [extract_word_from_Synset_object(
+            word_syn) for word_syn in w_syns]
+
+        # Create a list of synsets corresponding to the lemma
+        # Remove duplicates by temporarily making the list into a set
+        l_syns = wn.synsets(self.lemma)
+        l_syns_readable = l_syns
+        l_syns[:] = list(
+            set([extract_word_from_Synset_object(lemma_syn) for lemma_syn in l_syns]))
+
+        self.words_synonyms = w_syns_readable
+        self.lemma_synonyms = l_syns_readable
+
     def find_best_synonyms_for_words(self):
+        """ Finds the best synonyms for all the words """
         word_synonyms = []
         for word in self.words:
             word_synonyms.append(best_synset(word[0], word[1]))
         return word_synonyms
 
+    # On initialization, don't find the synonyms.
+    # Finding synonyms gets called out only on the top 20 most overused words
     def __init__(self, lemma, words_in_text, multiplier):
         self.lemma = lemma
         self.words = words_in_text
-        self.words_synonyms = self.find_best_synonyms_for_words()
-        self.lemma_synonym = wn.synsets(lemma)
+        self.words_synonyms = None
+        self.lemma_synonyms = None
         self.multiplier = multiplier
 
 
 def best_synset(word, pos):
+    """ Finds the best synset for a word, takes into account part of speech """
     conversion = {"S": wn.NOUN, "V": wn.VERB, "A": wn.ADJ, "D": wn.ADV}
 
     if pos not in conversion:
@@ -49,6 +71,13 @@ def best_synset(word, pos):
             if n[2] < best_name[2]:
                 best_name = n
     return syns[names.index(best_name)]
+
+
+def extract_word_from_Synset_object(synset):
+    if synset is None:
+        return None
+
+    return str(synset).split("'")[1].split(".")[0]
 
 
 def analyze_overused_words(text):
@@ -181,21 +210,25 @@ def analyze_overused_words(text):
         words_in_text = lemma_to_word[lemma]
 
         if multiplier > OVERUSED_MULTIPLIER:
-            results.append(OverusedWordAnalysis(
+            results.append(OverusedWordSummary(
                 lemma, words_in_text, multiplier))
 
-    # Print results
-    results = sorted(results, key=lambda x: x.multiplier, reverse=True)
-    for summary in results:
-        pretty_print_result(summary)
+    # Sort the results list by multiplier (descending order). Only leave the 20 most overused words
+    results = sorted(results, key=lambda x: x.multiplier, reverse=True)[:20]
+
+    for overusedWordSummary in results:
+        # Find the synonyms
+        overusedWordSummary.find_synonyms_for_words_and_lemma()
+        pretty_print_result(overusedWordSummary)
 
     print("Text word count:", user_word_count)
+    return results
 
 
-def pretty_print_result(overused_w_analysis):
-    print("Lemma:", overused_w_analysis.lemma)
-    print("Word:", overused_w_analysis.words)
-    print("Multiplier:", overused_w_analysis.multiplier)
-    print("Word synonyms:", overused_w_analysis.words_synonyms)
-    print("Lemma synonym:", overused_w_analysis.lemma_synonym)
+def pretty_print_result(overusedWordSummary):
+    print("Lemma:", overusedWordSummary.lemma)
+    print("Word:", overusedWordSummary.words)
+    print("Multiplier:", overusedWordSummary.multiplier)
+    print("Word synonyms:", overusedWordSummary.words_synonyms)
+    print("Lemma synonym:", overusedWordSummary.lemma_synonyms)
     print()
