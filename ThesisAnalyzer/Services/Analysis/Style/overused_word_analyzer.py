@@ -27,8 +27,13 @@ class OverusedWordSummary(object):
         l_syns[:] = list(
             set([extract_word_from_Synset_object(lemma_syn) for lemma_syn in l_syns]))
 
-        self.words_synonyms = w_syns_readable
-        self.lemma_synonyms = l_syns_readable
+        w_syns_final = remove_duplicate_synonyms_for_words(
+            self.words, w_syns_readable)
+        l_syns_final = remove_duplicate_synonyms_for_lemma(
+            self.lemma, l_syns_readable)
+
+        self.words_synonyms = w_syns_final
+        self.lemma_synonyms = l_syns_final
 
     def find_best_synonyms_for_words(self):
         """ Finds the best synonyms for all the words """
@@ -42,8 +47,8 @@ class OverusedWordSummary(object):
     def __init__(self, lemma, words_in_text, multiplier):
         self.lemma = lemma
         self.words = words_in_text
-        self.words_synonyms = None
-        self.lemma_synonyms = None
+        self.words_synonyms = []
+        self.lemma_synonyms = []
         self.multiplier = multiplier
 
 
@@ -78,6 +83,33 @@ def extract_word_from_Synset_object(synset):
         return None
 
     return str(synset).split("'")[1].split(".")[0]
+
+
+def remove_duplicate_synonyms_for_lemma(lemma, syn_list):
+    """ Convert synonyms that are the same as the lemma to None """
+    result = []
+    for syn in syn_list:
+        if syn != lemma:
+            result.append(syn)
+    # If all the synonyms are None, return an empty list
+    if result.count(None) == len(syn_list):
+        return []
+    return result
+
+
+def remove_duplicate_synonyms_for_words(word_list, syn_list):
+    """ Convert synonyms that are the same as the word to None """
+    if len(word_list) != len(syn_list):
+        return []
+
+    result = []
+
+    i = 0
+    for key in word_list:
+        if key[0] != syn_list[i]:
+            result.append(syn_list[i])
+        i += 1
+    return result
 
 
 def analyze_overused_words(text):
