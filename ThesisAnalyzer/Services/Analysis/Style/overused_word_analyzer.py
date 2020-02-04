@@ -45,11 +45,11 @@ class OverusedWordSummary(object):
     # On initialization, don't find the synonyms.
     # Finding synonyms gets called out only on the top 20 most overused words
     def __init__(self, lemma, words_in_text, multiplier):
+        self.multiplier = multiplier
         self.lemma = lemma
-        self.words = words_in_text
+        self.words = [key for key in words_in_text]  # Convert set to list
         self.words_synonyms = []
         self.lemma_synonyms = []
-        self.multiplier = multiplier
 
 
 def best_synset(word, pos):
@@ -105,9 +105,11 @@ def remove_duplicate_synonyms_for_words(word_list, syn_list):
     result = []
 
     i = 0
-    for key in word_list:
-        if key[0] != syn_list[i]:
+    for word in word_list:
+        if word[0] != syn_list[i]:
             result.append(syn_list[i])
+        else:
+            result.append(None)
         i += 1
     return result
 
