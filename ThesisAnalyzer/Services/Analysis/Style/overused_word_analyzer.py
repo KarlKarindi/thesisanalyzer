@@ -260,9 +260,9 @@ def analyze_overused_words(text):
 
 
 def pretty_print_result(overusedWordSummary):
-    print("Lemma:", overusedWordSummary.lemma)
-    print("Word:", overusedWordSummary.words)
     print("Multiplier:", overusedWordSummary.multiplier)
-    print("Word synonyms:", overusedWordSummary.words_synonyms)
+    print("Lemma:", overusedWordSummary.lemma)
     print("Lemma synonym:", overusedWordSummary.lemma_synonyms)
+    print("Word:", overusedWordSummary.words)
+    print("Word synonyms:", overusedWordSummary.words_synonyms)
     print()
