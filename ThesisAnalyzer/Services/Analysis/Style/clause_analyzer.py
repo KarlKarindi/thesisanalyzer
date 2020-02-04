@@ -2,9 +2,7 @@ from ThesisAnalyzer import vabamorf
 from ThesisAnalyzer.Services.Analysis.Style.Config import config
 from ThesisAnalyzer.Models.Feedback import StyleFeedback
 
-from flask import jsonify
-from estnltk import Text, EstWordTokenizer, ClauseSegmenter
-from pprint import pprint
+from estnltk import Text, ClauseSegmenter
 from collections import defaultdict
 
 

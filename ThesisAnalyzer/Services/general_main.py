@@ -1,12 +1,8 @@
 from ThesisAnalyzer import vabamorf
-from ThesisAnalyzer.Services.Constants import constants
 from ThesisAnalyzer.Services.utils import json_to_text
 from ThesisAnalyzer.Services.Analysis.General import impersonality_analyzer
-from pprint import pprint
 from estnltk import Text
 
-import simplejson as json
-import estnltk
 import nltk
 
 

@@ -1,7 +1,6 @@
 from ThesisAnalyzer.Models.LemmaStopword import LemmaStopword
 from ThesisAnalyzer.Models.Lemma import Lemma
 from ThesisAnalyzer.Services.Analysis.Style.Config import config
-from pprint import pprint
 
 from collections import defaultdict
 from estnltk.wordnet import wn
