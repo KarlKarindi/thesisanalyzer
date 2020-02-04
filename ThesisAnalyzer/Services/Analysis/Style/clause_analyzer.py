@@ -5,15 +5,20 @@ from ThesisAnalyzer.Models.Feedback import StyleFeedback
 from estnltk import Text, ClauseSegmenter
 from collections import defaultdict
 
+import statistics
+
 
 def analyze_clauses(text):
     """ Function to start the clause analysis """
     sentences = Text(text).sentence_texts
+
+    segmenter = ClauseSegmenter()
+
     for sentence in sentences:
-        clauses = segment_clauses_in_sentence(sentence)
+        clauses = segment_clauses_in_sentence(sentence, segmenter)
         clauses_feedback = analyze_clauses_in_sentence(
             clauses, sentence)
-    return clauses_feedback
+    return None
 
 
 def analyze_clauses_in_sentence(clauses, sentence):
@@ -39,9 +44,8 @@ def analyze_clauses_in_sentence(clauses, sentence):
         clause_lengths.append(clause_word_count)
         #print("CLAUSE_LEN", clause_word_count)
 
-    mean_word_count_in_clauses = total_word_count / \
-        len(clauses)
-    median_word_count_in_clauses = statistics.mean(
+    mean_word_count_in_clauses = total_word_count / len(clauses)
+    median_word_count_in_clauses = statistics.median(
         clause_lengths)
 
     #print("MEAN_WORD_COUNT_IN_CLAUSE", mean_word_count_in_clauses)
@@ -50,8 +54,8 @@ def analyze_clauses_in_sentence(clauses, sentence):
     # print()
 
     if len(clauses) > config.MAX_CLAUSE_AMOUNT:
-        feedback.length += 'Lause "' + sentence +\
-            '" tundub liiga pikk. Võimalik, et seda saab lühemaks teha.\n'
+        print('Lause\n"' + sentence +
+              '"\ntundub liiga pikk. Võimalik, et seda saab lühemaks teha.')
 
     # Äkki on võimalik teha osalause võrdlust? Näiteks vaadata osalausete sõnaarvu mediaani
     # ning vaadata, kas mingi osalause erineb sellest väga palju.
@@ -59,15 +63,15 @@ def analyze_clauses_in_sentence(clauses, sentence):
     return feedback
 
 
-def segment_clauses_in_sentence(sentence):
+def segment_clauses_in_sentence(sentence, segmenter):
     """ Segments the clauses (osalausestamine)
 
         Parameters:
             sentence - one sentence (as a string)
+            segmenter - ClauseSegmenter
         Returns:
             dictionary with clauses
      """
-    segmenter = ClauseSegmenter()
 
     # The sentence must be morphologically analyzed and then segmented.
     prepared = vabamorf.analyze(sentence)
