@@ -264,7 +264,6 @@ def analyze(text):
     for overusedWordSummary in overusedWordSummaryList:
         # Find the synonyms
         overusedWordSummary.find_synonyms_for_words_and_lemma()
-        pretty_print_ouw_summary(overusedWordSummary)
 
     # Return a textSummary object
     textSummary = TextSummmary(user_word_count, overusedWordSummaryList)

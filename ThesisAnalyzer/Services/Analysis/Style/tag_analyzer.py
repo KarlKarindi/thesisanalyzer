@@ -3,8 +3,16 @@ from ThesisAnalyzer.Services.Constants import constants
 from estnltk import Text
 
 
+class AdverbSummary():
+
+    def __init__(self, word_count, adverb_count):
+        self.word_count = word_count
+        self.adverb_count = adverb_count
+        self.adverb_percentage = round(adverb_count / word_count, 2)
+
+
 def analyze(text):
-    """ Tags all the sentences and finds the percentage of adverbs(määrsõnad) """
+    """ Tags all the sentences and finds the percentage of adverbs (määrsõnad) """
 
     sentences = Text(text).sentence_texts
 
@@ -17,12 +25,8 @@ def analyze(text):
             adverb_count += 1
         total_count += 1
 
-    adverb_percentage = round(
-        (adverb_count / total_count) * 100, 2)
-    print("Total count:", total_count)
-    print("Adverb count:", adverb_count)
-    print("Adverb percentage is",
-          str(adverb_percentage) + "%")
+    adverbSummary = AdverbSummary(total_count, adverb_count)
+    return adverbSummary
 
 
 def tag_words_in_sentences(sentences):

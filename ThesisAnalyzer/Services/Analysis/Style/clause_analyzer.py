@@ -7,7 +7,6 @@ from collections import defaultdict
 
 import statistics
 
-
 def analyze(text):
     """ Function to start the clause analysis """
     sentences = Text(text).sentence_texts
