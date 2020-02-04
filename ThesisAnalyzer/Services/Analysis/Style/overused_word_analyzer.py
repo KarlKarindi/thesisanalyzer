@@ -1,6 +1,6 @@
 from ThesisAnalyzer.Models.LemmaStopword import LemmaStopword
 from ThesisAnalyzer.Models.Lemma import Lemma
-from ThesisAnalyzer.Services.Analysis.Style.config import OVERUSED_MULTIPLIER
+from ThesisAnalyzer.Services.Analysis.Style.Config import config
 from pprint import pprint
 
 from collections import defaultdict
@@ -243,7 +243,7 @@ def analyze_overused_words(text):
 
         words_in_text = lemma_to_word[lemma]
 
-        if multiplier > OVERUSED_MULTIPLIER:
+        if multiplier > config.OVERUSED_MULTIPLIER:
             results.append(OverusedWordSummary(
                 lemma, words_in_text, multiplier))
 

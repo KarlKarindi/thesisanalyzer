@@ -1,1 +1,2 @@
 VERB = "V"
+ADVERB = "D"
