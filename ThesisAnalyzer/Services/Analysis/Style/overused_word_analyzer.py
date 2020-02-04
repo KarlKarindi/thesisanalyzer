@@ -5,11 +5,22 @@ from ThesisAnalyzer.Services.Analysis.Style.Config import config
 from collections import defaultdict
 from estnltk.wordnet import wn
 from estnltk import Text
+from flask import jsonify
+import jsonpickle
 import math
 
 
+class TextSummmary(object):
+
+    def __init__(self, word_count, OverusedWords):
+        self.word_count = word_count
+        self.OverusedWords = OverusedWords
+
+
 class OverusedWordSummary(object):
-    """ Container object for word usage analysis """
+    """ Container object for word usage analysis
+        Returns: TextSummary object
+    """
 
     def find_synonyms_for_words_and_lemma(self):
         """ Finds synonyms for the words and the lemma """
@@ -113,7 +124,7 @@ def remove_duplicate_synonyms_for_words(word_list, syn_list):
     return result
 
 
-def analyze_overused_words(text):
+def analyze(text):
     """ Analyzes repeating words using a method described in the Synonimity program """
 
     def get_words_without_punctuation(text):
@@ -229,7 +240,7 @@ def analyze_overused_words(text):
 
     lemmas = set(lemmas_for_analysis)
 
-    results = []
+    overusedWordSummaryList = []
     # Get the expected frequency of a lemma and compare it to the actual frequency
     # If the actual frequency is a lot higher than the expected frequency, the word may be overused
     for lemma in lemmas:
@@ -243,22 +254,24 @@ def analyze_overused_words(text):
         words_in_text = lemma_to_word[lemma]
 
         if multiplier > config.OVERUSED_MULTIPLIER:
-            results.append(OverusedWordSummary(
+            overusedWordSummaryList.append(OverusedWordSummary(
                 lemma, words_in_text, multiplier))
 
     # Sort the results list by multiplier (descending order). Only leave the 20 most overused words
-    results = sorted(results, key=lambda x: x.multiplier, reverse=True)[:20]
+    overusedWordSummaryList = sorted(
+        overusedWordSummaryList, key=lambda x: x.multiplier, reverse=True)[:20]
 
-    for overusedWordSummary in results:
+    for overusedWordSummary in overusedWordSummaryList:
         # Find the synonyms
         overusedWordSummary.find_synonyms_for_words_and_lemma()
-        pretty_print_result(overusedWordSummary)
+        pretty_print_ouw_summary(overusedWordSummary)
 
-    print("Text word count:", user_word_count)
-    return results
+    # Return a textSummary object
+    textSummary = TextSummmary(user_word_count, overusedWordSummaryList)
+    return textSummary
 
 
-def pretty_print_result(overusedWordSummary):
+def pretty_print_ouw_summary(overusedWordSummary):
     print("Multiplier:", overusedWordSummary.multiplier)
     print("Lemma:", overusedWordSummary.lemma)
     print("Lemma synonym:", overusedWordSummary.lemma_synonyms)

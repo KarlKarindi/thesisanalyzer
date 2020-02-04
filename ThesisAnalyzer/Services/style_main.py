@@ -1,21 +1,29 @@
 from ThesisAnalyzer.Services.Analysis.Style import overused_word_analyzer, clause_analyzer, tag_analyzer
+from ThesisAnalyzer.Services.Analysis.Style.overused_word_analyzer import TextSummmary, OverusedWordSummary
 from ThesisAnalyzer.Models.Feedback import StyleFeedback
-from ThesisAnalyzer.Services.utils import json_to_text
+from ThesisAnalyzer.Services import utils
 
 from flask import jsonify
+import jsonpickle
 
 
 def analyze(request):
     feedback = StyleFeedback()
-    text = json_to_text(request)
+    text = utils.json_to_text(request)
+
+    jsonpickle.set_preferred_backend("json")
+    jsonpickle.set_encoder_options("json", ensure_ascii=False)
 
     # Word repeat analysis
-    #overused_word_analyzer.analyze_overused_words(text)
-
+    textSummary = overused_word_analyzer.analyze(text)
+    
     # Clause analysis
-    clause_analyzer.analyze_clauses(text)
+    # clause_analyzer.analyze(text)
 
     # Tag analysis
-    # tag_analyzer.analyze_adverbs(text)
+    # tag_analyzer.analyze(text)
 
-    return jsonify(length=feedback.length)
+    return encode(textSummary)
+
+def encode(Object):
+    return(jsonpickle.encode(Object, unpicklable=False))

@@ -1,6 +1,7 @@
-from flask import Flask, request
-import estnltk
+from flask import Flask, request, jsonify
 from estnltk import Text
+import jsonpickle
+import estnltk
 
 PUNCTUATION_MARKS = list('.,-!?"\'/\\[]()')
 
@@ -21,7 +22,6 @@ def get_most_frequent_lemmas(limit=1000):
             freq_dict[lemma] = count
 
     return freq_dict
-
 
 def json_to_text(req, key="text"):
     return req.get_json()[key]

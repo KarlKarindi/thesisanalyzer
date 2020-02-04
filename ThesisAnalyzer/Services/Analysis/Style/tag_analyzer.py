@@ -3,7 +3,7 @@ from ThesisAnalyzer.Services.Constants import constants
 from estnltk import Text
 
 
-def analyze_adverbs(text):
+def analyze(text):
     """ Tags all the sentences and finds the percentage of adverbs(määrsõnad) """
 
     sentences = Text(text).sentence_texts
