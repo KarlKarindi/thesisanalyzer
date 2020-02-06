@@ -5,7 +5,7 @@ from pprint import pprint
 import estnltk
 
 
-def is_text_impersonal(text):
+def analyze(text):
     """ Checks if text is fully impersonal. A text is personal if it contains personal verbs (pv).
         Returns: a dictionary of sentences with words that are personal.
     """
@@ -17,21 +17,29 @@ def is_text_impersonal(text):
         personal_verbs = []
         analyzed_sentence = vabamorf.analyze(sentence)
 
-        # TODO: Check whether sentence contains a quote. If personal verb is in a quote, don't add it to pv list.
+        in_quotes = False
 
         for word in analyzed_sentence:
+            # Quickly check if word is in quotes or not.
+            # If the word is in quotes, it is not considered a personal verb.
+            if word["text"].endswith('"'):
+                in_quotes = False
+            if word["text"].startswith('"'):
+                in_quotes = True
+
             # Since a word may have multiple analyses, we must use a loop to iterate over them
             # In case of many options, if one of them is personal, add them to the list.
-            for w_analysis in word["analysis"]:
-                if (w_analysis["partofspeech"] == constants.VERB and
-                        w_analysis["form"] == "n" or
-                        w_analysis["ending"] == "in" or
-                        w_analysis["ending"] == "sin" or
-                        w_analysis["root"] == "mina"):
+            if not in_quotes:
+                for w_analysis in word["analysis"]:
+                    if (w_analysis["partofspeech"] == constants.VERB and
+                            w_analysis["form"] == "n" or
+                            w_analysis["ending"] == "in" or
+                            w_analysis["ending"] == "sin" or
+                            w_analysis["root"] == "mina"):
 
-                    word_text = word["text"]
-                    if word_text not in personal_verbs:
-                        personal_verbs.append(word_text)
+                        word_text = word["text"]
+                        if word_text not in personal_verbs:
+                            personal_verbs.append(word_text)
 
         return personal_verbs
 

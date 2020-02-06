@@ -11,9 +11,9 @@ def analyze(content):
     text = json_to_text(content)
 
     # Impersonal verb check (umbisikulise tegumoe kontroll)
-    impersonality_analyzer.is_text_impersonal(text)
+    impersonality_analyzer.analyze(text)
 
-    
+    """
     w_all = words_without_punctuation(text)
     l_all = lemmas_without_punctuation(text)
     l_unique = set(l_all)
@@ -29,7 +29,7 @@ def analyze(content):
         if w[0]["analysis"][0]["partofspeech"] == "V":
             verb_count += 1
             print(w_all[i], w[0]["text"], w[0]
-                    ["analysis"][0]["partofspeech"])
+                  ["analysis"][0]["partofspeech"])
     print(w_all)
 
     # print(most_frequent_words(w_all))
@@ -40,6 +40,7 @@ def analyze(content):
     i = 0
 
     print("VERB COUNT", verb_count)
+    """
     return "TODO: MAKE"
 
 
