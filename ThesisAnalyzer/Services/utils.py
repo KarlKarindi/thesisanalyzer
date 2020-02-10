@@ -29,15 +29,16 @@ def json_to_text(req, key="text"):
 
 
 # FIXME: Last word in a quote is incorrectly marked not in quotes.
-def is_word_in_quotes(word, in_quotes):
+def is_word_in_quotes(word, previous_word, in_quotes):
     """ Checks whether word is in quotes.
         Parameters:
             word (String) - Examples: "car; car; car"; car.
             in_quotes (boolean) - current status whether text is already in quotes or not
         Returns: (boolean) whether text is in quotes or not
     """
-    if in_quotes and word.endswith('"'):
-        in_quotes = False
+    if previous_word is not None:
+        if in_quotes and previous_word.endswith('"') or previous_word[-2] == '"':
+            in_quotes = False
     if not in_quotes and (word.startswith('"') or word.startswith('„')):
         in_quotes = True
     return in_quotes

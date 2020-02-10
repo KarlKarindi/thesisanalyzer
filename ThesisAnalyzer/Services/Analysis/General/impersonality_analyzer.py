@@ -19,29 +19,34 @@ def analyze(text):
         analyzed_sentence = vabamorf.analyze(sentence)
 
         in_quotes = False
+        previous_word = None
 
-        for word in analyzed_sentence:
+        for word_analysis in analyzed_sentence:
             # Quickly check if word is in quotes or not.
             # If the word is in quotes, it is not considered a personal verb.
-            word_text = word["text"]
+            word = word_analysis["text"]
 
             # FIXME: Kaldkirjas tekst ka sama, mis tsitaadis
             # FIXME: Võõrkeelsed asjad esile tõstetud kaldkirjaga
-            in_quotes = utils.is_word_in_quotes(word_text, in_quotes)
+            in_quotes = utils.is_word_in_quotes(word, previous_word, in_quotes)
 
             # Since a word may have multiple analyses, we must use a loop to iterate over them
             # In case of many options, if one of them is personal, add them to the list.
+            # print(word, in_quotes)
             if not in_quotes:
-                for w_analysis in word["analysis"]:
+                for w_analysis in word_analysis["analysis"]:
                     if (w_analysis["partofspeech"] == constants.VERB and
                             w_analysis["form"] == "n" or
                             w_analysis["ending"] == "in" or
                             w_analysis["ending"] == "sin" or
                             w_analysis["root"] == "mina"):
 
-                        word_text = word["text"]
+                        word_text = word_analysis["text"]
                         if word_text not in personal_verbs:
                             personal_verbs.append(word_text)
+
+            print(previous_word, word)
+            previous_word = word
 
         return personal_verbs
 
