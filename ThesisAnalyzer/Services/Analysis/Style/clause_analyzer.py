@@ -73,7 +73,7 @@ def segment_clauses_in_sentence(sentence, segmenter):
             sentence (String) - one sentence
             segmenter - ClauseSegmenter
         Returns:
-            dict with clauses
+            dict with clauses and the verb chains
      """
 
     # The sentence must be morphologically analyzed and then segmented.
@@ -96,9 +96,11 @@ def segment_clauses_in_sentence(sentence, segmenter):
             clauses[clause_index].append(word)
 
     # Find verb chains
-    clause_to_verb_chain = find_verb_chains(sentence, clauses)
-    print(len(clause_to_verb_chain), clause_to_verb_chain)
+    clauses_summary = find_verb_chains(sentence, clauses)
 
+    # Create a summary of the clauses by combining the verb chains and clauses dictionary
+
+    pprint(clauses_summary)
     return clauses
 
 
@@ -107,7 +109,7 @@ def find_verb_chains(sentence, clauses):
         Parameters:
             sentence (String) - string text of sentence
             clauses (dict) - dictionary of clauses in the sentence (not in quotes)
-        Returns: dict with clause_index keys and verb_chain values
+        Returns: dict with clauses and the corresponding verb chains in clauses
     """
     text = Text(sentence).tag_verb_chains()
 
@@ -119,7 +121,7 @@ def find_verb_chains(sentence, clauses):
     starts_ends = [(vc["clause_index"], vc["start"], vc["end"])
                    for vc in vc_analysis]
 
-    clause_to_verb_chain = {}
+    clause_index_to_verb_chain = {}
 
     # Iterate through the list of tuplets, map clauses to their verb chains
     for cse in starts_ends:
@@ -132,6 +134,17 @@ def find_verb_chains(sentence, clauses):
             _verb_chain_texts.append(sentence[starts[i]:ends[i]])
 
         verb_chain = " ".join(_verb_chain_texts)
-        clause_to_verb_chain[clause_index] = verb_chain
+        clause_index_to_verb_chain[clause_index] = verb_chain
 
-    return clause_to_verb_chain
+    # Create a dictionary that combines the clauses with the verb chains in them
+    clauses_summary = {}
+    for i in clauses:
+        if i in clause_index_to_verb_chain.keys():
+            verb_chains = [clause_index_to_verb_chain[i]]
+        else:
+            verb_chains = []
+
+        clauses_summary[i] = {
+            "words": clauses[i], "verb_chains": verb_chains}
+
+    return clauses_summary
