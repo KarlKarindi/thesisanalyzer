@@ -20,17 +20,17 @@ def analyze(request):
     styleSummary = StyleSummary()
 
     # Word repeat analysis
-    textSummary = overused_word_analyzer.analyze(text)
+    # textSummary = overused_word_analyzer.analyze(text)
 
     # Clause analysis
     clause_analyzer.analyze(text)
 
     # Tag analysis
-    adverbSummary = tag_analyzer.analyze(text)
+    # adverbSummary = tag_analyzer.analyze(text)
 
     # Set attributes for styleSummary
-    styleSummary.adverbSummary = adverbSummary
-    styleSummary.textSummary = textSummary
+    #styleSummary.adverbSummary = adverbSummary
+    #styleSummary.textSummary = textSummary
 
     return encode(styleSummary)
 

@@ -1,4 +1,5 @@
 from ThesisAnalyzer import vabamorf
+from ThesisAnalyzer.Services import utils
 from ThesisAnalyzer.Services.Constants import constants
 from pprint import pprint
 
@@ -22,10 +23,11 @@ def analyze(text):
         for word in analyzed_sentence:
             # Quickly check if word is in quotes or not.
             # If the word is in quotes, it is not considered a personal verb.
-            if word["text"].endswith('"'):
-                in_quotes = False
-            if word["text"].startswith('"'):
-                in_quotes = True
+            word_text = word["text"]
+
+            # FIXME: Kaldkirjas tekst ka sama, mis tsitaadis
+            # FIXME: Võõrkeelsed asjad esile tõstetud kaldkirjaga
+            in_quotes = utils.is_word_in_quotes(word_text, in_quotes)
 
             # Since a word may have multiple analyses, we must use a loop to iterate over them
             # In case of many options, if one of them is personal, add them to the list.
