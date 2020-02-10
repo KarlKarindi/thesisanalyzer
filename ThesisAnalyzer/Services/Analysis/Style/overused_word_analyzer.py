@@ -13,6 +13,7 @@ import math
 class TextSummmary(object):
 
     def __init__(self, word_count, OverusedWords):
+        # word_count does not include stopwords
         self.word_count = word_count
         self.OverusedWords = OverusedWords
 

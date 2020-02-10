@@ -17,9 +17,9 @@ def analyze(text):
     segmenter = ClauseSegmenter()
 
     for sentence in sentences:
-        clauses = segment_clauses_in_sentence(sentence, segmenter)
+        clauses_summary = segment_clauses_in_sentence(sentence, segmenter)
         clauses_feedback = analyze_clauses_in_sentence(
-            clauses, sentence)
+            clauses_summary, sentence)
     return None
 
 
@@ -29,41 +29,26 @@ def analyze_clauses_in_sentence(clauses, sentence):
         returns feedback accordingly.
 
         Parameters:
-            clauses (dict) - dictionary with clauses
+            clauses (dict) - dictionary with clauses and verb chains in corresponding clauses
         Returns:
             feedback - StyleFeedback object
     """
-    feedback = StyleFeedback()
 
-    # pprint(sentence)
-    # pprint(clauses)
-    # Count all the words in clauses
-    total_word_count = 0
-    clause_lengths = []
-    for clause in clauses.values():
-        clause_word_count = len(clause)
-        total_word_count += clause_word_count
-        clause_lengths.append(clause_word_count)
-        # print("CLAUSE_LEN", clause_word_count)
+    total_clause_count = len(clauses)
+    verb_chains_count = 0
+    for i in clauses:
+        verb_chains = clauses[i]["verb_chains"]
+        if len(verb_chains) > 0:
+            verb_chains_count += 1
 
-    mean_word_count_in_clauses = total_word_count / len(clauses)
-    median_word_count_in_clauses = statistics.median(
-        clause_lengths)
+    clauses_without_verb_count = total_clause_count - verb_chains_count
 
-    # print("MEAN_WORD_COUNT_IN_CLAUSE", mean_word_count_in_clauses)
-    # print("MEDIAN_WORD_COUNT_IN_CLAUSE", median_word_count_in_clauses)
-    # print("WORD_COUNT", total_word_count)
-    # print()
+    # TODO: Find optimal clauses_without_verb_count
+    if len(clauses) > config.MAX_CLAUSE_AMOUNT and clauses_without_verb_count < 3:
+        print('Pikk lause:\n' + sentence)
+        print()
 
-    # FIXME: Kui on loetelu, milles on nt pealkirjad vms, siis vaata, mida teha. Sama tsitaatidega.
-    if len(clauses) > config.MAX_CLAUSE_AMOUNT:
-        print('Lause\n"' + sentence +
-              '"\ntundub liiga pikk. Võimalik, et seda saab lühemaks teha.')
-
-    # Äkki on võimalik teha osalause võrdlust? Näiteks vaadata osalausete sõnaarvu mediaani
-    # ning vaadata, kas mingi osalause erineb sellest väga palju.
-
-    return feedback
+    return None
 
 
 def segment_clauses_in_sentence(sentence, segmenter):
@@ -73,7 +58,8 @@ def segment_clauses_in_sentence(sentence, segmenter):
             sentence (String) - one sentence
             segmenter - ClauseSegmenter
         Returns:
-            dict with clauses and the verb chains
+            dict with clauses and the verb chains.
+            IMPORTANT: Verb chains are not taken into account if clause is in quotes
      """
 
     # The sentence must be morphologically analyzed and then segmented.
@@ -98,11 +84,10 @@ def segment_clauses_in_sentence(sentence, segmenter):
     # Find verb chains
     clauses_summary = map_clauses_to_verb_chains(sentence, clauses)
 
-    pprint(clauses_summary)
-    return clauses
+    return clauses_summary
 
 
-def map_clauses_to_verb_chains(sentence, clauses):
+def map_clauses_to_verb_chains(sentence, clauses_not_in_quotes):
     """ Finds verb chains in the clauses of a sentence.
         Parameters:
             sentence (String) - string text of sentence
@@ -112,9 +97,9 @@ def map_clauses_to_verb_chains(sentence, clauses):
 
     text = Text(sentence).tag_verb_chains()
 
-    # Filter
+    # Filter. Leave only the verb chains analyses that aren't in quotes
     vc_analysis = [
-        vc for vc in text.verb_chains if vc["clause_index"] in clauses.keys()]
+        vc for vc in text.verb_chains if vc["clause_index"] in clauses_not_in_quotes.keys()]
 
     # Create a list of tuplets (clause_index, list of verb chain starts, list of verb chain ends)
     starts_ends = [(vc["clause_index"], vc["start"], vc["end"])
@@ -126,14 +111,14 @@ def map_clauses_to_verb_chains(sentence, clauses):
 
     # Create a dictionary that combines the clauses with the verb chains in them
     clauses_summary = {}
-    for i in clauses:
+    for i in clauses_not_in_quotes:
         if i in clause_index_to_verb_chain.keys():
             verb_chains = [clause_index_to_verb_chain[i]]
         else:
             verb_chains = []
 
         clauses_summary[i] = {
-            "words": clauses[i], "verb_chains": verb_chains}
+            "words": clauses_not_in_quotes[i], "verb_chains": verb_chains}
 
     return clauses_summary
 
