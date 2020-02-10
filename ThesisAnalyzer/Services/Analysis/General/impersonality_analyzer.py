@@ -21,10 +21,10 @@ def analyze(text):
         in_quotes = False
         previous_word = None
 
-        for word_analyses in analyzed_sentence:
+        for word_summary in analyzed_sentence:
             # Quickly check if word is in quotes or not.
             # If the word is in quotes, it is not considered a personal verb.
-            word = word_analyses["text"]
+            word = word_summary["text"]
 
             # FIXME: Kaldkirjas tekst ka sama, mis tsitaadis
             # FIXME: Võõrkeelsed asjad esile tõstetud kaldkirjaga
@@ -36,14 +36,14 @@ def analyze(text):
             # Since a word may have multiple analyses, we must use a loop to iterate over them
             # In case of many options, if one of them is personal, add them to the list.
             if not in_quotes:
-                for w_analysis in word_analyses["analysis"]:
-                    if ((w_analysis["partofspeech"] == constants.VERB) and
-                            w_analysis["form"] == "n" or
-                            w_analysis["ending"] == "in" or
-                            w_analysis["ending"] == "sin" or
-                            w_analysis["root"] == "mina"):
+                for word_analysis in word_summary["analysis"]:
+                    if ((word_analysis["partofspeech"] == constants.VERB) and
+                            word_analysis["form"] == "n" or
+                            word_analysis["ending"] == "in" or
+                            word_analysis["ending"] == "sin" or
+                            word_analysis["root"] == "mina"):
 
-                        word_text = word_analyses["text"]
+                        word_text = word_summary["text"]
                         if word_text not in personal_verbs:
                             personal_verbs.append(word_text)
 
