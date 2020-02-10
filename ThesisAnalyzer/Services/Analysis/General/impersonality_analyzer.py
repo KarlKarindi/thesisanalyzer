@@ -12,7 +12,7 @@ def analyze(text):
     """
 
     def find_pv_in_sentence(sentence):
-        """ Parameters: sentence - String, text of the sentence being analyzed.
+        """ Parameters: sentence (String) - text of the sentence being analyzed.
             Returns: list of personal verbs in the sentence.
         """
         personal_verbs = []
@@ -29,8 +29,6 @@ def analyze(text):
             # FIXME: Kaldkirjas tekst ka sama, mis tsitaadis
             # FIXME: Võõrkeelsed asjad esile tõstetud kaldkirjaga
             in_quotes = utils.is_word_in_quotes(word, previous_word, in_quotes)
-
-            # Update the previous word
             previous_word = word
 
             # Since a word may have multiple analyses, we must use a loop to iterate over them

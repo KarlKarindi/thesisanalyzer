@@ -32,7 +32,7 @@ def analyze(text):
 def tag_words_in_sentences(sentences):
     """ Tag all the words in a list of sentences using vabamorf
         Parameters:
-            sentences - List of sentences
+            sentences (list) - List of sentences
         Returns:
             list of tags
     """

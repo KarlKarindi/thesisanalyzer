@@ -5,6 +5,7 @@ from ThesisAnalyzer.Services import utils
 
 from estnltk import Text, ClauseSegmenter
 from collections import defaultdict
+from pprint import pprint
 
 import statistics
 
@@ -28,7 +29,7 @@ def analyze_clauses_in_sentence(clauses, sentence):
         returns feedback accordingly.
 
         Parameters:
-            clauses - dictionary with clauses
+            clauses (dict) - dictionary with clauses
         Returns:
             feedback - StyleFeedback object
     """
@@ -69,10 +70,10 @@ def segment_clauses_in_sentence(sentence, segmenter):
     """ Segments the clauses (osalausestamine)
 
         Parameters:
-            sentence - one sentence (as a string)
+            sentence (String) - one sentence
             segmenter - ClauseSegmenter
         Returns:
-            dictionary with clauses
+            dict with clauses
      """
 
     # The sentence must be morphologically analyzed and then segmented.
@@ -81,12 +82,12 @@ def segment_clauses_in_sentence(sentence, segmenter):
 
     # Create a dictionary of the clauses and the words they consist of.
     clauses = defaultdict(list)
+
     in_quotes = False
     previous_word = None
 
     for word_analysis in segmented:
         word = word_analysis["text"]
-
         in_quotes = utils.is_word_in_quotes(word, previous_word, in_quotes)
         previous_word = word
 
@@ -94,4 +95,43 @@ def segment_clauses_in_sentence(sentence, segmenter):
             clause_index = word_analysis["clause_index"]
             clauses[clause_index].append(word)
 
+    # Find verb chains
+    clause_to_verb_chain = find_verb_chains(sentence, clauses)
+    print(len(clause_to_verb_chain), clause_to_verb_chain)
+
     return clauses
+
+
+def find_verb_chains(sentence, clauses):
+    """ Finds verb chains in the clauses of a sentence.
+        Parameters:
+            sentence (String) - string text of sentence
+            clauses (dict) - dictionary of clauses in the sentence (not in quotes)
+        Returns: dict with clause_index keys and verb_chain values
+    """
+    text = Text(sentence).tag_verb_chains()
+
+    # Filter
+    vc_analysis = [
+        vc for vc in text.verb_chains if vc["clause_index"] in clauses.keys()]
+
+    # Create a list of tuplets (clause_index, list of verb chain starts, list of verb chain ends)
+    starts_ends = [(vc["clause_index"], vc["start"], vc["end"])
+                   for vc in vc_analysis]
+
+    clause_to_verb_chain = {}
+
+    # Iterate through the list of tuplets, map clauses to their verb chains
+    for cse in starts_ends:
+        clause_index = cse[0]
+        starts = cse[1]
+        ends = cse[2]
+
+        _verb_chain_texts = []
+        for i in range(len(starts)):
+            _verb_chain_texts.append(sentence[starts[i]:ends[i]])
+
+        verb_chain = " ".join(_verb_chain_texts)
+        clause_to_verb_chain[clause_index] = verb_chain
+
+    return clause_to_verb_chain
