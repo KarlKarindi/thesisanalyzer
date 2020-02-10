@@ -44,15 +44,15 @@ def analyze_clauses_in_sentence(clauses, sentence):
         clause_word_count = len(clause)
         total_word_count += clause_word_count
         clause_lengths.append(clause_word_count)
-        #print("CLAUSE_LEN", clause_word_count)
+        # print("CLAUSE_LEN", clause_word_count)
 
     mean_word_count_in_clauses = total_word_count / len(clauses)
     median_word_count_in_clauses = statistics.median(
         clause_lengths)
 
-    #print("MEAN_WORD_COUNT_IN_CLAUSE", mean_word_count_in_clauses)
-    #print("MEDIAN_WORD_COUNT_IN_CLAUSE", median_word_count_in_clauses)
-    #print("WORD_COUNT", total_word_count)
+    # print("MEAN_WORD_COUNT_IN_CLAUSE", mean_word_count_in_clauses)
+    # print("MEDIAN_WORD_COUNT_IN_CLAUSE", median_word_count_in_clauses)
+    # print("WORD_COUNT", total_word_count)
     # print()
 
     # FIXME: Kui on loetelu, milles on nt pealkirjad vms, siis vaata, mida teha. Sama tsitaatidega.
@@ -96,21 +96,20 @@ def segment_clauses_in_sentence(sentence, segmenter):
             clauses[clause_index].append(word)
 
     # Find verb chains
-    clauses_summary = find_verb_chains(sentence, clauses)
-
-    # Create a summary of the clauses by combining the verb chains and clauses dictionary
+    clauses_summary = map_clauses_to_verb_chains(sentence, clauses)
 
     pprint(clauses_summary)
     return clauses
 
 
-def find_verb_chains(sentence, clauses):
+def map_clauses_to_verb_chains(sentence, clauses):
     """ Finds verb chains in the clauses of a sentence.
         Parameters:
             sentence (String) - string text of sentence
             clauses (dict) - dictionary of clauses in the sentence (not in quotes)
         Returns: dict with clauses and the corresponding verb chains in clauses
     """
+
     text = Text(sentence).tag_verb_chains()
 
     # Filter
@@ -120,6 +119,31 @@ def find_verb_chains(sentence, clauses):
     # Create a list of tuplets (clause_index, list of verb chain starts, list of verb chain ends)
     starts_ends = [(vc["clause_index"], vc["start"], vc["end"])
                    for vc in vc_analysis]
+
+    # Create a dictionary that maps clause indexes to verb chains
+    clause_index_to_verb_chain = map_clause_index_to_verb_chain_text(
+        sentence, starts_ends)
+
+    # Create a dictionary that combines the clauses with the verb chains in them
+    clauses_summary = {}
+    for i in clauses:
+        if i in clause_index_to_verb_chain.keys():
+            verb_chains = [clause_index_to_verb_chain[i]]
+        else:
+            verb_chains = []
+
+        clauses_summary[i] = {
+            "words": clauses[i], "verb_chains": verb_chains}
+
+    return clauses_summary
+
+
+def map_clause_index_to_verb_chain_text(sentence, starts_ends):
+    """ Parameters:
+            sentence (String) - sentence in text form
+            starts_ends - tuplet that has the clause_index, list of verb_chain_starts, list of verb_chain_ends
+        Returns: dict that maps clause index to the verb chains (in text form)
+    """
 
     clause_index_to_verb_chain = {}
 
@@ -136,15 +160,4 @@ def find_verb_chains(sentence, clauses):
         verb_chain = " ".join(_verb_chain_texts)
         clause_index_to_verb_chain[clause_index] = verb_chain
 
-    # Create a dictionary that combines the clauses with the verb chains in them
-    clauses_summary = {}
-    for i in clauses:
-        if i in clause_index_to_verb_chain.keys():
-            verb_chains = [clause_index_to_verb_chain[i]]
-        else:
-            verb_chains = []
-
-        clauses_summary[i] = {
-            "words": clauses[i], "verb_chains": verb_chains}
-
-    return clauses_summary
+    return clause_index_to_verb_chain
