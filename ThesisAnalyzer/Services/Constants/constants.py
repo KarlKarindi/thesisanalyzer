@@ -1,2 +1,4 @@
 VERB = "V"
 ADVERB = "D"
+QUOTATION_MARK_UP = '"'
+QUOTATION_MARK_LOW = '„'

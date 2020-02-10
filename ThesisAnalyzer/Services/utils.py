@@ -1,3 +1,5 @@
+from ThesisAnalyzer.Services.Constants import constants
+
 from flask import Flask, request, jsonify
 from estnltk import Text
 import jsonpickle
@@ -28,17 +30,23 @@ def json_to_text(req, key="text"):
     return req.get_json()[key]
 
 
-# FIXME: Last word in a quote is incorrectly marked not in quotes.
 def is_word_in_quotes(word, previous_word, in_quotes):
-    """ Checks whether word is in quotes.
+    """ Checks whether word is in quotes or not.
         Parameters:
             word (String) - Examples: "car; car; car"; car.
+            previous_word (String) - the previous word that came prior to the word parameter
             in_quotes (boolean) - current status whether text is already in quotes or not
         Returns: (boolean) whether text is in quotes or not
     """
+    # Ending the quote
     if previous_word is not None:
-        if in_quotes and previous_word.endswith('"') or previous_word[-2] == '"':
+        if (in_quotes and previous_word.endswith(constants.QUOTATION_MARK_UP) or
+                previous_word[-2] == constants.QUOTATION_MARK_UP):
             in_quotes = False
-    if not in_quotes and (word.startswith('"') or word.startswith('„')):
+
+    # Beginning the quote
+    if not in_quotes and (word.startswith(constants.QUOTATION_MARK_UP) or
+                          word.startswith(constants.QUOTATION_MARK_LOW)):
         in_quotes = True
+
     return in_quotes

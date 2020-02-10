@@ -75,8 +75,6 @@ def segment_clauses_in_sentence(sentence, segmenter):
             dictionary with clauses
      """
 
-    # TODO: Try Except
-
     # The sentence must be morphologically analyzed and then segmented.
     prepared = vabamorf.analyze(sentence)
     segmented = segmenter.mark_annotations(prepared)
@@ -84,15 +82,16 @@ def segment_clauses_in_sentence(sentence, segmenter):
     # Create a dictionary of the clauses and the words they consist of.
     clauses = defaultdict(list)
     in_quotes = False
+    previous_word = None
 
-    for word in segmented:
-        word_text = word["text"]
+    for word_analysis in segmented:
+        word = word_analysis["text"]
 
-        in_quotes = utils.is_word_in_quotes(word_text, in_quotes)
-        print(word_text, in_quotes)
+        in_quotes = utils.is_word_in_quotes(word, previous_word, in_quotes)
+        previous_word = word
 
         if not in_quotes:
-            clause_index = word["clause_index"]
-            clauses[clause_index].append(word_text)
+            clause_index = word_analysis["clause_index"]
+            clauses[clause_index].append(word)
 
     return clauses
