@@ -21,32 +21,31 @@ def analyze(text):
         in_quotes = False
         previous_word = None
 
-        for word_analysis in analyzed_sentence:
+        for word_analyses in analyzed_sentence:
             # Quickly check if word is in quotes or not.
             # If the word is in quotes, it is not considered a personal verb.
-            word = word_analysis["text"]
+            word = word_analyses["text"]
 
             # FIXME: Kaldkirjas tekst ka sama, mis tsitaadis
             # FIXME: Võõrkeelsed asjad esile tõstetud kaldkirjaga
             in_quotes = utils.is_word_in_quotes(word, previous_word, in_quotes)
 
+            # Update the previous word
+            previous_word = word
+
             # Since a word may have multiple analyses, we must use a loop to iterate over them
             # In case of many options, if one of them is personal, add them to the list.
-            # print(word, in_quotes)
             if not in_quotes:
-                for w_analysis in word_analysis["analysis"]:
-                    if (w_analysis["partofspeech"] == constants.VERB and
+                for w_analysis in word_analyses["analysis"]:
+                    if ((w_analysis["partofspeech"] == constants.VERB) and
                             w_analysis["form"] == "n" or
                             w_analysis["ending"] == "in" or
                             w_analysis["ending"] == "sin" or
                             w_analysis["root"] == "mina"):
 
-                        word_text = word_analysis["text"]
+                        word_text = word_analyses["text"]
                         if word_text not in personal_verbs:
                             personal_verbs.append(word_text)
-
-            print(previous_word, word)
-            previous_word = word
 
         return personal_verbs
 
