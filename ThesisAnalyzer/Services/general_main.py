@@ -10,6 +10,9 @@ def analyze(content):
     """ Analyzes the content and returns general statistics about the text """
     text = json_to_text(content)
 
+    # FIXME: Bandaid solution for issue #14
+    text = text.replace("–", "-")
+
     # Impersonal verb check (umbisikulise tegumoe kontroll)
     impersonality_analyzer.analyze(text)
 

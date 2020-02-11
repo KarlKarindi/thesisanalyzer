@@ -7,7 +7,7 @@ ANALYZE_TAGS = True
 
 
 # Clause analyzer
-MAX_CLAUSE_AMOUNT = 6
+MAX_CLAUSE_AMOUNT = 5
 
 # Overused word analyzer
 OVERUSED_MULTIPLIER = 5

@@ -10,20 +10,37 @@ from pprint import pprint
 import statistics
 
 
+class ClauseSummary():
+
+    def add_sent_to_long_sentences(self, sentence):
+        self.long_sentences.append(sentence)
+
+    def __init__(self):
+        self.long_sentences = []
+
+
 def analyze(text):
-    """ Function to start the clause analysis """
+
     sentences = Text(text).sentence_texts
 
     segmenter = ClauseSegmenter()
 
+    clauseSummary = ClauseSummary()
+
+    # Iterate through the sentences.
+    # Create a clause_dict for every sentence, then check if sentence is too long.
     for sentence in sentences:
-        clauses_summary = segment_clauses_in_sentence(sentence, segmenter)
-        clauses_feedback = analyze_clauses_in_sentence(
-            clauses_summary, sentence)
-    return None
+        clauses_dict = segment_clauses_in_sentence(sentence, segmenter)
+        sentence_is_long = is_sentence_too_long(
+            clauses_dict, sentence)
+
+        if sentence_is_long:
+            clauseSummary.add_sent_to_long_sentences(sentence)
+
+    return clauseSummary
 
 
-def analyze_clauses_in_sentence(clauses, sentence):
+def is_sentence_too_long(clauses, sentence):
     """ Analyzes the clauses in a sentence.
         Looks at clause word length, sentence word length, clause amount,
         returns feedback accordingly.
@@ -31,7 +48,7 @@ def analyze_clauses_in_sentence(clauses, sentence):
         Parameters:
             clauses (dict) - dictionary with clauses and verb chains in corresponding clauses
         Returns:
-            feedback - StyleFeedback object
+            boolean whether sentence is too long or not
     """
 
     total_clause_count = len(clauses)
@@ -41,15 +58,14 @@ def analyze_clauses_in_sentence(clauses, sentence):
         if len(verb_chains) > 0:
             verb_chains_count += 1
 
-    clauses_without_verb_count = total_clause_count - verb_chains_count
     half_of_clauses = total_clause_count // 2
 
-    # TODO: Find optimal clauses_without_verb_count
-    if len(clauses) > config.MAX_CLAUSE_AMOUNT and clauses_without_verb_count < half_of_clauses:
-        print('Pikk lause:\n' + sentence)
-        print()
+    # TODO: Find optimal conditions that work the best
+    # Conditions for deciding whether a sentence is too long
+    if len(clauses) > config.MAX_CLAUSE_AMOUNT and verb_chains_count > half_of_clauses:
+        return True
 
-    return None
+    return False
 
 
 def segment_clauses_in_sentence(sentence, segmenter):
@@ -83,9 +99,9 @@ def segment_clauses_in_sentence(sentence, segmenter):
             clauses[clause_index].append(word)
 
     # Find verb chains
-    clauses_summary = map_clauses_to_verb_chains(sentence, clauses)
+    clauses_dict = map_clauses_to_verb_chains(sentence, clauses)
 
-    return clauses_summary
+    return clauses_dict
 
 
 def map_clauses_to_verb_chains(sentence, clauses_not_in_quotes):

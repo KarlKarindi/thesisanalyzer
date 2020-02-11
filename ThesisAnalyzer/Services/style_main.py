@@ -14,6 +14,9 @@ def analyze(request):
     """ The main function that starts all analyses related to style in the text """
     text = utils.json_to_text(request)
 
+    # FIXME: Bandaid solution for issue #14
+    text = text.replace("–", "-")
+
     # Set jsonpickle settings
     jsonpickle.set_preferred_backend("json")
     jsonpickle.set_encoder_options("json", ensure_ascii=False)
@@ -27,7 +30,8 @@ def analyze(request):
 
     # Clause analysis
     if config.ANALYZE_CLAUSES:
-        clause_analyzer.analyze(text)
+        clauseSummary = clause_analyzer.analyze(text)
+        styleSummary.clauseSummary = clauseSummary
 
     # Tag analysis
     if config.ANALYZE_TAGS:

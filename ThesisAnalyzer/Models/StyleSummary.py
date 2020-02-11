@@ -8,4 +8,5 @@ class StyleSummary(object):
 
     def __init__(self):
         self.tagSummary = None
+        self.clauseSummary = None
         self.textSummary = None

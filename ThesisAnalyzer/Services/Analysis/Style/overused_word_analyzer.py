@@ -65,6 +65,7 @@ class OverusedWordSummary(object):
 
 def best_synset(word, pos):
     """ Finds the best synset for a word, takes into account part of speech """
+
     conversion = {"S": wn.NOUN, "V": wn.VERB, "A": wn.ADJ, "D": wn.ADV}
 
     if pos not in conversion:
