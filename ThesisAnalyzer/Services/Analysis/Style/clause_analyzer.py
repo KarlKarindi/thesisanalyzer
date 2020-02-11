@@ -42,9 +42,10 @@ def analyze_clauses_in_sentence(clauses, sentence):
             verb_chains_count += 1
 
     clauses_without_verb_count = total_clause_count - verb_chains_count
+    half_of_clauses = total_clause_count // 2
 
     # TODO: Find optimal clauses_without_verb_count
-    if len(clauses) > config.MAX_CLAUSE_AMOUNT and clauses_without_verb_count < 3:
+    if len(clauses) > config.MAX_CLAUSE_AMOUNT and clauses_without_verb_count < half_of_clauses:
         print('Pikk lause:\n' + sentence)
         print()
 
