@@ -22,7 +22,7 @@ def analyze(text):
         previous_word = None
 
         for word_summary in analyzed_sentence:
-            # Quickly check if word is in quotes or not.
+            # Check if word is in quotes or not.
             # If the word is in quotes, it is not considered a personal verb.
             word = word_summary["text"]
 

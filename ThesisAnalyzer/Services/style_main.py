@@ -1,6 +1,6 @@
 from ThesisAnalyzer.Services.Analysis.Style import overused_word_analyzer, clause_analyzer, tag_analyzer
 from ThesisAnalyzer.Services.Analysis.Style.overused_word_analyzer import TextSummmary, OverusedWordSummary
-from ThesisAnalyzer.Services.Analysis.Style.tag_analyzer import AdverbSummary
+from ThesisAnalyzer.Services.Analysis.Style.tag_analyzer import TagSummary
 from ThesisAnalyzer.Models.Feedback import StyleFeedback
 from ThesisAnalyzer.Models.StyleSummary import StyleSummary
 from ThesisAnalyzer.Services import utils
@@ -20,17 +20,17 @@ def analyze(request):
     styleSummary = StyleSummary()
 
     # Word repeat analysis
-    textSummary = overused_word_analyzer.analyze(text)
+    # textSummary = overused_word_analyzer.analyze(text)
 
     # Clause analysis
     clause_analyzer.analyze(text)
 
     # Tag analysis
-    adverbSummary = tag_analyzer.analyze(text)
+    tagSummary = tag_analyzer.analyze(text)
 
     # Set attributes for styleSummary
-    styleSummary.adverbSummary = adverbSummary
-    styleSummary.textSummary = textSummary
+    styleSummary.tagSummary = tagSummary
+    # styleSummary.textSummary = textSummary
 
     return encode(styleSummary)
 

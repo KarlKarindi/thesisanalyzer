@@ -52,7 +52,7 @@ def analyze_clauses_in_sentence(clauses, sentence):
 
 
 def segment_clauses_in_sentence(sentence, segmenter):
-    """ Segments the clauses (osalausestamine)
+    """ Segments the clauses (osalausestamine).
 
         Parameters:
             sentence (String) - one sentence
@@ -89,6 +89,7 @@ def segment_clauses_in_sentence(sentence, segmenter):
 
 def map_clauses_to_verb_chains(sentence, clauses_not_in_quotes):
     """ Finds verb chains in the clauses of a sentence.
+
         Parameters:
             sentence (String) - string text of sentence
             clauses (dict) - dictionary of clauses in the sentence (not in quotes)
@@ -112,9 +113,10 @@ def map_clauses_to_verb_chains(sentence, clauses_not_in_quotes):
     # Create a dictionary that combines the clauses with the verb chains in them
     clauses_summary = {}
     for i in clauses_not_in_quotes:
+        # If clause contains verb chains, add the verb chains as values
         if i in clause_index_to_verb_chain.keys():
             verb_chains = [clause_index_to_verb_chain[i]]
-        else:
+        else:  # Add an empty list as the verb chains
             verb_chains = []
 
         clauses_summary[i] = {

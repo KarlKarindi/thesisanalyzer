@@ -178,6 +178,7 @@ def analyze(text):
     def create_lemma_to_rank_and_count(Lemma_list):
         """ Iterates over list of model Lemma.
             Sorts the list beforehand to get the rank of each word.
+
             Returns: dictionary where the keys are lemmas in the database
             and the values tuplets of (rank, count)
         """
