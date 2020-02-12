@@ -261,9 +261,10 @@ def analyze(text):
             overusedWordSummaryList.append(OverusedWordSummary(
                 lemma, words_in_text, multiplier))
 
-    # Sort the results list by multiplier (descending order). Only leave the 20 most overused words
+    # Sort the results list by multiplier (descending order)
+    # Only leave config.OUW_NUM_WORDS_TO_ANALYZE words for analysis
     overusedWordSummaryList = sorted(
-        overusedWordSummaryList, key=lambda x: x.multiplier, reverse=True)[:20]
+        overusedWordSummaryList, key=lambda x: x.multiplier, reverse=True)[config.OUW_NUM_WORDS_TO_ANALYZE]
 
     for overusedWordSummary in overusedWordSummaryList:
         # Find the synonyms
