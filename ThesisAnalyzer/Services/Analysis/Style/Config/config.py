@@ -1,7 +1,7 @@
 # Config file for style analysis
 
 # Options for analysis
-ANALYZE_OVERUSED_WORDS = False
+ANALYZE_OVERUSED_WORDS = True
 ANALYZE_CLAUSES = True
 ANALYZE_TAGS = True
 
