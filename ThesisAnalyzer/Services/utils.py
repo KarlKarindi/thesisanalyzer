@@ -45,15 +45,16 @@ def is_word_in_quotes(word, previous_word, in_quotes):
 
     # Ending the quote
     if previous_word is not None and in_quotes:
-        if previous_word.endswith(constants.QUOTATION_MARK_UP):
+        if previous_word.endswith(constants.QUOTATION_MARK_UP_1) or previous_word.endswith(constants.QUOTATION_MARK_UP_2):
             in_quotes = False
         # If second to last letter is an ending quotation mark
         elif len(previous_word) > 2:
-            if previous_word[-2] == constants.QUOTATION_MARK_UP:
+            if previous_word[-2] == constants.QUOTATION_MARK_UP_1 or previous_word[-2] == constants.QUOTATION_MARK_UP_2:
                 in_quotes = False
 
     # Beginning the quote
-    if not in_quotes and (word.startswith(constants.QUOTATION_MARK_UP) or
+    if not in_quotes and (word.startswith(constants.QUOTATION_MARK_UP_1) or
+                          word.startswith(constants.QUOTATION_MARK_UP_2) or
                           word.startswith(constants.QUOTATION_MARK_LOW)):
         in_quotes = True
 
