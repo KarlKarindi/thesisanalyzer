@@ -10,7 +10,7 @@ from pprint import pprint
 import statistics
 
 
-class ClauseSummary():
+class SentencesLengthSummary():
 
     def add_sent_to_long_sentences(self, sentence):
         self.long_sentences.append(sentence)
@@ -25,7 +25,7 @@ def analyze(text):
 
     segmenter = ClauseSegmenter()
 
-    clauseSummary = ClauseSummary()
+    sentencesLengthSummary = SentencesLengthSummary()
 
     # Iterate through the sentences.
     # Create a clause_dict for every sentence, then check if sentence is too long.
@@ -35,9 +35,9 @@ def analyze(text):
             clauses_dict, sentence)
 
         if sentence_is_long:
-            clauseSummary.add_sent_to_long_sentences(sentence)
+            sentencesLengthSummary.add_sent_to_long_sentences(sentence)
 
-    return clauseSummary
+    return sentencesLengthSummary
 
 
 def is_sentence_too_long(clauses, sentence):

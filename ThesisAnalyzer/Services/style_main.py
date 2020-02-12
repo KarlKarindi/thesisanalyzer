@@ -1,4 +1,4 @@
-from ThesisAnalyzer.Services.Analysis.Style import overused_word_analyzer, tag_analyzer, clause_length_analyzer
+from ThesisAnalyzer.Services.Analysis.Style import overused_word_analyzer, tag_analyzer, sentences_length_analyzer
 from ThesisAnalyzer.Services.Analysis.Style.overused_word_analyzer import TextSummmary, OverusedWordSummary
 from ThesisAnalyzer.Services.Analysis.Style.Config import config
 from ThesisAnalyzer.Services.Analysis.Style.tag_analyzer import TagSummary
@@ -30,8 +30,8 @@ def analyze(request):
 
     # Clause analysis
     if config.ANALYZE_CLAUSES:
-        clauseSummary = clause_length_analyzer.analyze(text)
-        styleSummary.clauseSummary = clauseSummary
+        sentencesLengthSummary = sentences_length_analyzer.analyze(text)
+        styleSummary.sentencesLengthSummary = sentencesLengthSummary
 
     # Tag analysis
     if config.ANALYZE_TAGS:

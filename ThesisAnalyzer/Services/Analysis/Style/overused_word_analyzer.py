@@ -11,6 +11,7 @@ import math
 
 
 class TextSummmary(object):
+    """ Container class for OverusedWordSummary object """
 
     def __init__(self, word_count, OverusedWords):
         # word_count does not include stopwords
@@ -19,9 +20,7 @@ class TextSummmary(object):
 
 
 class OverusedWordSummary(object):
-    """ Container object for word usage analysis
-        Returns: TextSummary object
-    """
+    """ Container object for word usage analysis """
 
     def find_synonyms_for_words_and_lemma(self):
         """ Finds synonyms for the words and the lemma """
@@ -127,7 +126,9 @@ def remove_duplicate_synonyms_for_words(word_list, syn_list):
 
 
 def analyze(text):
-    """ Analyzes repeating words using a method described in the Synonimity program """
+    """ Analyzes repeating words using a method described in the Synonimity program 
+        Returns: TextSummary object
+    """
 
     def get_words_without_punctuation(text):
         return [word for word in Text(text).word_texts if word.isalpha()]

@@ -24,9 +24,7 @@ def analyze(text):
 
     tags = tag_words_in_sentences(sentences)
 
-    total_count = 0
-    adverb_count = 0
-    pronoun_count = 0
+    total_count, adverb_count, pronoun_count = 0, 0, 0
 
     for n in tags:
         tag = n[1]

@@ -1,6 +1,4 @@
 from ThesisAnalyzer import db
-from ThesisAnalyzer.Services.Analysis.Style.overused_word_analyzer import OverusedWordSummary, TextSummmary
-from ThesisAnalyzer.Services.Analysis.Style.tag_analyzer import TagSummary
 
 
 class StyleSummary(object):
@@ -8,5 +6,5 @@ class StyleSummary(object):
 
     def __init__(self):
         self.tagSummary = None
-        self.clauseSummary = None
+        self.sentencesLengthSummary = None
         self.textSummary = None
