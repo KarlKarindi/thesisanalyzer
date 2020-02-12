@@ -264,7 +264,7 @@ def analyze(text):
     # Sort the results list by multiplier (descending order)
     # Only leave config.OUW_NUM_WORDS_TO_ANALYZE words for analysis
     overusedWordSummaryList = sorted(
-        overusedWordSummaryList, key=lambda x: x.multiplier, reverse=True)[config.OUW_NUM_WORDS_TO_ANALYZE]
+        overusedWordSummaryList, key=lambda x: x.multiplier, reverse=True)[:config.OUW_NUM_WORDS_TO_ANALYZE]
 
     for overusedWordSummary in overusedWordSummaryList:
         # Find the synonyms
