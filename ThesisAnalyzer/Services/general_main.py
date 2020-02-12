@@ -1,5 +1,6 @@
 from ThesisAnalyzer import vabamorf
-from ThesisAnalyzer.Services.utils import json_to_text
+from ThesisAnalyzer.Services import utils
+from ThesisAnalyzer.Services.Analysis.General.impersonality_analyzer import ImpersonalitySummary
 from ThesisAnalyzer.Services.Analysis.General import impersonality_analyzer
 from estnltk import Text
 
@@ -8,13 +9,13 @@ import nltk
 
 def analyze(content):
     """ Analyzes the content and returns general statistics about the text """
-    text = json_to_text(content)
+    text = utils.json_to_text(content)
 
     # FIXME: Bandaid solution for issue #14
     text = text.replace("–", "-")
 
     # Impersonal verb check (umbisikulise tegumoe kontroll)
-    impersonality_analyzer.analyze(text)
+    impersonalitySummary = impersonality_analyzer.analyze(text)
 
     """
     w_all = words_without_punctuation(text)
@@ -44,7 +45,7 @@ def analyze(content):
 
     print("VERB COUNT", verb_count)
     """
-    return "TODO: MAKE"
+    return utils.encode(impersonalitySummary)
 
 
 def words_without_punctuation(text):

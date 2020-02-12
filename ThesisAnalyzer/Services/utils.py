@@ -30,6 +30,10 @@ def json_to_text(req, key="text"):
     return req.get_json()[key]
 
 
+def encode(Object):
+    return(jsonpickle.encode(Object, unpicklable=False))
+
+
 def is_word_in_quotes(word, previous_word, in_quotes):
     """ Checks whether word is in quotes or not.
         Parameters:

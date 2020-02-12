@@ -6,6 +6,13 @@ from pprint import pprint
 import estnltk
 
 
+class ImpersonalitySummary():
+
+    def __init__(self, is_impersonal, sentences_with_pv):
+        self.is_impersonal = is_impersonal
+        self.sentences_with_pv = sentences_with_pv
+
+
 def analyze(text):
     """ Checks if text is fully impersonal. A text is personal if it contains personal verbs (pv).
         Returns: a dictionary of sentences with words that are personal.
@@ -63,6 +70,7 @@ def analyze(text):
             sentences_with_pv[sentence] = pv_in_sentence
 
     text_is_impersonal = len(sentences_with_pv) == 0
-    print("TEXT_IS_IMPERSONAL", text_is_impersonal)
-    pprint(sentences_with_pv)
-    return text_is_impersonal
+
+    impersonalitySummary = ImpersonalitySummary(
+        text_is_impersonal, sentences_with_pv)
+    return impersonalitySummary

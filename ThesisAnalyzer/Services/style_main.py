@@ -1,4 +1,4 @@
-from ThesisAnalyzer.Services.Analysis.Style import overused_word_analyzer, clause_analyzer, tag_analyzer
+from ThesisAnalyzer.Services.Analysis.Style import overused_word_analyzer, tag_analyzer, clause_length_analyzer
 from ThesisAnalyzer.Services.Analysis.Style.overused_word_analyzer import TextSummmary, OverusedWordSummary
 from ThesisAnalyzer.Services.Analysis.Style.Config import config
 from ThesisAnalyzer.Services.Analysis.Style.tag_analyzer import TagSummary
@@ -30,7 +30,7 @@ def analyze(request):
 
     # Clause analysis
     if config.ANALYZE_CLAUSES:
-        clauseSummary = clause_analyzer.analyze(text)
+        clauseSummary = clause_length_analyzer.analyze(text)
         styleSummary.clauseSummary = clauseSummary
 
     # Tag analysis
@@ -38,8 +38,4 @@ def analyze(request):
         tagSummary = tag_analyzer.analyze(text)
         styleSummary.tagSummary = tagSummary
 
-    return encode(styleSummary)
-
-
-def encode(Object):
-    return(jsonpickle.encode(Object, unpicklable=False))
+    return utils.encode(styleSummary)
