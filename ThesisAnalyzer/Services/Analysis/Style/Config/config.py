@@ -3,7 +3,7 @@
 # Options for analysis
 ANALYZE_OVERUSED_WORDS = True
 ANALYZE_CLAUSES = True
-ANALYZE_TAGS = True
+ANALYZE_TAGS = False
 
 
 # Clause analyzer
