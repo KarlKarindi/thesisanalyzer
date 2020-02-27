@@ -17,34 +17,6 @@ def analyze(content):
     # Impersonal verb check (umbisikulise tegumoe kontroll)
     impersonalitySummary = impersonality_analyzer.analyze(text)
 
-    """
-    w_all = words_without_punctuation(text)
-    l_all = lemmas_without_punctuation(text)
-    l_unique = set(l_all)
-
-    # print(w_all)
-    # print("Töös on kokku", len(w_all), "sõna.")
-    # print("Nendest", len(w_unique), "on unikaalsed")
-    # print("Leksiline tihedus on", "%")
-    verb_count = 0
-    for i in range(len(w_all)):
-        w = vabamorf.analyze(w_all[i])
-        # print("("+  w[0]["text"]+", ", w[0]["analysis"][0]["partofspeech"]+")")
-        if w[0]["analysis"][0]["partofspeech"] == "V":
-            verb_count += 1
-            print(w_all[i], w[0]["text"], w[0]
-                  ["analysis"][0]["partofspeech"])
-    print(w_all)
-
-    # print(most_frequent_words(w_all))
-    tag_text(text)
-
-    # print(tag_words(text))
-    tagged_sents = tag_text(text)
-    i = 0
-
-    print("VERB COUNT", verb_count)
-    """
     return utils.encode(impersonalitySummary)
 
 
