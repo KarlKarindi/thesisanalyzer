@@ -68,8 +68,11 @@ class OverusedWordSummary(object):
         self.words_synonyms = []
         self.lemma_synonyms = []
 
+    def __repr__(self):
+        return self.lemma
 
-class Word(object):
+
+class WordSummary(object):
 
     def __init__(self, text, pos, start, end):
         self.text = text
@@ -176,9 +179,9 @@ def analyze(text):
 
     lemmas = set(lemmas_for_analysis)
 
-    overusedWordSummaryList = []
     # Get the expected frequency of a lemma and compare it to the actual frequency
     # If the actual frequency is a lot higher than the expected frequency, the word may be overused
+    overusedWordSummaryList = []
     for lemma in lemmas:
 
         expected_freq = get_lemma_expected_frequency(most_used_frequency,
@@ -201,6 +204,9 @@ def analyze(text):
     for overusedWordSummary in overusedWordSummaryList:
         # Find the synonyms
         overusedWordSummary.find_synonyms_for_words_and_lemma()
+        word = overusedWordSummary.words[1]
+
+        print(find_sentence_by_word(sentences, word))
 
     # Return a textSummary object
     textSummary = TextSummmary(user_word_count, overusedWordSummaryList)
@@ -228,7 +234,9 @@ def get_lemmas(text):
 
 
 def map_lemma_to_word(words, lemmas):
-    """ Returns: defaultdict that maps lemmas to their corresponding words """
+    """ Returns: defaultdict that maps lemmas to their corresponding words.
+        Words are of type WordSummary
+    """
 
     lemma_to_word = defaultdict(set)
 
@@ -243,7 +251,7 @@ def map_lemma_to_word(words, lemmas):
             start = word["start"]
             end = word["end"]
 
-            word_obj = Word(text, pos, start, end)
+            word_obj = WordSummary(text, pos, start, end)
             lemma_to_word[lemma].add(
                 (word_obj))
 
@@ -268,14 +276,13 @@ def find_lemmas_viable_for_analysis(Lemma_list, lemmas_repeating):
 
 
 def create_lemma_to_count_in_user_text(lemmas_for_analysis):
-    """ Returns: dictionary of lemma to its count in the user text """
+    """ Parameters: lemmas_for_analysis - list of lemmas
+        Returns: dictionary of lemma to its count in the user text
+    """
 
     lemma_to_count_in_user_text = {}
     for lemma in lemmas_for_analysis:
-        if lemma not in lemma_to_count_in_user_text.keys():
-            lemma_to_count_in_user_text[lemma] = 1
-        else:
-            lemma_to_count_in_user_text[lemma] += 1
+        lemma_to_count_in_user_text[lemma] = lemmas_for_analysis.count(lemma)
 
     return lemma_to_count_in_user_text
 
@@ -283,7 +290,7 @@ def create_lemma_to_count_in_user_text(lemmas_for_analysis):
 def create_lemma_to_rank_and_count(Lemma_list):
     """ Iterates over list of model Lemma.
         Sorts the list beforehand to get the rank of each word.
-
+        Parameters: Lemma_list - list of objects Lemma
         Returns: dictionary where the keys are lemmas in the database
         and the values tuplets of (rank, count)
     """
@@ -308,6 +315,7 @@ def get_frequency_of_most_used_word(Lemma_list):
 
     most_used_count = Lemma_list_sorted[0].count
     total_count = 0
+    # Must be iterated over to add to total_count, as Lemma_list is a list of Lemma objects
     for Lem in Lemma_list_sorted:
         total_count += Lem.count
 
@@ -320,6 +328,18 @@ def get_lemma_expected_frequency(most_used_word_frequency, rank):
 
 def get_lemma_actual_frequency(lemma_count, total_count):
     return lemma_count / total_count
+
+
+def find_sentence_by_word(sentences, word):
+    """ Finds the sentence that word (type WordSummary) belongs to.
+        Parameters:
+            sentences - dictionary of all sentences with key (start, end) and values "sentence"
+            word - object of type WordSummary
+    """
+    # TODO: Error handling if sentence isn't found.
+    for key in sentences.keys():
+        if key[0] <= word.start <= key[1]:
+            return sentences[key]
 
 
 def pretty_print_ouw_summary(overusedWordSummary):
