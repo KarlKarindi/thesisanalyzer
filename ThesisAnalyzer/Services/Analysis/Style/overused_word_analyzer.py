@@ -213,9 +213,20 @@ def analyze(text):
         Words = overusedWordSummary.words
         clusters = find_large_clusters(dict(enumerate(create_clusters(Words))))
 
-        for value in clusters.values():
-            pprint(value)
+        if (len(clusters) > 0):
+            sentences_by_clusters = find_sentences_by_clusters(
+                sentences, clusters)
 
+            pprint(overusedWordSummary.lemma)
+            for sent in sentences_by_clusters:
+                pprint(sent)
+                print()
+
+            # pprint(cluster)
+            print()
+            print("##########")
+            print("##########")
+            print()
     # pprint(overusedWordSummaryList[0])
 
     # Return a textSummary object
@@ -366,27 +377,47 @@ def create_clusters(Words):
 
 def find_large_clusters(clusters):
     """ Finds clusters that have a size larger than config.MAX_CLUSTER_SIZE 
-        Returns: dictionary of large clusters.
+        Returns: list of large clusters.
     """
-    large_clusters = {}
-    i = 0
+    large_clusters = []
     for key in clusters:
         if len(clusters[key]) > config.MAX_CLUSTER_SIZE:
-            large_clusters[i] = clusters[key]
-            i += 1
+            large_clusters.append(clusters[key])
 
     return large_clusters
 
 
-def find_sentence_by_word(sentences, word):
+def find_sentences_by_clusters(sentences, clusters):
+    """ Finds all the sentences according to the clusters.
+        Parameters: sentences - dict of all sentences with key (start, end) and values (index, sentence)
+        Returns: list of values (index, sentence)
+    """
+
+    # Iterates through all the words in a cluster
+    result = []
+    for Word_list in clusters:
+
+        sentences_in_cluster = []
+        # In a cluster, finds the sentence that every word belongs to
+        for Word in Word_list:
+            sent = find_sentence_by_word(sentences, Word)
+            if sent not in sentences_in_cluster:
+                sentences_in_cluster.append(sent)
+        result.append(sentences_in_cluster)
+
+    return result
+
+
+def find_sentence_by_word(sentences, Word):
     """ Finds the sentence that word (type WordSummary) belongs to.
         Parameters:
-            sentences - dictionary of all sentences with key (start, end) and values "sentence"
+            sentences - dictionary of all sentences with key (start, end) and values (index, sentence)
             word - object of type WordSummary
     """
     # TODO: Error handling if sentence isn't found.
+
     for key in sentences.keys():
-        if key[0] <= word.start <= key[1]:
+        if key[0] <= Word.start <= key[1]:
             return sentences[key]
 
 
