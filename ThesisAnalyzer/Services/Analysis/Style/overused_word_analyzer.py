@@ -10,8 +10,6 @@ from pprint import pprint
 import jsonpickle
 import math
 
-# TODO: CLUSTER FUNCTIONS.
-
 
 class TextSummmary(object):
     """ Container class for OverusedWordSummary object """
@@ -58,6 +56,9 @@ class OverusedWordSummary(object):
             word_synonyms.append(best_synset(word[0], word[1]))
         return word_synonyms
 
+    def add_cluster(self, cluster):
+        self.clusters.append(cluster)
+
     # On initialization, don't find the synonyms.
     # Finding synonyms gets called out only on the top 20 most overused words
     def __init__(self, lemma, words_in_text, multiplier):
@@ -85,6 +86,14 @@ class WordSummary(object):
 
     def __repr__(self):
         return '<Word (text: {}, start: {}, end: {})>'.format(self.text, self.start, self.end)
+
+
+class SentencesContainer(object):
+
+    def __init__(self, text, start, end):
+        self.text = text
+        self.start = start
+        self.end = end
 
 
 def best_synset(word, pos):
@@ -150,7 +159,7 @@ def remove_duplicate_synonyms_for_words(word_list, syn_list):
     return result
 
 
-def analyze(text):
+def analyze(original_text):
     """ Analyzes repeating words using a method described in the Synonimity program
         Returns: TextSummary object
     """
@@ -158,9 +167,7 @@ def analyze(text):
     # Query the database for all lemmas that are known. Get list of model Lemma
     Lemma_list = Lemma.query.all()
 
-    # TODO: FIND SENTENCES CONTAINING WORDS
-    text = Text(text)
-    sentences = get_sentences(text)
+    text = Text(original_text)
     words = get_words(text)
     lemmas = get_lemmas(text)
 
@@ -184,6 +191,8 @@ def analyze(text):
     most_used_frequency = get_frequency_of_most_used_word(Lemma_list)
 
     lemmas = set(lemmas_for_analysis)
+
+    sentences = get_sentences(text)
 
     # Get the expected frequency of a lemma and compare it to the actual frequency
     # If the actual frequency is a lot higher than the expected frequency, the word may be overused
@@ -210,24 +219,18 @@ def analyze(text):
     for overusedWordSummary in overusedWordSummaryList:
         # Find the synonyms
         overusedWordSummary.find_synonyms_for_words_and_lemma()
+
         Words = overusedWordSummary.words
+        # Only leave clusters where the usage of a word is more than config.MAX_CLUSTER_SIZE
+        # If a word is used less than MAX_CLUSTER_SIZE times, the cluster is empty
         clusters = find_large_clusters(dict(enumerate(create_clusters(Words))))
 
         if (len(clusters) > 0):
-            sentences_by_clusters = find_sentences_by_clusters(
+            sentences_in_clusters = find_sentences_in_clusters(
                 sentences, clusters)
 
-            pprint(overusedWordSummary.lemma)
-            for sent in sentences_by_clusters:
-                pprint(sent)
-                print()
-
-            # pprint(cluster)
-            print()
-            print("##########")
-            print("##########")
-            print()
-    # pprint(overusedWordSummaryList[0])
+            results = format_text(original_text, sentences_in_clusters)
+            overusedWordSummary.add_cluster(results)
 
     # Return a textSummary object
     textSummary = TextSummmary(user_word_count, overusedWordSummaryList)
@@ -235,12 +238,16 @@ def analyze(text):
 
 
 def get_sentences(text):
-    """ Returns: dictionary with tuplet of (start, end) as key and tuplets (index, sentence text) as value"""
+    """ Returns: dictionary with tuplet of (start, end) as key and
+        dictionary of sentence with index, text, start and end keys.
+    """
     keys = text.sentence_spans
     sentences = text.sentence_texts
+    sentence_spans = text.sentence_spans
     values = []
-    for index, sent in enumerate(sentences):
-        values.append((index, sent))
+    for i, sent in enumerate(sentences):
+        values.append(
+            ({"index": i, "text": sent, "start": sentence_spans[i][0], "end": sentence_spans[i][1]}))
 
     return dict(zip(keys, values))
 
@@ -267,7 +274,9 @@ def map_lemma_to_word(words, lemmas):
     for word in words:
         analyses = Text(word).analysis
         if len(analyses) > 1:
-            pprint("LEN ANALYSIS > 1:", analyses)
+            print("word", word)
+            print("LEN ANALYSIS > 1:", analyses)
+            print()
         for analysis in analyses:
             lemma = analysis[0]["lemma"]
             text = word["text"]
@@ -376,7 +385,7 @@ def create_clusters(Words):
 
 
 def find_large_clusters(clusters):
-    """ Finds clusters that have a size larger than config.MAX_CLUSTER_SIZE 
+    """ Finds clusters that have a size larger than config.MAX_CLUSTER_SIZE
         Returns: list of large clusters.
     """
     large_clusters = []
@@ -387,7 +396,7 @@ def find_large_clusters(clusters):
     return large_clusters
 
 
-def find_sentences_by_clusters(sentences, clusters):
+def find_sentences_in_clusters(sentences, clusters):
     """ Finds all the sentences according to the clusters.
         Parameters: sentences - dict of all sentences with key (start, end) and values (index, sentence)
         Returns: list of values (index, sentence)
@@ -419,6 +428,49 @@ def find_sentence_by_word(sentences, Word):
     for key in sentences.keys():
         if key[0] <= Word.start <= key[1]:
             return sentences[key]
+
+
+def format_text(original_text, sentences_in_clusters):
+    results = []
+    for cluster in sentences_in_clusters:
+
+        start = cluster[0]["start"]
+        end = cluster[len(cluster) - 1]["end"]
+
+        if sentences_are_connected(cluster):
+            text = original_text[start:end]
+
+        else:
+            # TODO: Check if everything works nicely
+            text = ""
+            for i in range(len(cluster)):
+                if i + 2 <= len(cluster) and sentences_are_connected(cluster[i: i + 2]):
+                    text += " " + cluster[i]["text"]
+                else:
+                    text += " " + cluster[i]["text"] + " [...] "
+            # Remove whitespace and unnecessary symbols from the end of a text
+            text = text.strip().strip("[...] ")
+
+        result = SentencesContainer(text, start, end)
+        results.append(result)
+
+    return results
+
+
+def sentences_are_connected(sentences_in_cluster):
+    """ Checks whether sentences are connected.
+        They are connected when the indexes are right after each other.
+    """
+    connected = True
+
+    prev = None
+    for sent in sentences_in_cluster:
+        current = sent["index"]
+        if prev is not None and current - prev != 1:
+            connected = False
+        prev = current
+
+    return connected
 
 
 def pretty_print_ouw_summary(overusedWordSummary):
