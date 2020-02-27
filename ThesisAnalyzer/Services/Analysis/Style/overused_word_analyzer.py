@@ -63,10 +63,13 @@ class OverusedWordSummary(object):
     def __init__(self, lemma, words_in_text, multiplier):
         self.multiplier = multiplier
         self.lemma = lemma
-        self.words = [key for key in words_in_text]  # Convert set to list
+        # Create a list from the set of words_in_text, then sort it by start index.
+        words = [key for key in words_in_text]
+        self.words = sorted(words, key=lambda x: x.start, reverse=False)
         self.times_used = len(self.words)
         self.words_synonyms = []
         self.lemma_synonyms = []
+        self.clusters = []
 
     def __repr__(self):
         return self.lemma
@@ -79,6 +82,9 @@ class WordSummary(object):
         self.pos = pos
         self.start = start
         self.end = end
+
+    def __repr__(self):
+        return '<Word (text: {}, start: {}, end: {})>'.format(self.text, self.start, self.end)
 
 
 def best_synset(word, pos):
@@ -204,9 +210,13 @@ def analyze(text):
     for overusedWordSummary in overusedWordSummaryList:
         # Find the synonyms
         overusedWordSummary.find_synonyms_for_words_and_lemma()
-        word = overusedWordSummary.words[1]
+        Words = overusedWordSummary.words
+        clusters = find_large_clusters(dict(enumerate(create_clusters(Words))))
 
-        print(find_sentence_by_word(sentences, word))
+        for value in clusters.values():
+            pprint(value)
+
+    # pprint(overusedWordSummaryList[0])
 
     # Return a textSummary object
     textSummary = TextSummmary(user_word_count, overusedWordSummaryList)
@@ -214,9 +224,12 @@ def analyze(text):
 
 
 def get_sentences(text):
-    """ Returns: dictionary with tuplet of (start, end) as key and sentence text as value"""
+    """ Returns: dictionary with tuplet of (start, end) as key and tuplets (index, sentence text) as value"""
     keys = text.sentence_spans
-    values = text.sentence_texts
+    sentences = text.sentence_texts
+    values = []
+    for index, sent in enumerate(sentences):
+        values.append((index, sent))
 
     return dict(zip(keys, values))
 
@@ -243,7 +256,7 @@ def map_lemma_to_word(words, lemmas):
     for word in words:
         analyses = Text(word).analysis
         if len(analyses) > 1:
-            pprint(analyses)
+            pprint("LEN ANALYSIS > 1:", analyses)
         for analysis in analyses:
             lemma = analysis[0]["lemma"]
             text = word["text"]
@@ -290,6 +303,7 @@ def create_lemma_to_count_in_user_text(lemmas_for_analysis):
 def create_lemma_to_rank_and_count(Lemma_list):
     """ Iterates over list of model Lemma.
         Sorts the list beforehand to get the rank of each word.
+
         Parameters: Lemma_list - list of objects Lemma
         Returns: dictionary where the keys are lemmas in the database
         and the values tuplets of (rank, count)
@@ -328,6 +342,40 @@ def get_lemma_expected_frequency(most_used_word_frequency, rank):
 
 def get_lemma_actual_frequency(lemma_count, total_count):
     return lemma_count / total_count
+
+
+def create_clusters(Words):
+    """ Generator function that creates clusters of overused words.
+        Searches for words that aren't further away from each-other than config.CLUSTER_DISTANCE
+        Clustering function found here:
+        https://stackoverflow.com/questions/15800895/finding-clusters-of-numbers-in-a-list
+    """
+
+    previous = None
+    cluster = []
+    for Word in Words:
+        if not previous or Word.start - previous <= config.CLUSTER_DISTANCE:
+            cluster.append(Word)
+        else:
+            yield cluster
+            cluster = [Word]
+        previous = Word.start
+    if cluster:
+        yield cluster
+
+
+def find_large_clusters(clusters):
+    """ Finds clusters that have a size larger than config.MAX_CLUSTER_SIZE 
+        Returns: dictionary of large clusters.
+    """
+    large_clusters = {}
+    i = 0
+    for key in clusters:
+        if len(clusters[key]) > config.MAX_CLUSTER_SIZE:
+            large_clusters[i] = clusters[key]
+            i += 1
+
+    return large_clusters
 
 
 def find_sentence_by_word(sentences, word):
