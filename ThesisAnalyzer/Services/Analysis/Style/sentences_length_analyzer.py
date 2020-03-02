@@ -1,9 +1,9 @@
-from ThesisAnalyzer import vabamorf
+#from ThesisAnalyzer import vabamorf
 from ThesisAnalyzer.Services.Analysis.Style.Config import config
 from ThesisAnalyzer.Models.Feedback import StyleFeedback
 from ThesisAnalyzer.Services import utils
 
-from estnltk import Text, ClauseSegmenter
+from estnltk import Text
 from collections import defaultdict
 from pprint import pprint
 
@@ -22,15 +22,13 @@ class SentencesLengthSummary():
 def analyze(text):
 
     sentences = Text(text).sentence_texts
-
-    segmenter = ClauseSegmenter()
-
+    pprint(Text(text))
     sentencesLengthSummary = SentencesLengthSummary()
 
     # Iterate through the sentences.
     # Create a clause_dict for every sentence, then check if sentence is too long.
     for sentence in sentences:
-        clauses_dict = segment_clauses_in_sentence(sentence, segmenter)
+        clauses_dict = segment_clauses_in_sentence(sentence)
         sentence_is_long = is_sentence_too_long(
             clauses_dict, sentence)
 

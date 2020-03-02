@@ -3,7 +3,7 @@ from ThesisAnalyzer.Models.Lemma import Lemma
 from ThesisAnalyzer.Services.Analysis.Style.Config import config
 
 from collections import defaultdict
-from estnltk.wordnet import wn
+#from estnltk.wordnet import wn
 from estnltk import Text
 from flask import jsonify
 from pprint import pprint
@@ -25,36 +25,21 @@ class TextSummmary(object):
 class OverusedWordSummary(object):
     """ Container object for word usage analysis """
 
-    def find_synonyms_for_words_and_lemma(self):
-        """ Finds synonyms for the words and the lemma """
-        # Create a list of synsets corresponding to the words
-        # w_syns = self.find_best_synonyms_for_words()
-        # w_syns_readable = w_syns
-        # w_syns[:] = [extract_word_from_Synset_object(
-        #    word_syn) for word_syn in w_syns]
+    def find_synonyms_for_lemma(self):
+        """ Finds synonyms for the lemma """
 
+        # TODO: FIX FOR estnltk 1.6
         # Create a list of synsets corresponding to the lemma
         # Remove duplicates by temporarily making the list into a set
-        l_syns = wn.synsets(self.lemma)
-        l_syns_readable = l_syns
-        l_syns[:] = list(
-            set([extract_word_from_Synset_object(lemma_syn) for lemma_syn in l_syns]))
+        #l_syns = wn.synsets(self.lemma)
+        #l_syns_readable = l_syns
+        # l_syns[:] = list(
+        #    set([extract_word_from_Synset_object(lemma_syn) for lemma_syn in l_syns]))
 
-        # w_syns_final = remove_duplicate_synonyms_for_words(
-        #    self.words, w_syns_readable)
-        l_syns_final = remove_duplicate_synonyms_for_lemma(
-            self.lemma, l_syns_readable)
+        # l_syns_final = remove_duplicate_synonyms_for_lemma(
+        #    self.lemma, l_syns_readable)
 
-        # self.words_synonyms = w_syns_final
-        self.lemma_synonyms = l_syns_final
-
-    def find_best_synonyms_for_words(self):
-        """ Finds the best synonyms for all the words """
-
-        word_synonyms = []
-        for word in self.words:
-            word_synonyms.append(best_synset(word[0], word[1]))
-        return word_synonyms
+        #self.lemma_synonyms = l_syns_final
 
     def add_cluster(self, cluster):
         self.clusters.append(cluster)
@@ -96,33 +81,6 @@ class SentencesContainer(object):
         self.end = end
 
 
-def best_synset(word, pos):
-    """ Finds the best synset for a word, takes into account part of speech """
-
-    conversion = {"S": wn.NOUN, "V": wn.VERB, "A": wn.ADJ, "D": wn.ADV}
-
-    if pos not in conversion:
-        return None
-    # What synsets contain this word (taking into account the part of speech)
-    syns = wn.synsets(word, pos=conversion[pos])
-    # If this word isn't in the wordnet, then return none
-    if len(syns) == 0:
-        return None
-    # If there's only one synonym, return it
-    if len(syns) == 1:
-        return syns[0]
-    # If there's more than one, return the one with the smallest number
-    names = [s.name.split('.') for s in syns]
-    best_name = names[0]
-    for n in names:
-        if n[0] == word and best_name[0] != word:
-            best_name = n
-        elif n[0] == word:
-            if n[2] < best_name[2]:
-                best_name = n
-    return syns[names.index(best_name)]
-
-
 def extract_word_from_Synset_object(synset):
     if synset is None:
         return None
@@ -139,23 +97,6 @@ def remove_duplicate_synonyms_for_lemma(lemma, syn_list):
     # If all the synonyms are None, return an empty list
     if result.count(None) == len(syn_list):
         return []
-    return result
-
-
-def remove_duplicate_synonyms_for_words(word_list, syn_list):
-    """ Convert synonyms that are the same as the word to None """
-    if len(word_list) != len(syn_list):
-        return []
-
-    result = []
-
-    i = 0
-    for word in word_list:
-        if word[0] != syn_list[i]:
-            result.append(syn_list[i])
-        else:
-            result.append(None)
-        i += 1
     return result
 
 
@@ -218,7 +159,7 @@ def analyze(original_text):
 
     for overusedWordSummary in overusedWordSummaryList:
         # Find the synonyms
-        overusedWordSummary.find_synonyms_for_words_and_lemma()
+        overusedWordSummary.find_synonyms_for_lemma()
 
         Words = overusedWordSummary.words
         # Only leave clusters where the usage of a word is more than config.MAX_CLUSTER_SIZE
@@ -261,7 +202,7 @@ def get_words(text):
 def get_lemmas(text):
     # FIXME: Add punctuation.
     # return [lemma for lemma in Text(text).lemmas if lemma.isalpha()]
-    return [lemma for lemma in text.lemmas]
+    return [lemma for lemma in text.lemmas if lemma]
 
 
 def map_lemma_to_word(words, lemmas):
@@ -274,6 +215,7 @@ def map_lemma_to_word(words, lemmas):
     for word in words:
         analyses = Text(word).analysis
         if len(analyses) > 1:
+            # TODO: Wtf do I do when there are many analyses?
             print("word", word)
             print("LEN ANALYSIS > 1:", analyses)
             print()
@@ -342,7 +284,7 @@ def create_lemma_to_rank_and_count(Lemma_list):
 
 
 def get_frequency_of_most_used_word(Lemma_list):
-    """ Gets the occurence of the most used lemma in Estonian. """
+    """ Gets the frequency of the most used lemma in Estonian. """
 
     Lemma_list_sorted = sorted(
         Lemma_list, key=lambda x: x.count, reverse=True)
@@ -386,7 +328,7 @@ def create_clusters(Words):
 
 def find_large_clusters(clusters):
     """ Finds clusters that have a size larger than config.MAX_CLUSTER_SIZE
-        Returns: list of large clusters.
+        Returns: list of large clusters. If a cluster isn't large enough, an empty list is returned.
     """
     large_clusters = []
     for key in clusters:
@@ -431,19 +373,34 @@ def find_sentence_by_word(sentences, Word):
 
 
 def format_text(original_text, sentences_in_clusters):
+    """ Formatting text for the SentencesContainer class.
+        First, checks if all the sentences in a cluster are continuous.
+        If the sentences are continuous, add a slice of the original text to the output.
+        If the sentences aren't continuous, replace missing sentences with [...]
+
+        Parameters:
+            original_text (string) - the original thesis text as one string.
+            sentences_in_clusters - for an overused word: a list of lists where
+                                    each embedded list is a cluster of sentences.
+        Returns: a list of SentencesContainer objects.
+    """
+
     results = []
     for cluster in sentences_in_clusters:
 
+        # Find the start and end indexes, as these are necessary anyway
         start = cluster[0]["start"]
         end = cluster[len(cluster) - 1]["end"]
 
+        # Decide formatting style on whether all the sentences are connected or not
         if sentences_are_connected(cluster):
             text = original_text[start:end]
-
         else:
             # TODO: Check if everything works nicely
+            # Initialize a string, start appending sentences to it
             text = ""
             for i in range(len(cluster)):
+                # Check if sentences are connected to eachother
                 if i + 2 <= len(cluster) and sentences_are_connected(cluster[i: i + 2]):
                     text += " " + cluster[i]["text"]
                 else:
@@ -459,7 +416,8 @@ def format_text(original_text, sentences_in_clusters):
 
 def sentences_are_connected(sentences_in_cluster):
     """ Checks whether sentences are connected.
-        They are connected when the indexes are right after each other.
+        Sentences are connected when the indexes are right after each other.
+        Returns (boolean) - whether sentences are connected or not.
     """
     connected = True
 

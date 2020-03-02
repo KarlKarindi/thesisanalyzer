@@ -1,4 +1,4 @@
-from ThesisAnalyzer import vabamorf
+#from ThesisAnalyzer import vabamorf
 from ThesisAnalyzer.Services import utils
 from ThesisAnalyzer.Services.Analysis.General.impersonality_analyzer import ImpersonalitySummary
 from ThesisAnalyzer.Services.Analysis.General import impersonality_analyzer
