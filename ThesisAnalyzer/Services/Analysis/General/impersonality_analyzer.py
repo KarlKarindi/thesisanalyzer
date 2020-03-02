@@ -28,16 +28,17 @@ def analyze(text):
 
     # Then analyze singular sentences
     for sentence in sentences:
-        pv_in_sentence = find_pv_in_sentence(sentence)
+        personal_verbs = find_pv_in_sentence(sentence)
 
-    # If sentence contains personal verbs, add the verbs to dict
-    # if len(pv_in_sentence) > 0:
-    #    sentences_with_pv[sentence] = pv_in_sentence
+        # If the sentence contains personal verbs, add the verbs to dict
+        if len(personal_verbs) > 0:
+            sentences_with_pv[sentence.text] = personal_verbs
 
     text_is_impersonal = len(sentences_with_pv) == 0
 
     impersonalitySummary = ImpersonalitySummary(
         text_is_impersonal, sentences_with_pv)
+
     return impersonalitySummary
 
 
@@ -46,7 +47,6 @@ def find_pv_in_sentence(sentence):
         Returns: list of personal verbs in the sentence.
     """
     personal_verbs = []
-
     analyzed_sentence = sentence.morph_analysis
 
     in_quotes = False
@@ -56,9 +56,22 @@ def find_pv_in_sentence(sentence):
         word = analysis.text
 
         # Check if word is in quotes or not
+        # FIXME: Kaldkirjas tekst ka sama, mis tsitaadis
+        # FIXME: Võõrkeelsed asjad esile tõstetud kaldkirjaga
         in_quotes, quotes_just_started = utils.is_word_in_quotes(
             in_quotes, word, previous_word)
         if not quotes_just_started:
             previous_word = word
+
+        if not in_quotes:
+            # Since there may be multiple roots/endings, we check through all of them.
+            if ((constants.VERB in analysis.partofspeech) and
+                    "sin" in analysis.ending or
+                    "in" in analysis.ending or
+                    "n" in analysis.ending or
+                    "mina" in analysis.root):
+
+                if word not in personal_verbs:
+                    personal_verbs.append(word)
 
     return personal_verbs
