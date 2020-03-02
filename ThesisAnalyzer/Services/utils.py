@@ -34,29 +34,30 @@ def encode(Object):
     return(jsonpickle.encode(Object, unpicklable=False))
 
 
-def is_word_in_quotes(word, previous_word, in_quotes):
+def is_word_in_quotes(in_quotes, word, previous_word):
     """ Checks whether word is in quotes or not.
         Parameters:
-            word (String) - Examples: "car; car; car"; car.
+            word (String) - Examples: "," ; "hi", "'"
             previous_word (String) - the previous word that came prior to the word parameter
             in_quotes (boolean) - current status whether text is already in quotes or not
-        Returns: (boolean) whether text is in quotes or not
+        Returns: 
+            in_quotes (boolean) - whether text is in quotes or not
+            quotes_just_started (boolean) - whether quotes just started or not
     """
+    # Assume that this word won't be skipped
+    quotes_just_started = False
 
     # Ending the quote
     if previous_word is not None and in_quotes:
-        if (previous_word.endswith(constants.QUOTATION_MARK_UP_1) or
-                previous_word.endswith(constants.QUOTATION_MARK_UP_2)):
+        if (previous_word == constants.QUOTATION_MARK_UP_1 or
+                previous_word == constants.QUOTATION_MARK_UP_2):
             in_quotes = False
-        # If second to last letter is an ending quotation mark
-        elif len(previous_word) > 2:
-            if previous_word[-2] == constants.QUOTATION_MARK_UP_1 or previous_word[-2] == constants.QUOTATION_MARK_UP_2:
-                in_quotes = False
 
-    # Beginning the quote
-    if not in_quotes and (word.startswith(constants.QUOTATION_MARK_UP_1) or
-                          word.startswith(constants.QUOTATION_MARK_UP_2) or
-                          word.startswith(constants.QUOTATION_MARK_LOW)):
-        in_quotes = True
+    # Starting the quote
+    if not in_quotes and (word == constants.QUOTATION_MARK_UP_1 or
+                          word == constants.QUOTATION_MARK_UP_2 or
+                          word == constants.QUOTATION_MARK_LOW):
+        # Skip setting this word to previous_word
+        in_quotes, quotes_just_started = True, True
 
-    return in_quotes
+    return in_quotes, quotes_just_started
