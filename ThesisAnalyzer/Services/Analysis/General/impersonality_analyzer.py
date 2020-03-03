@@ -1,5 +1,5 @@
-# from ThesisAnalyzer import vabamorf
 from ThesisAnalyzer.Services import utils
+from ThesisAnalyzer.Services.utils import QuoteAnalyzer
 from ThesisAnalyzer.Services.Constants import constants
 from pprint import pprint
 
@@ -21,7 +21,7 @@ def analyze(text):
 
     # Dictionary to store sentences and the personal verbs (pv) they have
     sentences_with_pv = {}
-    sentences = utils.find_sententces(text)
+    sentences = utils.find_sentences(text)
 
     # Then analyze singular sentences
     for sentence in sentences:
@@ -46,8 +46,7 @@ def find_pv_in_sentence(sentence):
     personal_verbs = []
     analyzed_sentence = sentence.morph_analysis
 
-    in_quotes = False
-    previous_word = None
+    quoteAnalyzer = QuoteAnalyzer()
 
     for analysis in analyzed_sentence:
         word = analysis.text
@@ -55,10 +54,7 @@ def find_pv_in_sentence(sentence):
         # Check if word is in quotes or not
         # FIXME: Kaldkirjas tekst ka sama, mis tsitaadis
         # FIXME: Võõrkeelsed asjad esile tõstetud kaldkirjaga
-        in_quotes, quotes_just_started = utils.is_word_in_quotes(
-            in_quotes, word, previous_word)
-        if not quotes_just_started:
-            previous_word = word
+        in_quotes = quoteAnalyzer.is_word_in_quotes(word)
 
         if not in_quotes:
             # Since there may be multiple roots/endings, we check through all of them.

@@ -1,6 +1,7 @@
 #from ThesisAnalyzer import vabamorf
 from ThesisAnalyzer.Services.Analysis.Style.Config import config
 from ThesisAnalyzer.Models.Feedback import StyleFeedback
+from ThesisAnalyzer.Services.utils import QuoteAnalyzer
 from ThesisAnalyzer.Services import utils
 
 from estnltk import Text
@@ -61,26 +62,17 @@ def segment_clauses_in_sentence(sentence, segmenter):
     # Create a dictionary of the clauses and the words they consist of.
     clauses = defaultdict(list)
 
-    in_quotes = False
-    previous_word = None
+    quoteAnalyzer = QuoteAnalyzer()
 
     for word_analysis in segmented:
         word = word_analysis.text
 
-    # 
-    # in_quotes =
+        in_quotes = quoteAnalyzer.is_word_in_quotes(word)
 
-    in_quotes, quotes_just_started = utils.is_word_in_quotes(
-        word, previous_word, in_quotes)
+        if not in_quotes:
+            clause_index = word_analysis["clause_index"]
+            clauses[clause_index].append(word)
 
-    if not quotes_just_started:
-        previous_word = word
-
-    if not in_quotes:
-        clause_index = word_analysis["clause_index"]
-        clauses[clause_index].append(word)
-
-    pprint(clauses)
     # Find verb chains
     #clauses_dict = map_clauses_to_verb_chains(sentence, clauses)
 

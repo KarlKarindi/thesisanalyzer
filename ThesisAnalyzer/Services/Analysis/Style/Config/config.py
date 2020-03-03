@@ -2,7 +2,7 @@
 
 # Options for analysis
 ANALYZE_OVERUSED_WORDS = False
-ANALYZE_CLAUSES = True
+ANALYZE_CLAUSES = False
 ANALYZE_TAGS = False
 
 

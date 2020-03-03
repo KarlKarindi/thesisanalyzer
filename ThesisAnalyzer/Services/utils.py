@@ -11,14 +11,50 @@ STOP_WORDS = ["ja", "et", "aga", "sest", "kuigi", "vaid", "kuna"]
 
 
 class QuoteAnalyzer(object):
-
-    
+    """ QuoteAnalyzer checks whether a certain word in a sentence is in quotes or not.
+        Usage:
+            1. Initialize a new instance of QuoteAnalyzer
+            2. Take one sentence for inspection
+            3. Iterate over all of the words.
+            4. For every word, call out the is_word_in_quotes(word) function with
+            the word text as its argument.
+    """
 
     def __init__(self):
         self.in_quotes = False
+        self.word = None
         self.previous_word = None
-        
-    
+
+    def is_word_in_quotes(self, word):
+        """ Checks whether word is in quotes or not.
+            Uses self.previous_word and self.in_quotes to make a decision whether word is in quotes or not.
+            Parameters:
+                word (String) - Examples: "," ; "hi", "'"
+            Returns:
+                in_quotes (boolean) - whether the word is in quotes or not
+        """
+        # Assume that this word won't be skipped
+        quotes_just_started = False
+
+        # Ending the quote
+        if self.previous_word is not None and self.in_quotes:
+            if (self.previous_word == constants.QUOTATION_MARK_UP_1 or
+                    self.previous_word == constants.QUOTATION_MARK_UP_2):
+                self.in_quotes = False
+
+        # Starting the quote
+        if not self.in_quotes and (word == constants.QUOTATION_MARK_UP_1 or
+                                   self.word == constants.QUOTATION_MARK_UP_2 or
+                                   self.word == constants.QUOTATION_MARK_LOW):
+            # Set quotes_just_started_to_true
+            self.in_quotes, quotes_just_started = True, True
+
+        # If quotes just started, skip setting the previous word as current word so that on the next word,
+        # the same quotes won't be marked as ending the quote
+        if not quotes_just_started:
+            self.previous_word = word
+
+        return self.in_quotes
 
 
 def get_most_frequent_lemmas(limit=1000):
@@ -43,35 +79,6 @@ def json_to_text(req, key="text"):
 
 def encode(Object):
     return(jsonpickle.encode(Object, unpicklable=False))
-
-
-def is_word_in_quotes(in_quotes, word, previous_word):
-    """ Checks whether word is in quotes or not.
-        Parameters:
-            word (String) - Examples: "," ; "hi", "'"
-            previous_word (String) - the previous word that came prior to the word parameter
-            in_quotes (boolean) - current status whether text is already in quotes or not
-        Returns:
-            in_quotes (boolean) - whether text is in quotes or not
-            quotes_just_started (boolean) - whether quotes just started or not
-    """
-    # Assume that this word won't be skipped
-    quotes_just_started = False
-
-    # Ending the quote
-    if previous_word is not None and in_quotes:
-        if (previous_word == constants.QUOTATION_MARK_UP_1 or
-                previous_word == constants.QUOTATION_MARK_UP_2):
-            in_quotes = False
-
-    # Starting the quote
-    if not in_quotes and (word == constants.QUOTATION_MARK_UP_1 or
-                          word == constants.QUOTATION_MARK_UP_2 or
-                          word == constants.QUOTATION_MARK_LOW):
-        # Skip setting this word to previous_word
-        in_quotes, quotes_just_started = True, True
-
-    return in_quotes, quotes_just_started
 
 
 def find_sentences(text):
