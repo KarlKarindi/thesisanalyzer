@@ -4,7 +4,7 @@ from ThesisAnalyzer.Models.Feedback import StyleFeedback
 from ThesisAnalyzer.Services.utils import QuoteAnalyzer
 from ThesisAnalyzer.Services import utils
 
-from estnltk import Text
+from estnltk import Text, Layer
 from estnltk.taggers import ClauseSegmenter, VerbChainDetector
 from collections import defaultdict
 from pprint import pprint
@@ -24,7 +24,6 @@ class SentencesLengthSummary():
 def analyze(text):
 
     sentences = utils.find_sentences(text)
-
     sentencesLengthSummary = SentencesLengthSummary()
 
     # Initialize a ClauseSegmenter instance
@@ -35,12 +34,11 @@ def analyze(text):
     # Iterate through the sentences.
     # Create a clause_dict for every sentence, then check if sentence is too long.
     for sentence in sentences:
-
-        word_index = analyze_words_in_sentence(
+        sentence = add_word_info_layer_to_sentence(
             sentence.text, quote_analyzer)
 
         clauses_dict = segment_clauses_in_sentence(
-            sentence, word_index, clause_segmenter, vc_detector)
+            sentence, clause_segmenter, vc_detector)
 
         # sentence_is_long = is_sentence_too_long(
         #   clauses_dict, sentence)
@@ -54,26 +52,30 @@ def analyze(text):
     return sentencesLengthSummary
 
 
-def analyze_words_in_sentence(sentence, quote_analyzer):
-    """ Creates a word_index dictionary with tuplet values where the first value is
-        the word and the second whether its in quotes or not. """
+def add_word_info_layer_to_sentence(sentence, quote_analyzer):
+    """ Adds a word_info layer to the sentence Text object.
+        word_info layer contains attributes:
+            word_id - index of the word in a sentence.
+            in_quotes - whether the word is in quotes or not.
+     """
 
     sentence = Text(sentence)
     sentence.tag_layer()
 
-    word_index = defaultdict()
+    word_info = Layer(name="word_info",
+                      attributes=["word_id", "in_quotes"])
+    sentence.add_layer(word_info)
 
-    # Iterate over all the words, map index to (word, in_quote)
+    # Populate the layer
     for i, word in enumerate(sentence.words):
-        word = word.text
-        in_quotes = quote_analyzer.is_word_in_quotes(word)
+        word_text = word.text
+        in_quot = quote_analyzer.is_word_in_quotes(word_text)
+        word_info.add_annotation(word, word_id=i, in_quotes=in_quot)
 
-        word_index[i] = ((word, in_quotes))
-
-    return word_index
+    return sentence
 
 
-def segment_clauses_in_sentence(sentence, word_index, clause_segmenter, vc_detector):
+def segment_clauses_in_sentence(sentence, clause_segmenter, vc_detector):
     """ Segments the clauses (osalausestamine).
         # TODO: UPDATE
         Parameters:
@@ -92,7 +94,7 @@ def segment_clauses_in_sentence(sentence, word_index, clause_segmenter, vc_detec
     # Create a dictionary of the clauses and the words they consist of
     clause_index_to_words = defaultdict(list)
 
-    pprint(clauses)
+    # pprint(clauses)
 
     word_id = 0
     for i, analysis in enumerate(clauses):
@@ -107,11 +109,11 @@ def segment_clauses_in_sentence(sentence, word_index, clause_segmenter, vc_detec
         # else:
         #   indexes_of_words_in_quotes.add(word_id)
 
-    pprint(clause_index_to_words)
+    # pprint(clause_index_to_words)
 
     # Find verb chains
-    clauses_dict = map_clauses_to_verb_chains(
-        sentence, clause_index_to_words, word_index, vc_detector)
+    # clauses_dict = map_clauses_to_verb_chains(
+     #   sentence, clause_index_to_words, word_index, vc_detector)
     # return clauses_dict
 
 
