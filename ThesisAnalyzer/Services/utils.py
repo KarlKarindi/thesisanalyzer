@@ -1,13 +1,24 @@
 from ThesisAnalyzer.Services.Constants import constants
 
 from flask import Flask, request, jsonify
-from estnltk import Text
+from estnltk import Text, layer_operations
 import jsonpickle
 import estnltk
 
 PUNCTUATION_MARKS = list('.,-!?"\'/\\[]()')
 
 STOP_WORDS = ["ja", "et", "aga", "sest", "kuigi", "vaid", "kuna"]
+
+
+class QuoteAnalyzer(object):
+
+    
+
+    def __init__(self):
+        self.in_quotes = False
+        self.previous_word = None
+        
+    
 
 
 def get_most_frequent_lemmas(limit=1000):
@@ -40,7 +51,7 @@ def is_word_in_quotes(in_quotes, word, previous_word):
             word (String) - Examples: "," ; "hi", "'"
             previous_word (String) - the previous word that came prior to the word parameter
             in_quotes (boolean) - current status whether text is already in quotes or not
-        Returns: 
+        Returns:
             in_quotes (boolean) - whether text is in quotes or not
             quotes_just_started (boolean) - whether quotes just started or not
     """
@@ -61,3 +72,17 @@ def is_word_in_quotes(in_quotes, word, previous_word):
         in_quotes, quotes_just_started = True, True
 
     return in_quotes, quotes_just_started
+
+
+def find_sentences(text):
+    """ Finds all the sentences in a text. Analyses everything.
+        Parameters:
+            text (string) - clean text to find sentences from.
+        Returns:
+            sentences (list) - list of sentences
+    """
+
+    text = Text(text)
+    text.analyse("all")
+    return layer_operations.split_by_sentences(
+        text=text, layers_to_keep=list(text.layers), trim_overlapping=True)

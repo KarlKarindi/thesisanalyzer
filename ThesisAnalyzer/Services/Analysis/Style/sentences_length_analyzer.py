@@ -4,6 +4,7 @@ from ThesisAnalyzer.Models.Feedback import StyleFeedback
 from ThesisAnalyzer.Services import utils
 
 from estnltk import Text
+from estnltk.taggers import ClauseSegmenter
 from collections import defaultdict
 from pprint import pprint
 
@@ -21,21 +22,69 @@ class SentencesLengthSummary():
 
 def analyze(text):
 
-    sentences = Text(text).sentence_texts
-    pprint(Text(text))
+    sentences = utils.find_sentences(text)
+
     sentencesLengthSummary = SentencesLengthSummary()
 
+    segmenter = ClauseSegmenter()
     # Iterate through the sentences.
     # Create a clause_dict for every sentence, then check if sentence is too long.
-    for sentence in sentences:
-        clauses_dict = segment_clauses_in_sentence(sentence)
-        sentence_is_long = is_sentence_too_long(
-            clauses_dict, sentence)
+    for sentence in sentences[:1]:
+        clauses_dict = segment_clauses_in_sentence(sentence, segmenter)
 
-        if sentence_is_long:
-            sentencesLengthSummary.add_sent_to_long_sentences(sentence)
+        # sentence_is_long = is_sentence_too_long(
+        #   clauses_dict, sentence)
+
+        # if sentence_is_long:
+        #   sentencesLengthSummary.add_sent_to_long_sentences(sentence)
 
     return sentencesLengthSummary
+
+
+def segment_clauses_in_sentence(sentence, segmenter):
+    """ Segments the clauses (osalausestamine).
+
+        Parameters:
+            sentence (String) - one sentence
+            segmenter - ClauseSegmenter
+        Returns:
+            dict with clauses and the verb chains.
+            IMPORTANT: Verb chains are not taken into account if clause is in quotes
+     """
+
+    # Use this method as specified in the estnltk 1.6 clause segmenter tutorial
+    with segmenter as clause_segmenter:
+        clause_segmenter.tag(sentence)
+
+    segmented = sentence.clauses
+
+    # Create a dictionary of the clauses and the words they consist of.
+    clauses = defaultdict(list)
+
+    in_quotes = False
+    previous_word = None
+
+    for word_analysis in segmented:
+        word = word_analysis.text
+
+    # 
+    # in_quotes =
+
+    in_quotes, quotes_just_started = utils.is_word_in_quotes(
+        word, previous_word, in_quotes)
+
+    if not quotes_just_started:
+        previous_word = word
+
+    if not in_quotes:
+        clause_index = word_analysis["clause_index"]
+        clauses[clause_index].append(word)
+
+    pprint(clauses)
+    # Find verb chains
+    #clauses_dict = map_clauses_to_verb_chains(sentence, clauses)
+
+    # return clauses_dict
 
 
 def is_sentence_too_long(clauses, sentence):
@@ -64,42 +113,6 @@ def is_sentence_too_long(clauses, sentence):
         return True
 
     return False
-
-
-def segment_clauses_in_sentence(sentence, segmenter):
-    """ Segments the clauses (osalausestamine).
-
-        Parameters:
-            sentence (String) - one sentence
-            segmenter - ClauseSegmenter
-        Returns:
-            dict with clauses and the verb chains.
-            IMPORTANT: Verb chains are not taken into account if clause is in quotes
-     """
-
-    # The sentence must be morphologically analyzed and then segmented.
-    prepared = vabamorf.analyze(sentence)
-    segmented = segmenter.mark_annotations(prepared)
-
-    # Create a dictionary of the clauses and the words they consist of.
-    clauses = defaultdict(list)
-
-    in_quotes = False
-    previous_word = None
-
-    for word_analysis in segmented:
-        word = word_analysis["text"]
-        in_quotes = utils.is_word_in_quotes(word, previous_word, in_quotes)
-        previous_word = word
-
-        if not in_quotes:
-            clause_index = word_analysis["clause_index"]
-            clauses[clause_index].append(word)
-
-    # Find verb chains
-    clauses_dict = map_clauses_to_verb_chains(sentence, clauses)
-
-    return clauses_dict
 
 
 def map_clauses_to_verb_chains(sentence, clauses_not_in_quotes):

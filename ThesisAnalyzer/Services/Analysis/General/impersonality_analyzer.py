@@ -21,10 +21,7 @@ def analyze(text):
 
     # Dictionary to store sentences and the personal verbs (pv) they have
     sentences_with_pv = {}
-    text = Text(text)
-    text.analyse("all")
-    sentences = layer_operations.split_by_sentences(
-        text=text, layers_to_keep=list(text.layers), trim_overlapping=True)
+    sentences = utils.find_sententces(text)
 
     # Then analyze singular sentences
     for sentence in sentences:
