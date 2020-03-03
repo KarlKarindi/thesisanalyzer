@@ -17,7 +17,7 @@ class QuoteAnalyzer(object):
             2. Take one sentence for inspection
             3. Iterate over all of the words.
             4. For every word, call out the is_word_in_quotes(word) function with
-            the word text as its argument.
+            the word's text (string) as its argument.
     """
 
     def __init__(self):

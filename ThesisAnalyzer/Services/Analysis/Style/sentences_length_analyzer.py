@@ -27,11 +27,13 @@ def analyze(text):
 
     sentencesLengthSummary = SentencesLengthSummary()
 
-    segmenter = ClauseSegmenter()
+    # Initialize a ClauseSegmenter instance
+    clause_segmenter = ClauseSegmenter()
+
     # Iterate through the sentences.
     # Create a clause_dict for every sentence, then check if sentence is too long.
-    for sentence in sentences[:1]:
-        clauses_dict = segment_clauses_in_sentence(sentence, segmenter)
+    for sentence in sentences:
+        clauses_dict = segment_clauses_in_sentence(sentence, clause_segmenter)
 
         # sentence_is_long = is_sentence_too_long(
         #   clauses_dict, sentence)
@@ -39,43 +41,47 @@ def analyze(text):
         # if sentence_is_long:
         #   sentencesLengthSummary.add_sent_to_long_sentences(sentence)
 
+    # Terminate the ClauseSegmenter process
+    clause_segmenter.close()
+
     return sentencesLengthSummary
 
 
-def segment_clauses_in_sentence(sentence, segmenter):
+def segment_clauses_in_sentence(sentence, clause_segmenter):
     """ Segments the clauses (osalausestamine).
 
         Parameters:
             sentence (String) - one sentence
-            segmenter - ClauseSegmenter
+            clause_segmenter - ClauseSegmenter instance
         Returns:
             dict with clauses and the verb chains.
             IMPORTANT: Verb chains are not taken into account if clause is in quotes
      """
 
-    # Use this method as specified in the estnltk 1.6 clause segmenter tutorial
-    with segmenter as clause_segmenter:
-        clause_segmenter.tag(sentence)
+    # Tag clause annotations
+    clause_segmenter.tag(sentence)
 
-    segmented = sentence.clauses
+    clauses = sentence.clauses
 
     # Create a dictionary of the clauses and the words they consist of.
-    clauses = defaultdict(list)
+    clauses_with_words = defaultdict(list)
 
-    quoteAnalyzer = QuoteAnalyzer()
+    quote_analyzer = QuoteAnalyzer()
 
-    for word_analysis in segmented:
-        word = word_analysis.text
+    for clause_index, clause_analysis in enumerate(clauses):
+        clause_text = clause_analysis.text
+        # Iterate over all the words in a clause
+        for word in clause_text:
+            in_quotes = quote_analyzer.is_word_in_quotes(word)
 
-        in_quotes = quoteAnalyzer.is_word_in_quotes(word)
-
-        if not in_quotes:
-            clause_index = word_analysis["clause_index"]
-            clauses[clause_index].append(word)
+            # If a word is in quotes, don't add it into the clause, as it might be a title or quote.
+            if not in_quotes:
+                clauses_with_words[clause_index].append(word)
 
     # Find verb chains
-    #clauses_dict = map_clauses_to_verb_chains(sentence, clauses)
+    clauses_dict = map_clauses_to_verb_chains(sentence, clauses_with_words)
 
+    pprint(clauses_with_words)
     # return clauses_dict
 
 

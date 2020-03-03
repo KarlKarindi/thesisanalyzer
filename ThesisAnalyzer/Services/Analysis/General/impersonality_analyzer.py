@@ -46,7 +46,7 @@ def find_pv_in_sentence(sentence):
     personal_verbs = []
     analyzed_sentence = sentence.morph_analysis
 
-    quoteAnalyzer = QuoteAnalyzer()
+    quote_analyzer = QuoteAnalyzer()
 
     for analysis in analyzed_sentence:
         word = analysis.text
@@ -54,7 +54,7 @@ def find_pv_in_sentence(sentence):
         # Check if word is in quotes or not
         # FIXME: Kaldkirjas tekst ka sama, mis tsitaadis
         # FIXME: Võõrkeelsed asjad esile tõstetud kaldkirjaga
-        in_quotes = quoteAnalyzer.is_word_in_quotes(word)
+        in_quotes = quote_analyzer.is_word_in_quotes(word)
 
         if not in_quotes:
             # Since there may be multiple roots/endings, we check through all of them.
