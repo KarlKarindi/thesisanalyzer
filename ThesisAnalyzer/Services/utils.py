@@ -26,11 +26,6 @@ class QuoteAnalyzer(object):
         self.word = None
         self.previous_word = None
 
-    def reset(self):
-        self.in_quotes = False
-        self.word = None
-        self.previous_word = None
-
     def is_word_in_quotes(self, word):
         """ Checks whether word is in quotes or not.
             Uses self.previous_word and self.in_quotes to make a decision whether word is in quotes or not.
