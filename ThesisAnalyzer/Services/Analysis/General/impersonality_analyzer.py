@@ -23,9 +23,11 @@ def analyze(text):
     sentences_with_pv = {}
     sentences = utils.find_sentences(text)
 
+    quote_analyzer = QuoteAnalyzer()
+
     # Then analyze singular sentences
     for sentence in sentences:
-        personal_verbs = find_pv_in_sentence(sentence)
+        personal_verbs = find_pv_in_sentence(sentence, quote_analyzer)
 
         # If the sentence contains personal verbs, add the verbs to dict
         if len(personal_verbs) > 0:
@@ -39,14 +41,16 @@ def analyze(text):
     return impersonalitySummary
 
 
-def find_pv_in_sentence(sentence):
-    """ Parameters: sentence (String) - text of the sentence being analyzed.
+def find_pv_in_sentence(sentence, quote_analyzer):
+    """ Parameters:
+            sentence (String) - text of the sentence being analyzed.
+            quote_analyzer (QuoteAnalyzer) - QuoteAnalyzer instance.
         Returns: list of personal verbs in the sentence.
     """
+    quote_analyzer.reset()
+
     personal_verbs = []
     analyzed_sentence = sentence.morph_analysis
-
-    quote_analyzer = QuoteAnalyzer()
 
     for analysis in analyzed_sentence:
         word = analysis.text

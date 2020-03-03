@@ -14,13 +14,19 @@ class QuoteAnalyzer(object):
     """ QuoteAnalyzer checks whether a certain word in a sentence is in quotes or not.
         Usage:
             1. Initialize a new instance of QuoteAnalyzer
-            2. Take one sentence for inspection
+            2. Take one sentence for inspection.
             3. Iterate over all of the words.
             4. For every word, call out the is_word_in_quotes(word) function with
             the word's text (string) as its argument.
+            5. If a new sentence is started, call the reset() function to initalize again.
     """
 
     def __init__(self):
+        self.in_quotes = False
+        self.word = None
+        self.previous_word = None
+
+    def reset(self):
         self.in_quotes = False
         self.word = None
         self.previous_word = None
