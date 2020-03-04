@@ -25,44 +25,50 @@ class SentencesLengthSummary():
 
 
 def analyze(text):
+    """ Analyzes all the sentences and brings out all sentences that might be too long.
+        On deciding on whether a sentence is long or not, see function is_sentence_too_long()
+    """
 
     sentences = utils.find_sentences(text)
     sentencesLengthSummary = SentencesLengthSummary()
 
     # Initialize a ClauseSegmenter instance
     clause_segmenter = ClauseSegmenter()
+
+    # Initalize a VerbChainDetector instance
     vc_detector = VerbChainDetector()
+
+    # Initialize a QuoteAnalyzer instance
     quote_analyzer = QuoteAnalyzer()
 
     # Iterate through the sentences.
-    # Create a clause_dict for every sentence, then check if sentence is too long.
     for sentence in sentences:
         sentence = add_word_info_layer_to_sentence(
             sentence, quote_analyzer)
 
-        # TODO: Leave only the non-quoted parts of a sentence. indexof
-        # Find the start and end indexes of quotes
+        # Filter out the words so that only words not in quotes remain
         words_not_in_quotes = sentence.words.groupby(
-            ["in_quotes"], return_type="spans")
+            ["in_quotes"], return_type="spans").groups[(False,)]
 
-        # pprint(words_not_in_quotes.groups[(False,)])
+        # Find clusters of words that are not in quotes
+        clusters = dict(
+            enumerate(create_clusters_of_viable_words(words_not_in_quotes)))
 
-        # cleaned_sentence = get_sentence_without_quotes(sentence,
-        #                                              quote_end_indexes, quote_start_indexes)
+        # Create a clean sentence that doesn't have any quotes
+        clean_sentence = create_clean_sentence(sentence, clusters)
 
-        #print("SIIN ON VASTUS\n", sentence.words[0:4].enclosing_text)
-
-        # print(cleaned_sentence)
-
-        print()
+        # FIXME: FIX THIS
+        if clean_sentence.text == '':
+            print(clean_sentence.text, sentence)
 
         clauses = find_clauses_in_sentence(
-            sentence, clause_segmenter)
+            clean_sentence, clause_segmenter)
 
-        verb_chain_to_clause = find_verb_chain_for_clauses(
+        clause_and_verb_chain_index = create_clause_and_verb_chain_index(
             clauses, vc_detector)
 
-        sentence_is_long = is_sentence_too_long(verb_chain_to_clause, sentence)
+        sentence_is_long = is_sentence_too_long(
+            clause_and_verb_chain_index, sentence)
 
         if sentence_is_long:
             sentencesLengthSummary.add_sent_to_long_sentences(sentence.text)
@@ -108,45 +114,110 @@ def add_word_info_layer_to_sentence(sentence, quote_analyzer):
 
 def find_clauses_in_sentence(sentence, clause_segmenter):
     """ Segments the clauses (osalausestamine).
-        # TODO: UPDATE
         Parameters:
-            sentence (String) - one sentence
-            clause_segmenter - ClauseSegmenter instance
-            quote_analyzer - QuoteAnalyzer instance
+            sentence (Layer) - one sentence as a Text object
+            clause_segmenter (ClauseSegmenter) - ClauseSegmenter instance
         Returns:
-            dict with clauses and the verb chains.
-            IMPORTANT: Verb chains are not taken into account if clause is in quotes
+            clauses (Layer) - the clauses layer for a sentence
      """
     # Tag clause annotations
     clause_segmenter.tag(sentence)
-    clauses = sentence.clauses
-
-    # CLAUSES.ENCLOSINGTEXT
-
-    return clauses
+    return sentence.clauses
 
 
-def find_verb_chain_for_clauses(clauses, vc_detector):
+def create_clause_and_verb_chain_index(clauses, vc_detector):
+    """ Creates an index of clauses.
+        For each sentence, create a dictionary of clauses and
+        the verb chains corresponding to those clauses.
+        Parameters:
+            clauses (Layer) - clauses layer
+            vc_detector (VerbChainDetector) - VerbChainDetector instance
+        Returns:
+            clause_index_to_words (dict)
+    """
     # Create a dictionary of the clauses and the words they consist of
-    clause_index_to_words = defaultdict(list)
-
-    # Iterate over all the words and find whether they are in quotes or not. If not, add to clauses to analyse
-
-    # print()
+    clause_and_verb_chain_index = defaultdict(list)
 
     for i, analysis in enumerate(clauses):
-        # What about enclosing text?
         clause_text_list = analysis.text
         verb_chains = find_verb_chain_in_clause(
             clause_text_list, vc_detector)
 
-        clause_index_to_words[i] = {
+        clause_and_verb_chain_index[i] = {
             "verb_chains": verb_chains, "clause": clause_text_list}
 
-    return clause_index_to_words
+    return clause_and_verb_chain_index
 
 
-def is_sentence_too_long(clauses, sentence):
+def find_verb_chain_in_clause(clause_text_list, vc_detector):
+    """ Finds the verb chains in one singular clause.
+        Parameters:
+            clause_text_list (list) - list of words in one clause.
+                Example: ["see", "peab", "saama", "tehtud"]
+            vc_detector (VerbChainDetector) - instance of VerbChainDetector
+        Returns:
+            verb chains (string) - in the case of the example, it's "peab saama"
+    """
+
+    # Join all the words in clauses into one string
+    clause_text = " ".join(clause_text_list)
+    clause_text = Text(clause_text)
+
+    # Clauses layer must be added
+    clause_text.tag_layer(["clauses"])
+
+    # Tag all the verb chains
+    vc_detector.tag(clause_text)
+    _verb_chains = clause_text.verb_chains
+
+    return " ".join(_verb_chains.text)
+
+
+def create_clusters_of_viable_words(words_not_in_quotes):
+    """ Generator function that creates clusters of viable words.
+        Viable words are words that aren't in quotes.
+        Searches for words that aren't further away from each-other than 1 word
+        Clustering function found here:
+        https://stackoverflow.com/questions/15800895/finding-clusters-of-numbers-in-a-list
+    """
+
+    previous = None
+    cluster = []
+    for word in words_not_in_quotes:
+        if not previous or word.id - previous == 1:
+            cluster.append(word)
+        else:
+            yield cluster
+            cluster = [word]
+        previous = word.id
+    if cluster:
+        yield cluster
+
+
+def create_clean_sentence(sentence, clusters):
+    """ Creates a clean sentence that doesn't contain any words in quotes.
+        Parameters:
+            clusters (dict) - clusters of word spans where clusters are words next to each other
+        Returns:
+            clean_sentence´(Text) - cleaned sentence without any quoted words
+    """
+    # Create a clean_sentence variable to later add to
+    clean_sentence = ""
+
+    # Iterate over all the clusters
+    for i in range(len(clusters)):
+        words = clusters[i]
+        start = words[0].id
+        # Finds n - 1 to avoid out of bounds exception
+        end = words[len(words) - 1].id
+
+        # Add to the clean_sentence. Range is until n + 1, as n must be included
+        clean_sentence += " " + sentence.words[start:end + 1].enclosing_text
+
+    return Text(clean_sentence).tag_layer()
+
+
+def is_sentence_too_long(clause_to_verb_chain_index, sentence):
     """ Analyzes the clauses in a sentence.
         Looks at clause word length, sentence word length, clause amount,
         returns feedback accordingly.
@@ -157,10 +228,10 @@ def is_sentence_too_long(clauses, sentence):
             boolean whether sentence is too long or not
     """
 
-    total_clause_count = len(clauses)
+    total_clause_count = len(clause_to_verb_chain_index)
     verb_chains_count = 0
-    for i in clauses:
-        verb_chains = clauses[i]["verb_chains"]
+    for i in clause_to_verb_chain_index:
+        verb_chains = clause_to_verb_chain_index[i]["verb_chains"]
         if len(verb_chains) > 0:
             verb_chains_count += 1
 
@@ -168,62 +239,7 @@ def is_sentence_too_long(clauses, sentence):
 
     # TODO: Find optimal conditions that work the best
     # Conditions for deciding whether a sentence is too long
-    if len(clauses) > config.MAX_CLAUSE_AMOUNT and verb_chains_count > half_of_clauses:
+    if len(clause_to_verb_chain_index) > config.MAX_CLAUSE_AMOUNT and verb_chains_count > half_of_clauses:
         return True
 
     return False
-
-
-def find_verb_chain_in_clause(clause_text_list, vc_detector):
-
-    clause_text = " ".join(clause_text_list)
-
-    clause_text = Text(clause_text)
-
-    # Clauses layer must be added
-    clause_text.tag_layer(["clauses"])
-
-    vc_detector.tag(clause_text)
-
-    _verb_chains = clause_text.verb_chains
-
-    return " ".join(_verb_chains.text)
-
-
-def find_quote_status_change_indexes(sentence):
-    previous_status = None
-    quote_end_indexes = []
-    quote_start_indexes = []
-    for word in sentence.words:
-
-        if previous_status is False and word.in_quotes is True:
-            quote_start_indexes.append(word.id)
-
-        if previous_status is True and word.in_quotes is False:
-            quote_end_indexes.append(word.id)
-
-        # For the first word of the sentence, decide if quotes start or not
-        if previous_status is None:
-            if word.in_quotes is True:
-                quote_start_indexes.append(word.id)
-            elif word.in_quotes is False:
-                quote_end_indexes.append(word.id)
-
-        previous_status = word.in_quotes
-
-    return quote_end_indexes, quote_start_indexes
-
-
-def get_sentence_without_quotes(sentence, quote_end_indexes, quote_start_indexes):
-    sentence_without_quotes = ""
-    pairs = []
-
-    print(quote_end_indexes, quote_start_indexes)
-
-    print("pairs:", pairs)
-
-    for pair in pairs:
-        sentence_without_quotes += " " + \
-            sentence.words[pair[0]:pair[1]].enclosing_text
-
-    return sentence_without_quotes.strip()

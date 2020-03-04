@@ -164,7 +164,7 @@ def analyze(original_text):
         Words = overusedWordSummary.words
         # Only leave clusters where the usage of a word is more than config.MAX_CLUSTER_SIZE
         # If a word is used less than MAX_CLUSTER_SIZE times, the cluster is empty
-        clusters = find_large_clusters(dict(enumerate(create_clusters(Words))))
+        clusters = find_large_clusters(dict(enumerate(create_clusters_of_words(Words))))
 
         if (len(clusters) > 0):
             sentences_in_clusters = find_sentences_in_clusters(
@@ -306,7 +306,7 @@ def get_lemma_actual_frequency(lemma_count, total_count):
     return lemma_count / total_count
 
 
-def create_clusters(Words):
+def create_clusters_of_words(Words):
     """ Generator function that creates clusters of overused words.
         Searches for words that aren't further away from each-other than config.CLUSTER_DISTANCE
         Clustering function found here:

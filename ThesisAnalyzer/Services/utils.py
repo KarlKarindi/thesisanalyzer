@@ -18,7 +18,6 @@ class QuoteAnalyzer(object):
             3. Iterate over all of the words.
             4. For every word, call out the is_word_in_quotes(word) function with
             the word's text (string) as its argument.
-            5. If a new sentence is started, call the reset() function to initalize again.
     """
 
     def __init__(self):
@@ -39,7 +38,8 @@ class QuoteAnalyzer(object):
         # Ending the quote
         if self.previous_word is not None and self.in_quotes:
             if (self.previous_word == constants.QUOTATION_MARK_UP_1 or
-                    self.previous_word == constants.QUOTATION_MARK_UP_2):
+                    self.previous_word == constants.QUOTATION_MARK_UP_2 or
+                    self.previous_word == constants.QUOTATION_MARK_UP_3):
                 self.in_quotes = False
 
         # Starting the quote
@@ -54,7 +54,6 @@ class QuoteAnalyzer(object):
         if not quotes_just_started:
             self.previous_word = word
 
-        print(word, self.in_quotes)
         return self.in_quotes
 
 
