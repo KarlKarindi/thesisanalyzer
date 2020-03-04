@@ -114,14 +114,15 @@ def segment_clauses_in_sentence(sentence, clause_segmenter, vc_detector):
     for i, analysis in enumerate(clauses):
         # What about enclosing text?
         clause_text_list = analysis.text
-        verb_chains = find_verb_chains_in_clause(
+        verb_chains = find_verb_chain_in_clause(
             clause_text_list, vc_detector)
 
-        clause_index_to_words[i] = (verb_chains.text, clause_text_list)
+        clause_index_to_words[i] = (verb_chains, clause_text_list)
 
-    if len(clause_index_to_words) > 6:
-        pprint(clause_index_to_words)
-        print()
+        # pprint(clause_index_to_words)
+    print(sentence.text)
+    pprint(clause_index_to_words)
+    print()
 
     # If a word is in quotes, don't add it into the clause, as it might be a title or quote.
     # pprint(clauses)
@@ -162,9 +163,9 @@ def is_sentence_too_long(clauses, sentence):
     return False
 
 
-def find_verb_chains_in_clause(clause_text_list, vc_detector):
+def find_verb_chain_in_clause(clause_text_list, vc_detector):
 
-    clause_text = " ".join(word for word in clause_text_list)
+    clause_text = " ".join(clause_text_list)
 
     clause_text = Text(clause_text)
 
@@ -173,7 +174,9 @@ def find_verb_chains_in_clause(clause_text_list, vc_detector):
 
     vc_detector.tag(clause_text)
 
-    return clause_text.verb_chains
+    _verb_chains = clause_text.verb_chains
+
+    return " ".join(_verb_chains.text)
 
 
 def map_clauses_to_verb_chains(sentence, clause_index_to_words, vc_detector):
