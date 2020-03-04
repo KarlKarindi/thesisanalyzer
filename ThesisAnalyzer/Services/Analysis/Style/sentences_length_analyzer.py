@@ -6,6 +6,7 @@ from ThesisAnalyzer.Services import utils
 
 from estnltk import Text, Layer
 from estnltk.taggers import ClauseSegmenter, VerbChainDetector
+from estnltk.layer_operations import flatten
 from collections import defaultdict
 from pprint import pprint
 
@@ -35,7 +36,7 @@ def analyze(text):
     # Create a clause_dict for every sentence, then check if sentence is too long.
     for sentence in sentences:
         sentence = add_word_info_layer_to_sentence(
-            sentence.text, quote_analyzer)
+            sentence, quote_analyzer)
 
         clauses_dict = segment_clauses_in_sentence(
             sentence, clause_segmenter, vc_detector)
@@ -59,18 +60,28 @@ def add_word_info_layer_to_sentence(sentence, quote_analyzer):
             in_quotes - whether the word is in quotes or not.
      """
 
-    sentence = Text(sentence)
-    sentence.tag_layer()
+    # Save a temporary list that contains all the words
+    temp_words = [word for word in sentence.words]
+    temp_normalized_forms = [
+        nf.normalized_form[0] for nf in sentence.words]
 
-    word_info = Layer(name="word_info",
-                      attributes=["word_id", "in_quotes"])
-    sentence.add_layer(word_info)
+    # Delete the words layer to later replace it
+    del sentence.words
+
+    # Add a custom words layer
+    words = Layer(name="words",
+                  attributes=["word_id", "in_quotes", "normalized_form"]
+                  )
+    sentence.add_layer(words)
 
     # Populate the layer
-    for i, word in enumerate(sentence.words):
+    for i, word in enumerate(temp_words):
         word_text = word.text
         in_quot = quote_analyzer.is_word_in_quotes(word_text)
-        word_info.add_annotation(word, word_id=i, in_quotes=in_quot)
+        words.add_annotation(word, word_id=i, in_quotes=in_quot,
+                             normalized_form=temp_normalized_forms[i])
+
+    sentence.tag_layer(["sentences", "morph_analysis"])
 
     return sentence
 
@@ -91,29 +102,35 @@ def segment_clauses_in_sentence(sentence, clause_segmenter, vc_detector):
     clause_segmenter.tag(sentence)
     clauses = sentence.clauses
 
+    # CLAUSES.ENCLOSINGTEXT
+
     # Create a dictionary of the clauses and the words they consist of
     clause_index_to_words = defaultdict(list)
 
-    # pprint(clauses)
+    # Iterate over all the words and find whether they are in quotes or not. If not, add to clauses to analyse
 
-    word_id = 0
+    # print()
+
     for i, analysis in enumerate(clauses):
         # What about enclosing text?
-        clause_text = analysis.text
-        clause_type = analysis.clause_type
-        clause_index_to_words[i] = clause_text
+        clause_text_list = analysis.text
+        verb_chains = find_verb_chains_in_clause(
+            clause_text_list, vc_detector)
 
-        # If a word is in quotes, don't add it into the clause, as it might be a title or quote.
-        # if not in_quotes:
-        #    clause_indexes_to_words[clause_index].append(word)
-        # else:
-        #   indexes_of_words_in_quotes.add(word_id)
+        clause_index_to_words[i] = (verb_chains.text, clause_text_list)
+
+    if len(clause_index_to_words) > 6:
+        pprint(clause_index_to_words)
+        print()
+
+    # If a word is in quotes, don't add it into the clause, as it might be a title or quote.
+    # pprint(clauses)
 
     # pprint(clause_index_to_words)
 
     # Find verb chains
-    # clauses_dict = map_clauses_to_verb_chains(
-     #   sentence, clause_index_to_words, word_index, vc_detector)
+   # clauses_dict = map_clauses_to_verb_chains(
+    #    sentence, clause_index_to_words, vc_detector)
     # return clauses_dict
 
 
@@ -145,8 +162,21 @@ def is_sentence_too_long(clauses, sentence):
     return False
 
 
-def map_clauses_to_verb_chains(sentence, clause_index_to_words,
-                               word_index, vc_detector):
+def find_verb_chains_in_clause(clause_text_list, vc_detector):
+
+    clause_text = " ".join(word for word in clause_text_list)
+
+    clause_text = Text(clause_text)
+
+    # Clauses layer must be added
+    clause_text.tag_layer(["clauses"])
+
+    vc_detector.tag(clause_text)
+
+    return clause_text.verb_chains
+
+
+def map_clauses_to_verb_chains(sentence, clause_index_to_words, vc_detector):
     """ Finds verb chains in the clauses of a sentence.
 
         Parameters:
@@ -157,11 +187,10 @@ def map_clauses_to_verb_chains(sentence, clause_index_to_words,
         Returns: dict with clauses and the corresponding verb chains in clauses
     """
 
-    sentence.tag_layer(["words", "sentences", "morph_analysis", "clauses"])
     vc_detector.tag(sentence)
     verb_chains = sentence.verb_chains
 
-    print(verb_chains)
+    # print(verb_chains)
 
     # Filtering. Leaves only the verb chains that aren't in quotes
 
@@ -180,7 +209,7 @@ def map_clause_index_to_vc_text(clause_indexes_to_words, vc_text):
 
     clause_index_to_verb_chain = {}
 
-    pprint(vc_text)
+    # pprint(vc_text)
 
     for vc in vc_text:
         vc_indexes = set([n[0] for n in vc])
