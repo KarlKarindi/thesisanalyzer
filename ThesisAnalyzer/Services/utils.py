@@ -23,7 +23,6 @@ class QuoteAnalyzer(object):
 
     def __init__(self):
         self.in_quotes = False
-        self.word = None
         self.previous_word = None
 
     def is_word_in_quotes(self, word):
@@ -45,8 +44,8 @@ class QuoteAnalyzer(object):
 
         # Starting the quote
         if not self.in_quotes and (word == constants.QUOTATION_MARK_UP_1 or
-                                   self.word == constants.QUOTATION_MARK_UP_2 or
-                                   self.word == constants.QUOTATION_MARK_LOW):
+                                   word == constants.QUOTATION_MARK_UP_2 or
+                                   word == constants.QUOTATION_MARK_LOW):
             # Set quotes_just_started_to_true
             self.in_quotes, quotes_just_started = True, True
 
@@ -55,6 +54,7 @@ class QuoteAnalyzer(object):
         if not quotes_just_started:
             self.previous_word = word
 
+        print(word, self.in_quotes)
         return self.in_quotes
 
 

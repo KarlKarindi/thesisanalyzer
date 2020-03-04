@@ -42,50 +42,17 @@ def analyze(text):
 
         # TODO: Leave only the non-quoted parts of a sentence. indexof
         # Find the start and end indexes of quotes
-        previous_status = None
-        quote_start_indexes = []
-        quote_end_indexes = []
-        for word in sentence.words:
+        words_not_in_quotes = sentence.words.groupby(
+            ["in_quotes"], return_type="spans")
 
-            if previous_status is False and word.in_quotes is True:
-                quote_start_indexes.append(word.id)
+        # pprint(words_not_in_quotes.groups[(False,)])
 
-            if previous_status is True and word.in_quotes is False:
-                quote_end_indexes.append(word.id)
-
-            # For the first word of the sentence, decide if quotes start or not
-            if previous_status is None:
-                if word.in_quotes is True:
-                    quote_start_indexes.append(word.id)
-                elif word.in_quotes is False:
-                    quote_end_indexes.append(word.id)
-
-            previous_status = word.in_quotes
+        # cleaned_sentence = get_sentence_without_quotes(sentence,
+        #                                              quote_end_indexes, quote_start_indexes)
 
         #print("SIIN ON VASTUS\n", sentence.words[0:4].enclosing_text)
-        sentence_without_quotes = ""
-        pairs = []
-        while len(quote_end_indexes) > 0:
-            end_start_pair = [None, None]
-            e_index = quote_end_indexes.pop(0)
-            end_start_pair[0] = e_index
 
-            if len(quote_start_indexes) > 0:
-                s_index = quote_start_indexes.pop(0)
-                end_start_pair[1] = s_index
-
-            if e_index is not None and s_index is not None and e_index > s_index:
-                end_start_pair[1] = None
-            pairs.append(end_start_pair)
-
-        print("pairs:", pairs)
-
-        for pair in pairs:
-            sentence_without_quotes += " " + \
-                sentence.words[pair[0]:pair[1]].enclosing_text.strip()
-        print("original:", sentence.text)
-
-        print("no_quotes:", sentence_without_quotes)
+        # print(cleaned_sentence)
 
         print()
 
@@ -221,3 +188,42 @@ def find_verb_chain_in_clause(clause_text_list, vc_detector):
     _verb_chains = clause_text.verb_chains
 
     return " ".join(_verb_chains.text)
+
+
+def find_quote_status_change_indexes(sentence):
+    previous_status = None
+    quote_end_indexes = []
+    quote_start_indexes = []
+    for word in sentence.words:
+
+        if previous_status is False and word.in_quotes is True:
+            quote_start_indexes.append(word.id)
+
+        if previous_status is True and word.in_quotes is False:
+            quote_end_indexes.append(word.id)
+
+        # For the first word of the sentence, decide if quotes start or not
+        if previous_status is None:
+            if word.in_quotes is True:
+                quote_start_indexes.append(word.id)
+            elif word.in_quotes is False:
+                quote_end_indexes.append(word.id)
+
+        previous_status = word.in_quotes
+
+    return quote_end_indexes, quote_start_indexes
+
+
+def get_sentence_without_quotes(sentence, quote_end_indexes, quote_start_indexes):
+    sentence_without_quotes = ""
+    pairs = []
+
+    print(quote_end_indexes, quote_start_indexes)
+
+    print("pairs:", pairs)
+
+    for pair in pairs:
+        sentence_without_quotes += " " + \
+            sentence.words[pair[0]:pair[1]].enclosing_text
+
+    return sentence_without_quotes.strip()
