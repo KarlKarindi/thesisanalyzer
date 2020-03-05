@@ -57,21 +57,20 @@ def analyze(text):
         # Create a clean sentence that doesn't have any quotes
         clean_sentence = create_clean_sentence(sentence, clusters)
 
-        # FIXME: FIX THIS
-        if clean_sentence.text == '':
-            print(clean_sentence.text, sentence)
+        # If clean_sentence is empty, it's completely in quotes and shouldn't be analysed further.
+        if len(clean_sentence.text) > 0:
+            clauses = find_clauses_in_sentence(
+                clean_sentence, clause_segmenter)
 
-        clauses = find_clauses_in_sentence(
-            clean_sentence, clause_segmenter)
+            clause_and_verb_chain_index = create_clause_and_verb_chain_index(
+                clauses, vc_detector)
 
-        clause_and_verb_chain_index = create_clause_and_verb_chain_index(
-            clauses, vc_detector)
+            sentence_is_long = is_sentence_too_long(
+                clause_and_verb_chain_index, sentence)
 
-        sentence_is_long = is_sentence_too_long(
-            clause_and_verb_chain_index, sentence)
-
-        if sentence_is_long:
-            sentencesLengthSummary.add_sent_to_long_sentences(sentence.text)
+            if sentence_is_long:
+                sentencesLengthSummary.add_sent_to_long_sentences(
+                    sentence.text)
 
     # Terminate the ClauseSegmenter process
     clause_segmenter.close()
@@ -199,7 +198,8 @@ def create_clean_sentence(sentence, clusters):
         Parameters:
             clusters (dict) - clusters of word spans where clusters are words next to each other
         Returns:
-            clean_sentence´(Text) - cleaned sentence without any quoted words
+            clean_sentence (Text) - cleaned sentence without any quoted words.
+            If a sentence is completely surrounded by quotes, clean_sentence.text is an empty string.
     """
     # Create a clean_sentence variable to later add to
     clean_sentence = ""
@@ -208,6 +208,7 @@ def create_clean_sentence(sentence, clusters):
     for i in range(len(clusters)):
         words = clusters[i]
         start = words[0].id
+
         # Finds n - 1 to avoid out of bounds exception
         end = words[len(words) - 1].id
 
@@ -243,3 +244,13 @@ def is_sentence_too_long(clause_to_verb_chain_index, sentence):
         return True
 
     return False
+
+
+def print_shit(sentence, clean_sentence):
+    print("ORIGINAL")
+    pprint(sentence.words)
+
+    print()
+    print("CLEAN")
+    pprint(clean_sentence.words)
+    print("\n===============\n")

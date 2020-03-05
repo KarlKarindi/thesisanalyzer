@@ -4,7 +4,5 @@ ADVERB = "D"
 PRONOUN = "P"
 
 # Quotation marks
-QUOTATION_MARK_UP_1 = '"'
-QUOTATION_MARK_UP_2 = '”'
-QUOTATION_MARK_UP_3 = '“'
-QUOTATION_MARK_LOW = '„'
+QUOTE_MARKS_STARTING = ['"', '”', '“', '„']
+QUOTE_MARKS_ENDING = ['"', '”', '“']
