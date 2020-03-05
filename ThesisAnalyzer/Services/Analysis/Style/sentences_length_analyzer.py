@@ -244,13 +244,3 @@ def is_sentence_too_long(clause_to_verb_chain_index, sentence):
         return True
 
     return False
-
-
-def print_shit(sentence, clean_sentence):
-    print("ORIGINAL")
-    pprint(sentence.words)
-
-    print()
-    print("CLEAN")
-    pprint(clean_sentence.words)
-    print("\n===============\n")
