@@ -11,29 +11,6 @@ from pprint import pprint
 
 import statistics
 
-import cProfile
-import pstats
-import io
-
-
-def profile(fnc):
-    """A decorator that uses cProfile to profile a function"""
-
-    def inner(*args, **kwargs):
-
-        pr = cProfile.Profile()
-        pr.enable()
-        retval = fnc(*args, **kwargs)
-        pr.disable()
-        s = io.StringIO()
-        sortby = 'cumulative'
-        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-        ps.print_stats()
-        print(s.getvalue())
-        return retval
-
-    return inner
-
 
 class SentencesLengthSummary():
 
@@ -47,7 +24,6 @@ class SentencesLengthSummary():
         self.long_sentences = []
 
 
-# @profile
 def analyze(text):
     """ Analyzes all the sentences and brings out all sentences that might be too long.
         On deciding on whether a sentence is long or not, see function is_sentence_too_long()
@@ -68,16 +44,17 @@ def analyze(text):
 
     # Iterate through the sentences.
     for sentence in sentences:
-        sentence = add_index_and_in_quotes_info_to_words_layer(
-            sentence, quote_analyzer)
 
-        # Filter out the words so that only words not in quotes remain
-        words_not_in_quotes = sentence.words.groupby(
-            ["in_quotes"], return_type="spans").groups[(False,)]
+        # Add the words layer to the sentence
+        sentence.tag_layer(["words"])
+
+        # Find the indexes of words and whether they are in quotes or not
+        word_indexes_that_are_not_in_quotes = find_indexes_of_words_not_in_quotes(
+            sentence, quote_analyzer)
 
         # Find clusters of words that are not in quotes
         clusters = dict(
-            enumerate(create_clusters_of_viable_words(words_not_in_quotes)))
+            enumerate(create_clusters_of_viable_words(word_indexes_that_are_not_in_quotes)))
 
         # Create a clean sentence that doesn't have any quotes
         clean_sentence = create_clean_sentence(sentence, clusters)
@@ -103,37 +80,22 @@ def analyze(text):
     return sentencesLengthSummary
 
 
-def add_index_and_in_quotes_info_to_words_layer(sentence, quote_analyzer):
-    """ Adds a words layer to the sentence (Text) object.
-        If a words layer already exists, it is deleted.
-        The layer contains the following attributes:
-            word_id - index of the word in a sentence.
-            in_quotes - whether the word is in quotes or not.
-            normalized_form - the normalized form of a word.
-     """
+def find_indexes_of_words_not_in_quotes(sentence, quote_analyzer):
+    """ Creates a list of word indexes that are not in quotes
+        Parameters:
+            sentence (Layer) - a sentence layer that has the words layer
+        Returns:
+            indexes_of_words_not_in_quotes (list) - list of word indexes that aren't in quotes
+    """
 
-    # Save a temporary list that contains all the words and normalized forms in tuplets
-    temp = [(word, word.normalized_form[0]) for word in sentence.words]
+    indexes_of_words_not_in_quotes = []
 
-    # Delete the words layer to later replace it
-    del sentence.words
+    for i, word in enumerate(sentence.words):
+        in_quotes = quote_analyzer.is_word_in_quotes(word.text)
+        if in_quotes is False:
+            indexes_of_words_not_in_quotes.append(i)
 
-    # Add a custom words layer
-    words = Layer(name="words",
-                  attributes=["id", "in_quotes", "normalized_form"]
-                  )
-    sentence.add_layer(words)
-
-    # Populate the layer
-    for i, word in enumerate(temp):
-        word_text = word[0].text
-        in_quote = quote_analyzer.is_word_in_quotes(word_text)
-        words.add_annotation(word[0], id=i, in_quotes=in_quote,
-                             normalized_form=word[1])
-
-    sentence.tag_layer(["sentences", "morph_analysis"])
-
-    return sentence
+    return indexes_of_words_not_in_quotes
 
 
 def find_clauses_in_sentence(sentence, clause_segmenter):
@@ -197,7 +159,7 @@ def find_verb_chain_in_clause(clause_text_list, vc_detector):
     return " ".join(_verb_chains.text)
 
 
-def create_clusters_of_viable_words(words_not_in_quotes):
+def create_clusters_of_viable_words(word_indexes_that_are_not_in_quotes):
     """ Generator function that creates clusters of viable words.
         Viable words are words that aren't in quotes.
         Searches for words that aren't further away from each-other than 1 word
@@ -207,13 +169,13 @@ def create_clusters_of_viable_words(words_not_in_quotes):
 
     previous = None
     cluster = []
-    for word in words_not_in_quotes:
-        if not previous or word.id - previous == 1:
-            cluster.append(word)
+    for index in word_indexes_that_are_not_in_quotes:
+        if not previous or index - previous == 1:
+            cluster.append(index)
         else:
             yield cluster
-            cluster = [word]
-        previous = word.id
+            cluster = [index]
+        previous = index
     if cluster:
         yield cluster
 
@@ -232,15 +194,15 @@ def create_clean_sentence(sentence, clusters):
     # Iterate over all the clusters
     for i in range(len(clusters)):
         words = clusters[i]
-        start = words[0].id
 
-        # Finds n - 1 to avoid out of bounds exception
-        end = words[len(words) - 1].id
+        # Take the first and last index
+        start = words[0]
+        end = words[-1]
 
         # Add to the clean_sentence. Range is until n + 1, as n must be included
         clean_sentence += " " + sentence.words[start:end + 1].enclosing_text
 
-    return Text(clean_sentence).tag_layer()
+    return Text(clean_sentence.strip()).tag_layer()
 
 
 def is_sentence_too_long(clause_to_verb_chain_index, sentence):

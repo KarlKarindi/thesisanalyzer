@@ -74,14 +74,14 @@ def encode(Object):
 
 
 def find_sentences(text):
-    """ Finds all the sentences in a text. Analyses everything.
+    """ Finds all the sentences in a text.
         Parameters:
             text (string) - clean text to find sentences from.
         Returns:
-            sentences (list) - list of sentences
+            sentences (list) - list of sentences as Text objects
     """
 
     text = Text(text)
-    text.analyse("all")
-    return layer_operations.split_by_sentences(
-        text=text, layers_to_keep=None, trim_overlapping=False)
+    text.tag_layer()
+
+    return [Text(sent.enclosing_text) for sent in text.sentences]
