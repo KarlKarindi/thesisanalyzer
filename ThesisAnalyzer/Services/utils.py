@@ -32,17 +32,18 @@ class QuoteAnalyzer(object):
             Returns:
                 in_quotes (boolean) - whether the word is in quotes or not
         """
-        # Assume that this word won't be skipped
+        # First, assume that this word won't be skipped
         quotes_just_started = False
 
         # Ending the quote
         if self.previous_word is not None and self.in_quotes:
             # Check if the last letter is an ending quotation mark.
-            # This is necessary, as sometimes words are marked as !", so just checking previous_word isn't enough.
+            # The last letter is necessary, as sometimes words are marked as !",
+            # so just checking previous_word isn't enough.
             if self.previous_word[-1] in constants.QUOTE_MARKS_ENDING:
                 self.in_quotes = False
 
-            # Sometimes an ending quote is 2 symbols together.
+            # Sometimes an ending quote word is 2 symbols together.
             # for example: ". or “.
             # This condition checks for these cases.
             # First, check if word is longer than 1 to avoid out of bounds exception.
@@ -83,4 +84,4 @@ def find_sentences(text):
     text = Text(text)
     text.analyse("all")
     return layer_operations.split_by_sentences(
-        text=text, layers_to_keep=list(text.layers), trim_overlapping=True)
+        text=text, layers_to_keep=None, trim_overlapping=False)

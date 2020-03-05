@@ -11,6 +11,29 @@ from pprint import pprint
 
 import statistics
 
+import cProfile
+import pstats
+import io
+
+
+def profile(fnc):
+    """A decorator that uses cProfile to profile a function"""
+
+    def inner(*args, **kwargs):
+
+        pr = cProfile.Profile()
+        pr.enable()
+        retval = fnc(*args, **kwargs)
+        pr.disable()
+        s = io.StringIO()
+        sortby = 'cumulative'
+        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        print(s.getvalue())
+        return retval
+
+    return inner
+
 
 class SentencesLengthSummary():
 
@@ -24,12 +47,14 @@ class SentencesLengthSummary():
         self.long_sentences = []
 
 
+# @profile
 def analyze(text):
     """ Analyzes all the sentences and brings out all sentences that might be too long.
         On deciding on whether a sentence is long or not, see function is_sentence_too_long()
     """
 
     sentences = utils.find_sentences(text)
+
     sentencesLengthSummary = SentencesLengthSummary()
 
     # Initialize a ClauseSegmenter instance
@@ -43,7 +68,7 @@ def analyze(text):
 
     # Iterate through the sentences.
     for sentence in sentences:
-        sentence = add_word_info_layer_to_sentence(
+        sentence = add_index_and_in_quotes_info_to_words_layer(
             sentence, quote_analyzer)
 
         # Filter out the words so that only words not in quotes remain
@@ -78,17 +103,17 @@ def analyze(text):
     return sentencesLengthSummary
 
 
-def add_word_info_layer_to_sentence(sentence, quote_analyzer):
-    """ Adds a word_info layer to the sentence Text object.
-        word_info layer contains attributes:
+def add_index_and_in_quotes_info_to_words_layer(sentence, quote_analyzer):
+    """ Adds a words layer to the sentence (Text) object.
+        If a words layer already exists, it is deleted.
+        The layer contains the following attributes:
             word_id - index of the word in a sentence.
             in_quotes - whether the word is in quotes or not.
+            normalized_form - the normalized form of a word.
      """
 
-    # Save a temporary list that contains all the words
-    temp_words = [word for word in sentence.words]
-    temp_normalized_forms = [
-        nf.normalized_form[0] for nf in sentence.words]
+    # Save a temporary list that contains all the words and normalized forms in tuplets
+    temp = [(word, word.normalized_form[0]) for word in sentence.words]
 
     # Delete the words layer to later replace it
     del sentence.words
@@ -100,11 +125,11 @@ def add_word_info_layer_to_sentence(sentence, quote_analyzer):
     sentence.add_layer(words)
 
     # Populate the layer
-    for i, word in enumerate(temp_words):
-        word_text = word.text
+    for i, word in enumerate(temp):
+        word_text = word[0].text
         in_quote = quote_analyzer.is_word_in_quotes(word_text)
-        words.add_annotation(word, id=i, in_quotes=in_quote,
-                             normalized_form=temp_normalized_forms[i])
+        words.add_annotation(word[0], id=i, in_quotes=in_quote,
+                             normalized_form=word[1])
 
     sentence.tag_layer(["sentences", "morph_analysis"])
 
