@@ -29,7 +29,9 @@ def analyze(text):
         On deciding on whether a sentence is long or not, see function is_sentence_too_long()
     """
 
-    sentences = utils.find_sentences(text)
+    sentences = utils.get_sentences_layer(text)
+    # Leave only the enclosing text
+    sentences = [Text(sent.enclosing_text) for sent in sentences]
 
     sentencesLengthSummary = SentencesLengthSummary()
 

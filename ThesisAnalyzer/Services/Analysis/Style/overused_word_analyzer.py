@@ -1,9 +1,11 @@
 from ThesisAnalyzer.Models.LemmaStopword import LemmaStopword
 from ThesisAnalyzer.Models.Lemma import Lemma
 from ThesisAnalyzer.Services.Analysis.Style.Config import config
+from ThesisAnalyzer.Services import utils
+from estnltk.taggers import TokensTagger
 
 from collections import defaultdict
-#from estnltk.wordnet import wn
+# from estnltk.wordnet import wn
 from estnltk import Text
 from flask import jsonify
 from pprint import pprint
@@ -19,8 +21,6 @@ class TextSummmary(object):
         self.word_count = word_count
         self.OverusedWordSummary = OverusedWords
 
-# TODO: FIX WORD SYNONYMS.
-
 
 class OverusedWordSummary(object):
     """ Container object for word usage analysis """
@@ -31,15 +31,15 @@ class OverusedWordSummary(object):
         # TODO: FIX FOR estnltk 1.6
         # Create a list of synsets corresponding to the lemma
         # Remove duplicates by temporarily making the list into a set
-        #l_syns = wn.synsets(self.lemma)
-        #l_syns_readable = l_syns
+        # l_syns = wn.synsets(self.lemma)
+        # l_syns_readable = l_syns
         # l_syns[:] = list(
         #    set([extract_word_from_Synset_object(lemma_syn) for lemma_syn in l_syns]))
 
         # l_syns_final = remove_duplicate_synonyms_for_lemma(
         #    self.lemma, l_syns_readable)
 
-        #self.lemma_synonyms = l_syns_final
+        # self.lemma_synonyms = l_syns_final
 
     def add_cluster(self, cluster):
         self.clusters.append(cluster)
@@ -51,7 +51,8 @@ class OverusedWordSummary(object):
         self.lemma = lemma
         # Create a list from the set of words_in_text, then sort it by start index.
         words = [key for key in words_in_text]
-        self.words = sorted(words, key=lambda x: x.start, reverse=False)
+        # TODO: Currently it's sorting by index, should be by start.
+        self.words = sorted(words, key=lambda x: x.index, reverse=False)
         self.times_used = len(self.words)
         self.words_synonyms = []
         self.lemma_synonyms = []
@@ -63,14 +64,13 @@ class OverusedWordSummary(object):
 
 class WordSummary(object):
 
-    def __init__(self, text, pos, start, end):
+    def __init__(self, text, pos, index):
         self.text = text
         self.pos = pos
-        self.start = start
-        self.end = end
+        self.index = index
 
     def __repr__(self):
-        return '<Word (text: {}, start: {}, end: {})>'.format(self.text, self.start, self.end)
+        return '<Word (index: {}, text: "{}", pos: {})>'.format(self.index, self.text, self.pos)
 
 
 class SentencesContainer(object):
@@ -108,49 +108,54 @@ def analyze(original_text):
     # Query the database for all lemmas that are known. Get list of model Lemma
     Lemma_list = Lemma.query.all()
 
+    # Create a Text object out of the original text
     text = Text(original_text)
-    words = get_words(text)
-    lemmas = get_lemmas(text)
+    text.tag_layer()
 
-    lemma_to_word = map_lemma_to_word(words, lemmas)
+    # print(text.attributes)
+    words = get_words(text.words)
+    index_lemma_pos_list = get_index_lemma_pos(text.morph_analysis)
+
+    lemma_to_word = map_lemma_to_word(words, index_lemma_pos_list)
 
     user_word_count = len(words)
 
     # First, filter out all lemmas that aren't included in the text more than once,
     # Then find all the lemmas that are viable for analysis
+    repeating_lemmas = find_repeating_lemmas(lemma_to_word)
     lemmas_for_analysis = find_lemmas_viable_for_analysis(
-        Lemma_list, find_repeating_lemmas(lemmas))
+        Lemma_list, repeating_lemmas)
 
-    # Create dictionary to store repeating lemmas with their counts in the user text
-    lemma_to_count_in_user_text = create_lemma_to_count_in_user_text(
-        lemmas_for_analysis)
-
-    # Create a dictionary of lemma -> (rank, count)
-    lemma_to_rank_and_count = create_lemma_to_rank_and_count(Lemma_list)
+    # Create a dictionary of Lemma -> (rank, count). Lemma list taken from the database.
+    lemma_to_rank_and_count = create_database_lemma_to_rank_and_count(
+        Lemma_list)
 
     # Occurence of the most used lemma in Estonian
     most_used_frequency = get_frequency_of_most_used_word(Lemma_list)
 
     lemmas = set(lemmas_for_analysis)
 
-    sentences = get_sentences(text)
+    sentences = find_sentences_with_index_and_span(original_text)
 
     # Get the expected frequency of a lemma and compare it to the actual frequency
     # If the actual frequency is a lot higher than the expected frequency, the word may be overused
     overusedWordSummaryList = []
+
     for lemma in lemmas:
 
         expected_freq = get_lemma_expected_frequency(most_used_frequency,
                                                      lemma_to_rank_and_count[lemma][0])
         actual_freq = get_lemma_actual_frequency(
-            lemma_to_count_in_user_text[lemma], user_word_count)
+            len(lemma_to_word[lemma]), user_word_count)
+
         multiplier = math.floor(actual_freq / expected_freq)
 
         words_in_text = lemma_to_word[lemma]
 
         if multiplier > config.OVERUSED_MULTIPLIER:
-            overusedWordSummaryList.append(OverusedWordSummary(
-                lemma, words_in_text, multiplier))
+            overusedWordSummary = OverusedWordSummary(
+                lemma, words_in_text, multiplier)
+            overusedWordSummaryList.append(overusedWordSummary)
 
     # Sort the results list by multiplier (descending order)
     # Only leave config.OUW_NUM_WORDS_TO_ANALYZE words for analysis
@@ -158,113 +163,108 @@ def analyze(original_text):
         overusedWordSummaryList, key=lambda x: x.multiplier, reverse=True)[:config.OUW_NUM_WORDS_TO_ANALYZE]
 
     for overusedWordSummary in overusedWordSummaryList:
-        # Find the synonyms
-        overusedWordSummary.find_synonyms_for_lemma()
+        #     # Find the synonyms
+        #     overusedWordSummary.find_synonyms_for_lemma()
 
         Words = overusedWordSummary.words
         # Only leave clusters where the usage of a word is more than config.MAX_CLUSTER_SIZE
         # If a word is used less than MAX_CLUSTER_SIZE times, the cluster is empty
-        clusters = find_large_clusters(dict(enumerate(create_clusters_of_words(Words))))
+        clusters = find_large_clusters(
+            dict(enumerate(create_clusters_of_words(Words))))
 
         if (len(clusters) > 0):
             sentences_in_clusters = find_sentences_in_clusters(
                 sentences, clusters)
 
-            results = format_text(original_text, sentences_in_clusters)
-            overusedWordSummary.add_cluster(results)
+    #         results = format_text(original_text, sentences_in_clusters)
+    #         overusedWordSummary.add_cluster(results)
 
-    # Return a textSummary object
-    textSummary = TextSummmary(user_word_count, overusedWordSummaryList)
-    return textSummary
+    # # Return a textSummary object
+    # textSummary = TextSummmary(user_word_count, overusedWordSummaryList)
+    # return textSummary
 
 
-def get_sentences(text):
+def find_sentences_with_index_and_span(text):
     """ Returns: dictionary with tuplet of (start, end) as key and
-        dictionary of sentence with index, text, start and end keys.
+        dictionary of sentence with index, text, start and end values
     """
-    keys = text.sentence_spans
-    sentences = text.sentence_texts
-    sentence_spans = text.sentence_spans
-    values = []
-    for i, sent in enumerate(sentences):
+
+    keys, values = [], []
+
+    sentences = utils.get_sentences_layer(text)
+    sentence_spans = sentences[["start", "end"]]
+
+    for i, sentence in enumerate(sentences):
+        start = sentence_spans[i][0]
+        end = sentence_spans[i][1]
         values.append(
-            ({"index": i, "text": sent, "start": sentence_spans[i][0], "end": sentence_spans[i][1]}))
+            ({"index": i, "text": sentence.enclosing_text, "start": start, "end": end}))
+        keys.append((start, end))
 
     return dict(zip(keys, values))
 
 
-def get_words(text):
-    # FIXME: Add punctuation
-    # return [word for word in Text(text).word_texts if word.isalpha()]
-    return [word for word in text.words]
+def get_words(words_layer):
+    """ Returns a list of all words in text form """
+    return words_layer.text
 
 
-def get_lemmas(text):
-    # FIXME: Add punctuation.
-    # return [lemma for lemma in Text(text).lemmas if lemma.isalpha()]
-    return [lemma for lemma in text.lemmas if lemma]
+def get_index_lemma_pos(morph_analysis_layer):
+    """ Returns a list of tuplets (index, lemma, partofspeech).
+        In the case of multiple analyses (for example many lemmas, many POS options),
+        only choose the first for now.
+    """
+    return [(i, analysis.lemma[0], analysis.partofspeech[0]) for i, analysis in enumerate(morph_analysis_layer)]
 
 
-def map_lemma_to_word(words, lemmas):
-    """ Returns: defaultdict that maps lemmas to their corresponding words.
-        Words are of type WordSummary
+def map_lemma_to_word(words, index_lemma_pos_list):
+    """ Maps all the words that are used to their respective lemmas.
+        Parameters:
+            words (list) - list of words in text form
+            index_lemma_pos_list (list) - list of tuplets (index, lemma, pos)
+        Returns:
+            lemma_to_word (defaultdict) - WordSummary objects mapped to lemmas
+        Return example:
+            'olema': {<Word (index: 367, text: "on", pos: V)>,
+                    <Word (index: 357, text: "on", pos: V)>}
     """
 
     lemma_to_word = defaultdict(set)
 
-    for word in words:
-        analyses = Text(word).analysis
-        if len(analyses) > 1:
-            # TODO: Wtf do I do when there are many analyses?
-            print("word", word)
-            print("LEN ANALYSIS > 1:", analyses)
-            print()
-        for analysis in analyses:
-            lemma = analysis[0]["lemma"]
-            text = word["text"]
-            pos = analysis[0]["partofspeech"]
-            start = word["start"]
-            end = word["end"]
+    # Iterate over lists of lemmas
+    for index_lemma_pos in index_lemma_pos_list:
+        index = index_lemma_pos[0]
+        lemma = index_lemma_pos[1]
+        pos = index_lemma_pos[2]
+        word_text = words[index]
 
-            word_obj = WordSummary(text, pos, start, end)
-            lemma_to_word[lemma].add(
-                (word_obj))
+        word_obj = WordSummary(word_text, pos, index)
+
+        lemma_to_word[lemma].add(word_obj)
 
     return lemma_to_word
 
 
-def find_repeating_lemmas(lemmas_all):
+def find_repeating_lemmas(lemma_to_word):
     """ Returns: repeating lemmas from a list of all lemmas.
         Repeating lemmas do not include stopwords and must be alphabetical.
-        An overused lemma must be used in the text at least config.MAX_COUNT_OF_LEMMA times.
+        An overused lemma must be used in the text at least config.MIN_COUNT_OF_LEMMA times.
     """
     stop_words = [Lemma_sw.name for Lemma_sw in LemmaStopword.query.all()]
-    return [lemma for lemma in lemmas_all if lemmas_all.count(lemma) > config.MAX_COUNT_OF_LEMMA and
+    return [lemma for lemma in lemma_to_word.keys() if len(lemma_to_word[lemma]) >= config.MIN_COUNT_OF_LEMMA and
             lemma not in stop_words and lemma.isalpha()]
 
 
-def find_lemmas_viable_for_analysis(Lemma_list, lemmas_repeating):
+def find_lemmas_viable_for_analysis(Lemma_list, repeating_lemmas):
     """ Returns: list of lemmas that are viable for analysis (known in the database) """
 
     Lemma_name_list = [Lem.lemma for Lem in Lemma_list]
-    return [lemma for lemma in lemmas_repeating if lemma in Lemma_name_list]
+    return [lemma for lemma in repeating_lemmas if lemma in Lemma_name_list]
 
 
-def create_lemma_to_count_in_user_text(lemmas_for_analysis):
-    """ Parameters: lemmas_for_analysis - list of lemmas
-        Returns: dictionary of lemma to its count in the user text
-    """
-
-    lemma_to_count_in_user_text = {}
-    for lemma in lemmas_for_analysis:
-        lemma_to_count_in_user_text[lemma] = lemmas_for_analysis.count(lemma)
-
-    return lemma_to_count_in_user_text
-
-
-def create_lemma_to_rank_and_count(Lemma_list):
-    """ Iterates over list of model Lemma.
-        Sorts the list beforehand to get the rank of each word.
+def create_database_lemma_to_rank_and_count(Lemma_list):
+    """ Iterates over list of model Lemma. List taken from the database.
+        Sorts (in descending order) the list beforehand to get the correct rank of each word.
 
         Parameters: Lemma_list - list of objects Lemma
         Returns: dictionary where the keys are lemmas in the database
@@ -299,6 +299,7 @@ def get_frequency_of_most_used_word(Lemma_list):
 
 
 def get_lemma_expected_frequency(most_used_word_frequency, rank):
+    """ We find the expected frequency by dividing the most used word frequency with the rank of our lemma """
     return most_used_word_frequency / rank
 
 

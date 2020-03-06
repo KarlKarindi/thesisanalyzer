@@ -73,15 +73,13 @@ def encode(Object):
     return(jsonpickle.encode(Object, unpicklable=False))
 
 
-def find_sentences(text):
+def get_sentences_layer(text):
     """ Finds all the sentences in a text.
         Parameters:
             text (string) - clean text to find sentences from.
         Returns:
             sentences (list) - list of sentences as Text objects
     """
-
     text = Text(text)
     text.tag_layer()
-
-    return [Text(sent.enclosing_text) for sent in text.sentences]
+    return text.sentences

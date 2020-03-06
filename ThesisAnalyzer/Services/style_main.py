@@ -29,7 +29,7 @@ def analyze(request):
         styleSummary.textSummary = textSummary
 
     # Clause analysis
-    if config.ANALYZE_CLAUSES:
+    if config.ANALYZE_SENTENCE_LENGTH:
         sentencesLengthSummary = sentences_length_analyzer.analyze(text)
         styleSummary.sentencesLengthSummary = sentencesLengthSummary
 

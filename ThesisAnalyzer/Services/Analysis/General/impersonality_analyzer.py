@@ -21,7 +21,8 @@ def analyze(text):
 
     # Dictionary to store sentences and the personal verbs (pv) they have
     sentences_with_pv = {}
-    sentences = utils.find_sentences(text)
+    sentences = utils.get_sentences_layer(text)
+    # Leave only the enclosing text.
 
     quote_analyzer = QuoteAnalyzer()
 
@@ -31,7 +32,7 @@ def analyze(text):
 
         # If the sentence contains personal verbs, add the verbs to dict
         if len(personal_verbs) > 0:
-            sentences_with_pv[sentence.text] = personal_verbs
+            sentences_with_pv[sentence.enclosing_text] = personal_verbs
 
     text_is_impersonal = len(sentences_with_pv) == 0
 
@@ -47,8 +48,6 @@ def find_pv_in_sentence(sentence, quote_analyzer):
             quote_analyzer (QuoteAnalyzer) - QuoteAnalyzer instance.
         Returns: list of personal verbs in the sentence.
     """
-    quote_analyzer.reset()
-
     personal_verbs = []
     analyzed_sentence = sentence.morph_analysis
 
