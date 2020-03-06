@@ -51,8 +51,7 @@ class OverusedWordSummary(object):
         self.lemma = lemma
         # Create a list from the set of words_in_text, then sort it by start index.
         words = [key for key in words_in_text]
-        # TODO: Currently it's sorting by index, should be by start.
-        self.words = sorted(words, key=lambda x: x.index, reverse=False)
+        self.words = sorted(words, key=lambda x: x.start, reverse=False)
         self.times_used = len(self.words)
         self.words_synonyms = []
         self.lemma_synonyms = []
@@ -64,13 +63,14 @@ class OverusedWordSummary(object):
 
 class WordSummary(object):
 
-    def __init__(self, text, pos, index):
+    def __init__(self, text, pos, start, end):
         self.text = text
         self.pos = pos
-        self.index = index
+        self.start = start
+        self.end = end
 
     def __repr__(self):
-        return '<Word (index: {}, text: "{}", pos: {})>'.format(self.index, self.text, self.pos)
+        return '<Word (text: {}, pos: {}, start: {}, end: {})>'.format(self.text, self.pos, self.start, self.end)
 
 
 class SentencesContainer(object):
@@ -108,15 +108,14 @@ def analyze(original_text):
     # Query the database for all lemmas that are known. Get list of model Lemma
     Lemma_list = Lemma.query.all()
 
-    # Create a Text object out of the original text
-    text = Text(original_text)
-    text.tag_layer()
+    # Creates a dictionary
+    sentences = find_sentences_with_index_and_span(original_text)
+    words = []
+    for span, sentence in sentences.items():
+        words.extend(get_words_in_sentence(span, sentence))
 
-    # print(text.attributes)
-    words = get_words(text.words)
-    index_lemma_pos_list = get_index_lemma_pos(text.morph_analysis)
-
-    lemma_to_word = map_lemma_to_word(words, index_lemma_pos_list)
+    # Use the words list to map lemmas to the words the lemmas correspond to.
+    lemma_to_word = map_lemma_to_word(words)
 
     user_word_count = len(words)
 
@@ -133,9 +132,8 @@ def analyze(original_text):
     # Occurence of the most used lemma in Estonian
     most_used_frequency = get_frequency_of_most_used_word(Lemma_list)
 
+    # Create a set of lemmas that will be analysed.
     lemmas = set(lemmas_for_analysis)
-
-    sentences = find_sentences_with_index_and_span(original_text)
 
     # Get the expected frequency of a lemma and compare it to the actual frequency
     # If the actual frequency is a lot higher than the expected frequency, the word may be overused
@@ -163,9 +161,8 @@ def analyze(original_text):
         overusedWordSummaryList, key=lambda x: x.multiplier, reverse=True)[:config.OUW_NUM_WORDS_TO_ANALYZE]
 
     for overusedWordSummary in overusedWordSummaryList:
-        #     # Find the synonyms
-        #     overusedWordSummary.find_synonyms_for_lemma()
-
+        # Find the synonyms
+        # overusedWordSummary.find_synonyms_for_lemma()
         Words = overusedWordSummary.words
         # Only leave clusters where the usage of a word is more than config.MAX_CLUSTER_SIZE
         # If a word is used less than MAX_CLUSTER_SIZE times, the cluster is empty
@@ -176,12 +173,12 @@ def analyze(original_text):
             sentences_in_clusters = find_sentences_in_clusters(
                 sentences, clusters)
 
-    #         results = format_text(original_text, sentences_in_clusters)
-    #         overusedWordSummary.add_cluster(results)
+            results = format_text(original_text, sentences_in_clusters)
+            overusedWordSummary.add_cluster(results)
 
-    # # Return a textSummary object
-    # textSummary = TextSummmary(user_word_count, overusedWordSummaryList)
-    # return textSummary
+    # Return a textSummary object
+    textSummary = TextSummmary(user_word_count, overusedWordSummaryList)
+    return textSummary
 
 
 def find_sentences_with_index_and_span(text):
@@ -204,24 +201,48 @@ def find_sentences_with_index_and_span(text):
     return dict(zip(keys, values))
 
 
-def get_words(words_layer):
-    """ Returns a list of all words in text form """
-    return words_layer.text
+def get_words_in_sentence(sentence_span, sentence):
+    """ Returns a list of all words in a sentence.
+        Words in this case are dictionaries that have attributes:
+            text (string) - text string of the word
+            pos (string) - part of speech of the word
+            lemma (string) - lemma of the word
+            start (int) - start index of the word in the whole text
+            end (int) - end index of the word in the whole text
 
-
-def get_index_lemma_pos(morph_analysis_layer):
-    """ Returns a list of tuplets (index, lemma, partofspeech).
+        In the case of the word "See", start: 0 and end: 3
         In the case of multiple analyses (for example many lemmas, many POS options),
         only choose the first for now.
     """
-    return [(i, analysis.lemma[0], analysis.partofspeech[0]) for i, analysis in enumerate(morph_analysis_layer)]
+
+    text = Text(sentence["text"])
+
+    word_summaries = []
+    text.tag_layer()
+    words = text.words
+    word_spans_in_sentence = words[["start", "end"]]
+    for i in range(len(words)):
+
+        # Find the indexes of words in the whole text
+        word_start_in_sentence = word_spans_in_sentence[i][0][0]
+        start = sentence_span[0] + word_start_in_sentence
+        end = start + len(words.text[i])
+
+        # Find the lemma and pos of the word
+        lemma = text.morph_analysis[i].lemma[0]
+        pos = text.morph_analysis[i].partofspeech[0]
+
+        word_summaries.append(
+            {"text": words[i].text, "start": start, "end": end, "lemma": lemma, "pos": pos})
+
+    return word_summaries
 
 
-def map_lemma_to_word(words, index_lemma_pos_list):
+def map_lemma_to_word(words):
     """ Maps all the words that are used to their respective lemmas.
         Parameters:
-            words (list) - list of words in text form
-            index_lemma_pos_list (list) - list of tuplets (index, lemma, pos)
+            words (list) - list of words that in the format of get_words_in_sentence() output. 
+            Contains all the words in the text.
         Returns:
             lemma_to_word (defaultdict) - WordSummary objects mapped to lemmas
         Return example:
@@ -231,16 +252,11 @@ def map_lemma_to_word(words, index_lemma_pos_list):
 
     lemma_to_word = defaultdict(set)
 
-    # Iterate over lists of lemmas
-    for index_lemma_pos in index_lemma_pos_list:
-        index = index_lemma_pos[0]
-        lemma = index_lemma_pos[1]
-        pos = index_lemma_pos[2]
-        word_text = words[index]
-
-        word_obj = WordSummary(word_text, pos, index)
-
-        lemma_to_word[lemma].add(word_obj)
+    # Iterate over all the words
+    for word in words:
+        word_obj = WordSummary(
+            word["text"], word["pos"], word["start"], word["end"])
+        lemma_to_word[word["lemma"]].add(word_obj)
 
     return lemma_to_word
 
