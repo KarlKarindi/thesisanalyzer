@@ -416,7 +416,6 @@ def format_text(original_text, sentences_in_clusters):
         if sentences_are_connected(cluster):
             text = original_text[start:end]
         else:
-            # TODO: Check if everything works nicely
             # Initialize a string, start appending sentences to it
             text = ""
             for i in range(len(cluster)):
