@@ -2,7 +2,7 @@
 
 # Options for analysis
 ANALYZE_OVERUSED_WORDS = True
-ANALYZE_SENTENCE_LENGTH = False
+ANALYZE_SENTENCE_LENGTH = True
 ANALYZE_TAGS = False
 
 

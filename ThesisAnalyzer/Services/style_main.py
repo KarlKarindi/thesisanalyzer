@@ -5,11 +5,13 @@ from ThesisAnalyzer.Services.Analysis.Style.tag_analyzer import TagSummary
 from ThesisAnalyzer.Models.Feedback import StyleFeedback
 from ThesisAnalyzer.Models.StyleSummary import StyleSummary
 from ThesisAnalyzer.Services import utils
+from ThesisAnalyzer.Services import profiler
 
 from flask import jsonify
 import jsonpickle
 
 
+@profiler.profile
 def analyze(request):
     """ The main function that starts all analyses related to style in the text """
     text = utils.json_to_text(request)
@@ -23,15 +25,20 @@ def analyze(request):
 
     styleSummary = StyleSummary()
 
-    # Overused words analysis
-    if config.ANALYZE_OVERUSED_WORDS:
-        textSummary = overused_word_analyzer.analyze(text)
-        styleSummary.textSummary = textSummary
+    # Since finding the sentences layer takes time, do it once and pass it as an argument for the analyzers
+    if config.ANALYZE_OVERUSED_WORDS or config.ANALYZE_SENTENCE_LENGTH:
+        sentences_layer = utils.get_sentences_layer(text)
 
-    # Clause analysis
-    if config.ANALYZE_SENTENCE_LENGTH:
-        sentencesLengthSummary = sentences_length_analyzer.analyze(text)
-        styleSummary.sentencesLengthSummary = sentencesLengthSummary
+        # Overused words analysis
+        if config.ANALYZE_OVERUSED_WORDS:
+            textSummary = overused_word_analyzer.analyze(text, sentences_layer)
+            styleSummary.textSummary = textSummary
+
+        # Clause analysis
+        if config.ANALYZE_SENTENCE_LENGTH:
+            sentencesLengthSummary = sentences_length_analyzer.analyze(
+                text, sentences_layer)
+            styleSummary.sentencesLengthSummary = sentencesLengthSummary
 
     # Tag analysis
     if config.ANALYZE_TAGS:

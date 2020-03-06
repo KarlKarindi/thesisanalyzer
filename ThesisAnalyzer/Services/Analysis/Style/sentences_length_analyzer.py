@@ -24,14 +24,12 @@ class SentencesLengthSummary():
         self.long_sentences = []
 
 
-def analyze(text):
+def analyze(text, sentences_layer):
     """ Analyzes all the sentences and brings out all sentences that might be too long.
         On deciding on whether a sentence is long or not, see function is_sentence_too_long()
     """
-
-    sentences = utils.get_sentences_layer(text)
     # Leave only the enclosing text
-    sentences = [Text(sent.enclosing_text) for sent in sentences]
+    sentences = [Text(sent.enclosing_text) for sent in sentences_layer]
 
     sentencesLengthSummary = SentencesLengthSummary()
 

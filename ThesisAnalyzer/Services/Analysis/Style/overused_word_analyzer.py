@@ -100,7 +100,7 @@ def remove_duplicate_synonyms_for_lemma(lemma, syn_list):
     return result
 
 
-def analyze(original_text):
+def analyze(original_text, sentences_layer):
     """ Analyzes repeating words using a method described in the Synonimity program
         Returns: TextSummary object
     """
@@ -109,7 +109,8 @@ def analyze(original_text):
     Lemma_list = Lemma.query.all()
 
     # Creates a dictionary
-    sentences = find_sentences_with_index_and_span(original_text)
+    sentences = find_sentences_with_index_and_span(
+        original_text, sentences_layer)
     words = []
     for span, sentence in sentences.items():
         words.extend(get_words_in_sentence(span, sentence))
@@ -181,17 +182,16 @@ def analyze(original_text):
     return textSummary
 
 
-def find_sentences_with_index_and_span(text):
+def find_sentences_with_index_and_span(text, sentences_layer):
     """ Returns: dictionary with tuplet of (start, end) as key and
         dictionary of sentence with index, text, start and end values
     """
 
     keys, values = [], []
 
-    sentences = utils.get_sentences_layer(text)
-    sentence_spans = sentences[["start", "end"]]
+    sentence_spans = sentences_layer[["start", "end"]]
 
-    for i, sentence in enumerate(sentences):
+    for i, sentence in enumerate(sentences_layer):
         start = sentence_spans[i][0]
         end = sentence_spans[i][1]
         values.append(
@@ -241,7 +241,7 @@ def get_words_in_sentence(sentence_span, sentence):
 def map_lemma_to_word(words):
     """ Maps all the words that are used to their respective lemmas.
         Parameters:
-            words (list) - list of words that in the format of get_words_in_sentence() output. 
+            words (list) - list of words that in the format of get_words_in_sentence() output.
             Contains all the words in the text.
         Returns:
             lemma_to_word (defaultdict) - WordSummary objects mapped to lemmas
@@ -382,7 +382,7 @@ def find_sentence_by_word(sentences, Word):
             sentences - dictionary of all sentences with key (start, end) and values (index, sentence)
             word - object of type WordSummary
     """
-    # TODO: Error handling if sentence isn't found.
+    # TODO: Error handling if sentence isn't found, though this shouldn't happen.
 
     for key in sentences.keys():
         if key[0] <= Word.start <= key[1]:
