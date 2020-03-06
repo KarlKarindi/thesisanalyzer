@@ -11,7 +11,6 @@ from flask import jsonify
 import jsonpickle
 
 
-@profiler.profile
 def analyze(request):
     """ The main function that starts all analyses related to style in the text """
     text = utils.json_to_text(request)
