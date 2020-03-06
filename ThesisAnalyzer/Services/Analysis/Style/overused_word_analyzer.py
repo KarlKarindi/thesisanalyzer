@@ -63,14 +63,15 @@ class OverusedWordSummary(object):
 
 class WordSummary(object):
 
-    def __init__(self, text, pos, start, end):
+    def __init__(self, text, pos, start, end, sentence_index):
         self.text = text
         self.pos = pos
         self.start = start
         self.end = end
+        self.sentence_index = sentence_index
 
     def __repr__(self):
-        return '<Word (text: {}, pos: {}, start: {}, end: {})>'.format(self.text, self.pos, self.start, self.end)
+        return '<Word (text: {}, pos: {}, start: {}, end: {}, sentence_index: {})>'.format(self.text, self.pos, self.start, self.end, self.sentence_index)
 
 
 class SentencesContainer(object):
@@ -112,8 +113,10 @@ def analyze(original_text, sentences_layer):
     sentences = find_sentences_with_index_and_span(
         original_text, sentences_layer)
     words = []
-    for span, sentence in sentences.items():
-        words.extend(get_words_in_sentence(span, sentence))
+
+    for sentence_index, (span, sentence) in enumerate(sentences.items()):
+        words.extend(get_words_in_sentence(span, sentence, sentence_index))
+        sentence_index += 1
 
     # Use the words list to map lemmas to the words the lemmas correspond to.
     lemma_to_word = map_lemma_to_word(words)
@@ -201,7 +204,7 @@ def find_sentences_with_index_and_span(text, sentences_layer):
     return dict(zip(keys, values))
 
 
-def get_words_in_sentence(sentence_span, sentence):
+def get_words_in_sentence(sentence_span, sentence, sentence_index):
     """ Returns a list of all words in a sentence.
         Words in this case are dictionaries that have attributes:
             text (string) - text string of the word
@@ -209,6 +212,7 @@ def get_words_in_sentence(sentence_span, sentence):
             lemma (string) - lemma of the word
             start (int) - start index of the word in the whole text
             end (int) - end index of the word in the whole text
+            sentence_index (int) - index of the sentence this word belongs to
 
         In the case of the word "See", start: 0 and end: 3
         In the case of multiple analyses (for example many lemmas, many POS options),
@@ -233,7 +237,8 @@ def get_words_in_sentence(sentence_span, sentence):
         pos = text.morph_analysis[i].partofspeech[0]
 
         word_summaries.append(
-            {"text": words[i].text, "start": start, "end": end, "lemma": lemma, "pos": pos})
+            {"text": words[i].text, "start": start, "end": end, "lemma": lemma,
+             "pos": pos, "sentence_index": sentence_index})
 
     return word_summaries
 
@@ -255,7 +260,7 @@ def map_lemma_to_word(words):
     # Iterate over all the words
     for word in words:
         word_obj = WordSummary(
-            word["text"], word["pos"], word["start"], word["end"])
+            word["text"], word["pos"], word["start"], word["end"], word["sentence_index"])
         lemma_to_word[word["lemma"]].add(word_obj)
 
     return lemma_to_word
@@ -379,14 +384,12 @@ def find_sentences_in_clusters(sentences, clusters):
 def find_sentence_by_word(sentences, Word):
     """ Finds the sentence that word (type WordSummary) belongs to.
         Parameters:
-            sentences - dictionary of all sentences with key (start, end) and values (index, sentence)
-            word - object of type WordSummary
+            sentences - dictionary of all sentences with key (start, end)
+            Word - object of type WordSummary
     """
-    # TODO: Error handling if sentence isn't found, though this shouldn't happen.
-
-    for key in sentences.keys():
-        if key[0] <= Word.start <= key[1]:
-            return sentences[key]
+    sentences_list = list(sentences)
+    key = sentences_list[Word.sentence_index]
+    return sentences[key]
 
 
 def format_text(original_text, sentences_in_clusters):
