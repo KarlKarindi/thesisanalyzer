@@ -16,14 +16,27 @@ import math
 class TextSummmary(object):
     """ Container class for OverusedWordSummary object """
 
-    def __init__(self, word_count, OverusedWords):
+    def __init__(self, word_count, OverusedWordsDTO):
         # word_count does not include stopwords
         self.word_count = word_count
-        self.OverusedWordSummary = OverusedWords
+        self.OverusedWordSummary = OverusedWordsDTO
 
 
-class OverusedWordSummary(object):
-    """ Container object for word usage analysis """
+class OverusedWordSummaryDAO(object):
+    """ DTO to be returned and shown to user.
+        Doesn't contain words list. """
+
+    def __init__(self, multiplier, lemma, lemma_synonyms, clusters):
+        self.multiplier = multiplier
+        self.lemma = lemma
+        self.lemma_synonyms = lemma_synonyms
+        self.clusters = clusters
+
+
+class OverusedWordSummaryDTO(object):
+    """ Container object for word usage analysis.
+        Contains word list.
+    """
 
     def find_synonyms_for_lemma(self):
         """ Finds synonyms for the lemma """
@@ -141,7 +154,7 @@ def analyze(original_text, sentences_layer):
 
     # Get the expected frequency of a lemma and compare it to the actual frequency
     # If the actual frequency is a lot higher than the expected frequency, the word may be overused
-    overusedWordSummaryList = []
+    overusedWordSummaryDTOList = []
 
     for lemma in lemmas:
 
@@ -155,19 +168,22 @@ def analyze(original_text, sentences_layer):
         words_in_text = lemma_to_word[lemma]
 
         if multiplier > config.OVERUSED_MULTIPLIER:
-            overusedWordSummary = OverusedWordSummary(
+            dto = OverusedWordSummaryDTO(
                 lemma, words_in_text, multiplier)
-            overusedWordSummaryList.append(overusedWordSummary)
+            overusedWordSummaryDTOList.append(dto)
 
     # Sort the results list by multiplier (descending order)
     # Only leave config.OUW_NUM_WORDS_TO_ANALYZE words for analysis
-    overusedWordSummaryList = sorted(
-        overusedWordSummaryList, key=lambda x: x.multiplier, reverse=True)[:config.OUW_NUM_WORDS_TO_ANALYZE]
+    overusedWordSummaryDTOList = sorted(
+        overusedWordSummaryDTOList, key=lambda x: x.multiplier, reverse=True)[:config.OUW_NUM_WORDS_TO_ANALYZE]
 
-    for overusedWordSummary in overusedWordSummaryList:
+    # Create a list of DAO to return
+    overusedWordSummaryDAOList = []
+
+    for dto in overusedWordSummaryDTOList:
         # Find the synonyms
         # overusedWordSummary.find_synonyms_for_lemma()
-        Words = overusedWordSummary.words
+        Words = dto.words
         # Only leave clusters where the usage of a word is more than config.MAX_CLUSTER_SIZE
         # If a word is used less than MAX_CLUSTER_SIZE times, the cluster is empty
         clusters = find_large_clusters(
@@ -178,10 +194,17 @@ def analyze(original_text, sentences_layer):
                 sentences, clusters)
 
             results = format_text(original_text, sentences_in_clusters)
-            overusedWordSummary.add_cluster(results)
+            dto.add_cluster(results)
+
+        # Append DTO to DAO list
+        overusedWordSummaryDAOList.append(OverusedWordSummaryDAO(
+            dto.multiplier,
+            dto.lemma,
+            dto.lemma_synonyms,
+            dto.clusters))
 
     # Return a textSummary object
-    textSummary = TextSummmary(user_word_count, overusedWordSummaryList)
+    textSummary = TextSummmary(user_word_count, overusedWordSummaryDAOList)
     return textSummary
 
 

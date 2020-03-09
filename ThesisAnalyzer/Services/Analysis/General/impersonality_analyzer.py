@@ -19,12 +19,12 @@ def analyze(text):
         Returns: a dictionary of sentences with words that are personal.
     """
 
-    # Dictionary to store sentences and the personal verbs (pv) they have
-    sentences_with_pv = {}
     sentences = utils.get_sentences_layer(text)
-    # Leave only the enclosing text.
 
     quote_analyzer = QuoteAnalyzer()
+
+    # Dictionary to store sentences and the personal verbs (pv) they have
+    sentences_with_pv = {}
 
     # Then analyze singular sentences
     for sentence in sentences:
@@ -61,10 +61,10 @@ def find_pv_in_sentence(sentence, quote_analyzer):
 
         if not in_quotes:
             # Since there may be multiple roots/endings, we check through all of them.
-            if ((constants.VERB in analysis.partofspeech) and
+            if (((constants.VERB in analysis.partofspeech) and
                     "sin" in analysis.ending or
                     "in" in analysis.ending or
-                    "n" in analysis.ending or
+                    "n" in analysis.ending) or
                     "mina" in analysis.root):
 
                 if word not in personal_verbs:
