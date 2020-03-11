@@ -64,9 +64,11 @@ def find_pv_in_sentence(sentence, quote_analyzer):
             if (((constants.VERB in analysis.partofspeech) and
                     "sin" in analysis.ending or
                     "in" in analysis.ending or
-                    "n" in analysis.ending) or
+                    "n" in analysis.ending or
+                    "sime" in analysis.ending or
+                    "ime" in analysis.ending or
+                    "me" in analysis.ending) or
                     "mina" in analysis.root):
-
                 if word not in personal_verbs:
                     personal_verbs.append(word)
 
