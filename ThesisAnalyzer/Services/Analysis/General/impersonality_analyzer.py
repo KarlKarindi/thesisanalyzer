@@ -1,5 +1,5 @@
 from ThesisAnalyzer.Services import utils
-from ThesisAnalyzer.Services.utils import QuoteAnalyzer
+from ThesisAnalyzer.Services.Analysis.TextAnalyzers.analyzers import QuoteAnalyzer
 from ThesisAnalyzer.Services.Constants import constants
 from pprint import pprint
 

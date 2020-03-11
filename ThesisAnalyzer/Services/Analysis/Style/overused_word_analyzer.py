@@ -35,7 +35,7 @@ class OverusedWordSummaryDAO(object):
 
 class OverusedWordSummaryDTO(object):
     """ Container object for word usage analysis.
-        Contains word list.
+        Contains word list, not to be returned in response.
     """
 
     def find_synonyms_for_lemma(self):
@@ -471,12 +471,3 @@ def sentences_are_connected(sentences_in_cluster):
         prev = current
 
     return connected
-
-
-def pretty_print_ouw_summary(overusedWordSummary):
-    print("Multiplier:", overusedWordSummary.multiplier)
-    print("Lemma:", overusedWordSummary.lemma)
-    print("Lemma synonym:", overusedWordSummary.lemma_synonyms)
-    print("Word:", overusedWordSummary.words)
-    print("Word synonyms:", overusedWordSummary.words_synonyms)
-    print()

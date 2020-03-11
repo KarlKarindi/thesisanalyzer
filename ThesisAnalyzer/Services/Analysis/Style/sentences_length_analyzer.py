@@ -1,7 +1,6 @@
-# from ThesisAnalyzer import vabamorf
 from ThesisAnalyzer.Services.Analysis.Style.Config import config
 from ThesisAnalyzer.Models.Feedback import StyleFeedback
-from ThesisAnalyzer.Services.utils import QuoteAnalyzer
+from ThesisAnalyzer.Services.Analysis.TextAnalyzers.analyzers import QuoteAnalyzer, CitationAnalyzer
 from ThesisAnalyzer.Services import utils
 
 from estnltk import Text, Layer
@@ -9,7 +8,7 @@ from estnltk.taggers import ClauseSegmenter, VerbChainDetector
 from collections import defaultdict
 from pprint import pprint
 
-import statistics
+import re
 
 
 class SentencesLengthSummary():
@@ -42,6 +41,8 @@ def analyze(text, sentences_layer):
     # Initialize a QuoteAnalyzer instance
     quote_analyzer = QuoteAnalyzer()
 
+    citation_analyzer = CitationAnalyzer()
+
     # Iterate through the sentences.
     for sentence in sentences:
 
@@ -54,21 +55,25 @@ def analyze(text, sentences_layer):
 
         # Find clusters of words that are not in quotes
         clusters = dict(
-            enumerate(create_clusters_of_viable_words(word_indexes_that_are_not_in_quotes)))
+            enumerate(create_clusters_of_words_not_in_quotes(word_indexes_that_are_not_in_quotes)))
 
-        # Create a clean sentence that doesn't have any quotes
-        clean_sentence = create_clean_sentence(sentence, clusters)
+        # Create a sentence text that doesn't have any quotes
+        sentence_text_without_quotes = remove_quoted_parts_from_sentence(
+            sentence, clusters)
 
-        # If clean_sentence is empty, it's completely in quotes and shouldn't be analysed further.
-        if len(clean_sentence.text) > 0:
+        cleaned_sentence = citation_analyzer.get_sentence_without_citations(
+            sentence_text_without_quotes)
+
+        # If cleaned_sentence is empty, it's completely in quotes and shouldn't be analysed further.
+        if len(sentence_text_without_quotes) > 0:
             clauses = find_clauses_in_sentence(
-                clean_sentence, clause_segmenter)
+                cleaned_sentence, clause_segmenter)
 
             clause_and_verb_chain_index = create_clause_and_verb_chain_index(
                 clauses, vc_detector)
 
             sentence_is_long = is_sentence_too_long(
-                clause_and_verb_chain_index, sentence)
+                clause_and_verb_chain_index)
 
             if sentence_is_long:
                 sentencesLengthSummary.add_sent_to_long_sentences(
@@ -159,7 +164,7 @@ def find_verb_chain_in_clause(clause_text_list, vc_detector):
     return " ".join(_verb_chains.text)
 
 
-def create_clusters_of_viable_words(word_indexes_that_are_not_in_quotes):
+def create_clusters_of_words_not_in_quotes(word_indexes_that_are_not_in_quotes):
     """ Generator function that creates clusters of viable words.
         Viable words are words that aren't in quotes.
         Searches for words that aren't further away from each-other than 1 word
@@ -180,13 +185,14 @@ def create_clusters_of_viable_words(word_indexes_that_are_not_in_quotes):
         yield cluster
 
 
-def create_clean_sentence(sentence, clusters):
+def remove_quoted_parts_from_sentence(sentence, clusters):
     """ Creates a clean sentence that doesn't contain any words in quotes.
         Parameters:
+            sentence (Text) - Text object
             clusters (dict) - clusters of word spans where clusters are words next to each other
         Returns:
-            clean_sentence (Text) - cleaned sentence without any quoted words.
-            If a sentence is completely surrounded by quotes, clean_sentence.text is an empty string.
+            clean_sentence (string) - cleaned sentence text without any quoted words.
+            If a sentence is completely surrounded by quotes, clean_sentence is an empty string.
     """
     # Create a clean_sentence variable to later add to
     clean_sentence = ""
@@ -202,16 +208,16 @@ def create_clean_sentence(sentence, clusters):
         # Add to the clean_sentence. Range is until n + 1, as n must be included
         clean_sentence += " " + sentence.words[start:end + 1].enclosing_text
 
-    return Text(clean_sentence.strip()).tag_layer()
+    return clean_sentence.strip()
 
 
-def is_sentence_too_long(clause_to_verb_chain_index, sentence):
+def is_sentence_too_long(clause_to_verb_chain_index):
     """ Analyzes the clauses in a sentence.
         Looks at clause word length, sentence word length, clause amount,
         returns feedback accordingly.
 
         Parameters:
-            clauses (dict) - dictionary with clauses and verb chains in corresponding clauses
+            clause_to_verb_chain_index (dict) - dictionary with clauses and verb chains in corresponding clauses
         Returns:
             boolean whether sentence is too long or not
     """
