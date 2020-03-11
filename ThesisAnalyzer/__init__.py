@@ -1,14 +1,9 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from estnltk import Vabamorf
 
 
 # Globally accessible libraries
-
 db = SQLAlchemy()
-
-# Initialize vabamorf singleton
-vabamorf = Vabamorf.instance()
 
 
 def create_app():

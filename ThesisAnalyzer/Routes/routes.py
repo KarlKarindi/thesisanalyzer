@@ -5,7 +5,7 @@ from ThesisAnalyzer.Services import general_main
 mod = Blueprint('route', __name__)
 
 
-@mod.route('/')
+@mod.route('/', methods=["POST"])
 def index():
     return "<h1>Karl Erik Karindi lõputöö analüsaator<h1>"
 

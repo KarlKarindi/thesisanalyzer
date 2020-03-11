@@ -1,4 +1,4 @@
-from ThesisAnalyzer import vabamorf
+#from ThesisAnalyzer import vabamorf
 from ThesisAnalyzer.Services.Constants import constants
 from estnltk import Text
 from pprint import pprint
