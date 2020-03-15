@@ -2,6 +2,8 @@ import cProfile
 import pstats
 import io
 
+# Profiler used for performance testing.
+
 
 def profile(fnc):
     """A decorator that uses cProfile to profile a function"""
