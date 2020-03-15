@@ -204,7 +204,7 @@ def analyze(original_text, sentences_layer):
             dto.clusters))
 
     # Return a textSummary object
-    textSummary = TextSummmary(user_word_count, overusedWordSummaryDAOList)
+    textSummary = TextSummmary(user_word_count, overusedWordSummaryDTOList)
     return textSummary
 
 
