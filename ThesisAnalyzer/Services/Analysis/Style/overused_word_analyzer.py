@@ -192,7 +192,7 @@ def analyze(original_text, sentences_layer):
                     word.cluster_index = i
 
                     cluster_start = word.position[0] - \
-                        word.sentence_position[0]
+                        cluster.sentence_position[0]
                     cluster_end = (
                         word.position[1] - word.position[0]) + cluster_start
 
