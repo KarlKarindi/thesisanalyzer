@@ -50,7 +50,8 @@ class OverusedWordSummary(object):
 
 class WordSummary(object):
 
-    def __init__(self, text, part_of_speech, position, sentence_index, sentence_position, id=None, cluster_index=None, position_in_cluster=None):
+    def __init__(self, text, part_of_speech, position, sentence_index, sentence_position,
+                 id=None, cluster_index=None, position_in_cluster=None):
         # Not initialized on start. Corresponds to it's index in the OverusedWordSummary words list.
         self.id = id
         self.text = text
@@ -63,7 +64,9 @@ class WordSummary(object):
         self.position_in_cluster = position_in_cluster
 
     def __repr__(self):
-        return '<Word (id, {}, text: {}, part_of_speech: {}, position: [{}, {}], sentence_index: {}, sentence_position: [{}, {}])>'.format(self.id, self.text, self.part_of_speech, self.position[0], self.position[1], self.sentence_index, self.sentence_position[0], self.sentence_position[1])
+        return '<Word (id, {}, text: {}, part_of_speech: {}, position: [{}, {}], sentence_index: {}, sentence_position: \
+             [{}, {}])>'.format(self.id, self.text, self.part_of_speech, self.position[0], self.position[1],
+                                self.sentence_index, self.sentence_position[0], self.sentence_position[1])
 
 
 class ClusterContainer(object):
@@ -75,7 +78,8 @@ class ClusterContainer(object):
         self.word_indexes = []
 
     def __repr__(self):
-        return '<ClusterContainer (sentence_position: [{}, {}], text: {})'.format(self.sentence_position[0], self.sentence_position[1], self.text)
+        return '<ClusterContainer (sentence_position: [{}, {}], text: {})'.format(self.sentence_position[0],
+                                                                                  self.sentence_position[1], self.text)
 
 
 def extract_word_from_Synset_object(synset):
@@ -185,22 +189,40 @@ def analyze(original_text, sentences_layer):
         # Add cluster information to words
         for i, cluster in enumerate(ows.clusters):
 
+            # Tag the cluster text to get the words and their positions.
+            text = Text(cluster.text).tag_layer()
+            # Creates an AttributeList. Contains lists of [start, end, text]
+            cluster_word_position = text.words[["start", "end", "text"]]
+
+            # Set the start index. Used when searching for the word position in a cluster
+            start_index = 0
+
             # Iterate through each word
             for word in ows.words:
 
                 # Check if a word belongs to a cluster or not
-                if word.position[0] >= cluster.sentence_position[0] and word.position[1] <= cluster.sentence_position[1]:
-                    word.cluster_index = i
+                if cluster.sentence_position[0] <= word.position[0] and word.position[1] <= cluster.sentence_position[1]:
 
-                    cluster_start = word.position[0] - \
-                        cluster.sentence_position[0]
-                    cluster_end = (
-                        word.position[1] - word.position[0]) + cluster_start
+                    # Add word id to cluster indexes and add cluster index to word
+                    word.cluster_index = i
+                    ows.clusters[i].word_indexes.append(word.id)
+
+                    # Iterate through
+                    for j in range(start_index, len(cluster_word_position)):
+                        # Necessary to take first element, as it's a list inside a list.
+                        # curr_word in form [start, end, text]
+                        curr_word = cluster_word_position[j][0]
+
+                        if curr_word[2] == word.text:
+                            # Word has been found from cluster. Update words cluster position.
+                            cluster_start = curr_word[0]
+                            cluster_end = curr_word[1]
+                            # Set start index to j + 1, so our next iteration continues after j
+                            start_index = j + 1
+                            break
 
                     # Add info about the cluster to a word
                     word.position_in_cluster = [cluster_start, cluster_end]
-
-                    ows.clusters[i].word_indexes.append(word.id)
 
     # Return a textSummary object
     textSummary = TextSummmary(user_word_count, overusedWordSummaryList)
