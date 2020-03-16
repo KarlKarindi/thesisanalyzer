@@ -50,7 +50,7 @@ class OverusedWordSummary(object):
 
 class WordSummary(object):
 
-    def __init__(self, text, part_of_speech, position, sentence_index, sentence_position, id=None, cluster_index=None, cluster_position=None):
+    def __init__(self, text, part_of_speech, position, sentence_index, sentence_position, id=None, cluster_index=None, position_in_cluster=None):
         # Not initialized on start. Corresponds to it's index in the OverusedWordSummary words list.
         self.id = id
         self.text = text
@@ -59,7 +59,8 @@ class WordSummary(object):
         self.sentence_index = sentence_index
         self.sentence_position = sentence_position
         self.cluster_index = cluster_index  # Not initalized on start.
-        self.cluster_position = cluster_position  # Not initalized on start.
+        # Not initalized on start.
+        self.position_in_cluster = position_in_cluster
 
     def __repr__(self):
         return '<Word (id, {}, text: {}, part_of_speech: {}, position: [{}, {}], sentence_index: {}, sentence_position: [{}, {}])>'.format(self.id, self.text, self.part_of_speech, self.position[0], self.position[1], self.sentence_index, self.sentence_position[0], self.sentence_position[1])
@@ -197,7 +198,7 @@ def analyze(original_text, sentences_layer):
                         word.position[1] - word.position[0]) + cluster_start
 
                     # Add info about the cluster to a word
-                    word.cluster_position = [cluster_start, cluster_end]
+                    word.position_in_cluster = [cluster_start, cluster_end]
 
                     ows.clusters[i].word_indexes.append(word.id)
 
