@@ -25,28 +25,15 @@ class TextSummmary(object):
 class OverusedWordSummary(object):
     """ Container object for word usage analysis. """
 
-    def find_synonyms_for_lemma(self):
-        """ Finds synonyms for the lemma """
-
-        # TODO: FIX FOR estnltk 1.6
-        # Create a list of synsets corresponding to the lemma
-        # Remove duplicates by temporarily making the list into a set
-        # l_syns = wn.synsets(self.lemma)
-        # l_syns_readable = l_syns
-        # l_syns[:] = list(
-        #    set([extract_word_from_Synset_object(lemma_syn) for lemma_syn in l_syns]))
-
-        # l_syns_final = remove_duplicate_synonyms_for_lemma(
-        #    self.lemma, l_syns_readable)
-
-        # self.lemma_synonyms = l_syns_final
-
+    # Adds another cluster to the summary's list of clusters.
     def add_cluster(self, cluster):
         self.clusters.extend(cluster)
 
-    # On initialization, don't find the synonyms.
-    # Finding synonyms gets called out only on the top 20 most overused words
     def __init__(self, lemma, words_in_text, multiplier):
+        """ On initialization, don't find the synonyms.
+            Finding synonyms gets called out only on the top 20 most overused words
+        """
+
         self.multiplier = multiplier
         self.lemma = lemma
         # Create a list from the set of words_in_text, then sort it by start index.
@@ -63,22 +50,29 @@ class OverusedWordSummary(object):
 
 class WordSummary(object):
 
-    def __init__(self, text, part_of_speech, start, end, sentence_index, sentence_start, sentence_end):
+    def __init__(self, text, part_of_speech, position, sentence_index, sentence_position, cluster_index=None, cluster_position=None):
         self.text = text
         self.part_of_speech = part_of_speech
-        self.position = [start, end]
+        self.position = position
         self.sentence_index = sentence_index
-        self.sentence_position = [sentence_start, sentence_end]
+        self.sentence_position = sentence_position
+        self.cluster_index = cluster_index
+        self.cluster_position = cluster_position
 
     def __repr__(self):
         return '<Word (text: {}, part_of_speech: {}, position: [{}, {}], sentence_index: {}, sentence_position: [{}, {}])>'.format(self.text, self.part_of_speech, self.position[0], self.position[1], self.sentence_index, self.sentence_position[0], self.sentence_position[1])
 
 
-class SentencesContainer(object):
+class SentenceContainer(object):
+    """ Also used for containing clusters """
 
     def __init__(self, text, start, end):
         self.text = text
         self.sentence_position = [start, end]
+        self.word_positions = []
+
+    def __repr__(self):
+        return '<SentenceContainer (sentence_position: [{}, {}], text: {})'.format(self.sentence_position[0], self.sentence_position[1], self.text)
 
 
 def extract_word_from_Synset_object(synset):
@@ -179,6 +173,27 @@ def analyze(original_text, sentences_layer):
             results = format_text(original_text, sentences_in_clusters)
             ows.add_cluster(results)
 
+        # Add cluster information to words
+        for i, cluster in enumerate(ows.clusters):
+
+            # Iterate through each word
+            for word in ows.words:
+
+                # Check if a word belongs to a cluster or not
+                if word.position[0] >= cluster.sentence_position[0] and word.position[1] <= cluster.sentence_position[1]:
+                    word.cluster_index = i
+
+                    cluster_start = word.position[0] - \
+                        word.sentence_position[0]
+                    cluster_end = (
+                        word.position[1] - word.position[0]) + cluster_start
+
+                    # Add info about the cluster to a word
+                    word.cluster_position = [cluster_start, cluster_end]
+
+                    ows.clusters[i].word_positions.append(
+                        word.cluster_position)
+
     # Return a textSummary object
     textSummary = TextSummmary(user_word_count, overusedWordSummaryList)
     return textSummary
@@ -263,7 +278,7 @@ def map_lemma_to_word(words):
     # Iterate over all the words
     for word in words:
         word_obj = WordSummary(
-            word["text"], word["pos"], word["start"], word["end"], word["sentence_index"], word["sentence_start"], word["sentence_end"])
+            word["text"], word["pos"], [word["start"], word["end"]], word["sentence_index"], [word["sentence_start"], word["sentence_end"]])
         lemma_to_word[word["lemma"]].add(word_obj)
 
     return lemma_to_word
@@ -365,12 +380,14 @@ def find_large_clusters(clusters):
 
 def find_sentences_in_clusters(sentences, clusters):
     """ Finds all the sentences according to the clusters.
-        Parameters: sentences - dict of all sentences with key (start, end) and values (index, sentence)
+        Parameters:
+            sentences - dict of all sentences with key (start, end) and values (index, sentence)
+            clusters (list) - list of lists. Each list is a cluster containing Words.
         Returns: list of values (index, sentence)
     """
 
+    results = []
     # Iterates through all the words in a cluster
-    result = []
     for Word_list in clusters:
 
         sentences_in_cluster = []
@@ -379,9 +396,9 @@ def find_sentences_in_clusters(sentences, clusters):
             sent = find_sentence_by_word(sentences, Word)
             if sent not in sentences_in_cluster:
                 sentences_in_cluster.append(sent)
-        result.append(sentences_in_cluster)
+        results.append(sentences_in_cluster)
 
-    return result
+    return results
 
 
 def find_sentence_by_word(sentences, Word):
@@ -396,7 +413,7 @@ def find_sentence_by_word(sentences, Word):
 
 
 def format_text(original_text, sentences_in_clusters):
-    """ Formatting text for the SentencesContainer class.
+    """ Formatting text for the SentenceContainer class.
         First, checks if all the sentences in a cluster are continuous.
         If the sentences are continuous, add a slice of the original text to the output.
         If the sentences aren't continuous, replace missing sentences with [...]
@@ -405,7 +422,7 @@ def format_text(original_text, sentences_in_clusters):
             original_text (string) - the original thesis text as one string.
             sentences_in_clusters - for an overused word: a list of lists where
                                     each embedded list is a cluster of sentences.
-        Returns: a list of SentencesContainer objects.
+        Returns: a list of SentenceContainer objects.
     """
 
     results = []
@@ -430,7 +447,7 @@ def format_text(original_text, sentences_in_clusters):
             # Remove whitespace and unnecessary symbols from the end of a text
             text = text.strip().strip("[...] ")
 
-        result = SentencesContainer(text, start, end)
+        result = SentenceContainer(text, start, end)
         results.append(result)
 
     return results
