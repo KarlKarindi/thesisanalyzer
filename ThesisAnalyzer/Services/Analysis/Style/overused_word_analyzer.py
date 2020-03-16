@@ -16,10 +16,10 @@ import math
 class TextSummmary(object):
     """ Container class for OverusedWordSummary object """
 
-    def __init__(self, word_count, OverusedWordsSummary):
+    def __init__(self, word_count, OverusedWordSummary):
         # word_count does not include stopwords
         self.word_count = word_count
-        self.overused_word_summary = OverusedWordsSummary
+        self.overused_word_summary = OverusedWordSummary
 
 
 class OverusedWordSummary(object):
@@ -65,8 +65,8 @@ class WordSummary(object):
         return '<Word (id, {}, text: {}, part_of_speech: {}, position: [{}, {}], sentence_index: {}, sentence_position: [{}, {}])>'.format(self.id, self.text, self.part_of_speech, self.position[0], self.position[1], self.sentence_index, self.sentence_position[0], self.sentence_position[1])
 
 
-class SentenceContainer(object):
-    """ Also used for containing clusters """
+class ClusterContainer(object):
+    """ Used for containing cluster information """
 
     def __init__(self, text, start, end):
         self.text = text
@@ -74,7 +74,7 @@ class SentenceContainer(object):
         self.word_indexes = []
 
     def __repr__(self):
-        return '<SentenceContainer (sentence_position: [{}, {}], text: {})'.format(self.sentence_position[0], self.sentence_position[1], self.text)
+        return '<ClusterContainer (sentence_position: [{}, {}], text: {})'.format(self.sentence_position[0], self.sentence_position[1], self.text)
 
 
 def extract_word_from_Synset_object(synset):
@@ -420,7 +420,7 @@ def find_sentence_by_word(sentences, Word):
 
 
 def format_text(original_text, sentences_in_clusters):
-    """ Formatting text for the SentenceContainer class.
+    """ Formatting text for the ClusterContainer class.
         First, checks if all the sentences in a cluster are continuous.
         If the sentences are continuous, add a slice of the original text to the output.
         If the sentences aren't continuous, replace missing sentences with [...]
@@ -429,7 +429,7 @@ def format_text(original_text, sentences_in_clusters):
             original_text (string) - the original thesis text as one string.
             sentences_in_clusters - for an overused word: a list of lists where
                                     each embedded list is a cluster of sentences.
-        Returns: a list of SentenceContainer objects.
+        Returns: a list of ClusterContainer objects.
     """
 
     results = []
@@ -454,7 +454,7 @@ def format_text(original_text, sentences_in_clusters):
             # Remove whitespace and unnecessary symbols from the end of a text
             text = text.strip().strip("[...] ")
 
-        result = SentenceContainer(text, start, end)
+        result = ClusterContainer(text, start, end)
         results.append(result)
 
     return results
