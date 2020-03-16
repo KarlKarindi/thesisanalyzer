@@ -50,17 +50,19 @@ class OverusedWordSummary(object):
 
 class WordSummary(object):
 
-    def __init__(self, text, part_of_speech, position, sentence_index, sentence_position, cluster_index=None, cluster_position=None):
+    def __init__(self, text, part_of_speech, position, sentence_index, sentence_position, id=None, cluster_index=None, cluster_position=None):
+        # Not initialized on start. Corresponds to it's index in the OverusedWordSummary words list.
+        self.id = id
         self.text = text
         self.part_of_speech = part_of_speech
         self.position = position
         self.sentence_index = sentence_index
         self.sentence_position = sentence_position
-        self.cluster_index = cluster_index
-        self.cluster_position = cluster_position
+        self.cluster_index = cluster_index  # Not initalized on start.
+        self.cluster_position = cluster_position  # Not initalized on start.
 
     def __repr__(self):
-        return '<Word (text: {}, part_of_speech: {}, position: [{}, {}], sentence_index: {}, sentence_position: [{}, {}])>'.format(self.text, self.part_of_speech, self.position[0], self.position[1], self.sentence_index, self.sentence_position[0], self.sentence_position[1])
+        return '<Word (id, {}, text: {}, part_of_speech: {}, position: [{}, {}], sentence_index: {}, sentence_position: [{}, {}])>'.format(self.id, self.text, self.part_of_speech, self.position[0], self.position[1], self.sentence_index, self.sentence_position[0], self.sentence_position[1])
 
 
 class SentenceContainer(object):
@@ -69,7 +71,7 @@ class SentenceContainer(object):
     def __init__(self, text, start, end):
         self.text = text
         self.sentence_position = [start, end]
-        self.word_positions = []
+        self.word_indexes = []
 
     def __repr__(self):
         return '<SentenceContainer (sentence_position: [{}, {}], text: {})'.format(self.sentence_position[0], self.sentence_position[1], self.text)
@@ -160,7 +162,13 @@ def analyze(original_text, sentences_layer):
     for ows in overusedWordSummaryList:
         # Find the synonyms
         # overusedWordSummary.find_synonyms_for_lemma()
+
+        # Iterate over all the words, assign an id to each word.
+        # The id of a word corresponds to it's index in the words list.
         Words = ows.words
+        for i, Word in enumerate(Words):
+            Word.id = i
+
         # Only leave clusters where the usage of a word is more than config.MAX_CLUSTER_SIZE
         # If a word is used less than MAX_CLUSTER_SIZE times, the cluster is empty
         clusters = find_large_clusters(
@@ -191,8 +199,7 @@ def analyze(original_text, sentences_layer):
                     # Add info about the cluster to a word
                     word.cluster_position = [cluster_start, cluster_end]
 
-                    ows.clusters[i].word_positions.append(
-                        word.cluster_position)
+                    ows.clusters[i].word_indexes.append(word.id)
 
     # Return a textSummary object
     textSummary = TextSummmary(user_word_count, overusedWordSummaryList)
@@ -276,7 +283,7 @@ def map_lemma_to_word(words):
     lemma_to_word = defaultdict(set)
 
     # Iterate over all the words
-    for word in words:
+    for i, word in enumerate(words):
         word_obj = WordSummary(
             word["text"], word["pos"], [word["start"], word["end"]], word["sentence_index"], [word["sentence_start"], word["sentence_end"]])
         lemma_to_word[word["lemma"]].add(word_obj)
