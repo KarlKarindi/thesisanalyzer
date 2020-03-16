@@ -76,15 +76,17 @@ class OverusedWordSummaryDTO(object):
 
 class WordSummary(object):
 
-    def __init__(self, text, pos, start, end, sentence_index):
+    def __init__(self, text, pos, start, end, sentence_index, sentence_start, sentence_end):
         self.text = text
         self.pos = pos
         self.start = start
         self.end = end
         self.sentence_index = sentence_index
+        self.sentence_start = sentence_start
+        self.sentnece_end = sentence_end
 
     def __repr__(self):
-        return '<Word (text: {}, pos: {}, start: {}, end: {}, sentence_index: {})>'.format(self.text, self.pos, self.start, self.end, self.sentence_index)
+        return '<Word (text: {}, pos: {}, start: {}, end: {}, sentence_index: {}, sentence_start: {}, sentence_end: {})>'.format(self.text, self.pos, self.start, self.end, self.sentence_index, self.sentence_start, self.sentence_end)
 
 
 class SentencesContainer(object):
@@ -255,13 +257,17 @@ def get_words_in_sentence(sentence_span, sentence, sentence_index):
         start = sentence_span[0] + word_start_in_sentence
         end = start + len(words.text[i])
 
+	# Find the sentence start and end indices
+        sentence_start = sentence_span[0]
+        sentence_end = sentence_span[1]
+
         # Find the lemma and pos of the word
         lemma = text.morph_analysis[i].lemma[0]
         pos = text.morph_analysis[i].partofspeech[0]
 
         word_summaries.append(
             {"text": words[i].text, "start": start, "end": end, "lemma": lemma,
-             "pos": pos, "sentence_index": sentence_index})
+             "pos": pos, "sentence_index": sentence_index, "sentence_start": sentence_start, "sentence_end": sentence_end})
 
     return word_summaries
 
@@ -283,7 +289,7 @@ def map_lemma_to_word(words):
     # Iterate over all the words
     for word in words:
         word_obj = WordSummary(
-            word["text"], word["pos"], word["start"], word["end"], word["sentence_index"])
+            word["text"], word["pos"], word["start"], word["end"], word["sentence_index"], word["sentence_start"], word["sentence_end"])
         lemma_to_word[word["lemma"]].add(word_obj)
 
     return lemma_to_word
