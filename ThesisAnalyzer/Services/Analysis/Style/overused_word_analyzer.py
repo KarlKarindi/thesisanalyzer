@@ -16,27 +16,14 @@ import math
 class TextSummmary(object):
     """ Container class for OverusedWordSummary object """
 
-    def __init__(self, word_count, OverusedWordsDTO):
+    def __init__(self, word_count, OverusedWordsSummary):
         # word_count does not include stopwords
         self.word_count = word_count
-        self.OverusedWordSummary = OverusedWordsDTO
+        self.overused_word_summary = OverusedWordsSummary
 
 
-class OverusedWordSummaryDAO(object):
-    """ DTO to be returned and shown to user.
-        Doesn't contain words list. """
-
-    def __init__(self, multiplier, lemma, lemma_synonyms, clusters):
-        self.multiplier = multiplier
-        self.lemma = lemma
-        self.lemma_synonyms = lemma_synonyms
-        self.clusters = clusters
-
-
-class OverusedWordSummaryDTO(object):
-    """ Container object for word usage analysis.
-        Contains word list, not to be returned in response.
-    """
+class OverusedWordSummary(object):
+    """ Container object for word usage analysis. """
 
     def find_synonyms_for_lemma(self):
         """ Finds synonyms for the lemma """
@@ -55,7 +42,7 @@ class OverusedWordSummaryDTO(object):
         # self.lemma_synonyms = l_syns_final
 
     def add_cluster(self, cluster):
-        self.clusters.append(cluster)
+        self.clusters.extend(cluster)
 
     # On initialization, don't find the synonyms.
     # Finding synonyms gets called out only on the top 20 most overused words
@@ -64,7 +51,7 @@ class OverusedWordSummaryDTO(object):
         self.lemma = lemma
         # Create a list from the set of words_in_text, then sort it by start index.
         words = [key for key in words_in_text]
-        self.words = sorted(words, key=lambda x: x.start, reverse=False)
+        self.words = sorted(words, key=lambda x: x.position[0], reverse=False)
         self.times_used = len(self.words)
         self.words_synonyms = []
         self.lemma_synonyms = []
@@ -76,25 +63,22 @@ class OverusedWordSummaryDTO(object):
 
 class WordSummary(object):
 
-    def __init__(self, text, pos, start, end, sentence_index, sentence_start, sentence_end):
+    def __init__(self, text, part_of_speech, start, end, sentence_index, sentence_start, sentence_end):
         self.text = text
-        self.pos = pos
-        self.start = start
-        self.end = end
+        self.part_of_speech = part_of_speech
+        self.position = [start, end]
         self.sentence_index = sentence_index
-        self.sentence_start = sentence_start
-        self.sentence_end = sentence_end
+        self.sentence_position = [sentence_start, sentence_end]
 
     def __repr__(self):
-        return '<Word (text: {}, pos: {}, start: {}, end: {}, sentence_index: {}, sentence_start: {}, sentence_end: {})>'.format(self.text, self.pos, self.start, self.end, self.sentence_index, self.sentence_start, self.sentence_end)
+        return '<Word (text: {}, part_of_speech: {}, position: [{}, {}], sentence_index: {}, sentence_position: [{}, {}])>'.format(self.text, self.part_of_speech, self.position[0], self.position[1], self.sentence_index, self.sentence_position[0], self.sentence_position[1])
 
 
 class SentencesContainer(object):
 
     def __init__(self, text, start, end):
         self.text = text
-        self.start = start
-        self.end = end
+        self.sentence_position = [start, end]
 
 
 def extract_word_from_Synset_object(synset):
@@ -156,7 +140,7 @@ def analyze(original_text, sentences_layer):
 
     # Get the expected frequency of a lemma and compare it to the actual frequency
     # If the actual frequency is a lot higher than the expected frequency, the word may be overused
-    overusedWordSummaryDTOList = []
+    overusedWordSummaryList = []
 
     for lemma in lemmas:
 
@@ -170,22 +154,19 @@ def analyze(original_text, sentences_layer):
         words_in_text = lemma_to_word[lemma]
 
         if multiplier > config.OVERUSED_MULTIPLIER:
-            dto = OverusedWordSummaryDTO(
+            ows = OverusedWordSummary(
                 lemma, words_in_text, multiplier)
-            overusedWordSummaryDTOList.append(dto)
+            overusedWordSummaryList.append(ows)
 
     # Sort the results list by multiplier (descending order)
     # Only leave config.OUW_NUM_WORDS_TO_ANALYZE words for analysis
-    overusedWordSummaryDTOList = sorted(
-        overusedWordSummaryDTOList, key=lambda x: x.multiplier, reverse=True)[:config.OUW_NUM_WORDS_TO_ANALYZE]
+    overusedWordSummaryList = sorted(
+        overusedWordSummaryList, key=lambda x: x.multiplier, reverse=True)[:config.OUW_NUM_WORDS_TO_ANALYZE]
 
-    # Create a list of DAO to return
-    overusedWordSummaryDAOList = []
-
-    for dto in overusedWordSummaryDTOList:
+    for ows in overusedWordSummaryList:
         # Find the synonyms
         # overusedWordSummary.find_synonyms_for_lemma()
-        Words = dto.words
+        Words = ows.words
         # Only leave clusters where the usage of a word is more than config.MAX_CLUSTER_SIZE
         # If a word is used less than MAX_CLUSTER_SIZE times, the cluster is empty
         clusters = find_large_clusters(
@@ -196,17 +177,10 @@ def analyze(original_text, sentences_layer):
                 sentences, clusters)
 
             results = format_text(original_text, sentences_in_clusters)
-            dto.add_cluster(results)
-
-        # Append DTO to DAO list
-        overusedWordSummaryDAOList.append(OverusedWordSummaryDAO(
-            dto.multiplier,
-            dto.lemma,
-            dto.lemma_synonyms,
-            dto.clusters))
+            ows.add_cluster(results)
 
     # Return a textSummary object
-    textSummary = TextSummmary(user_word_count, overusedWordSummaryDTOList)
+    textSummary = TextSummmary(user_word_count, overusedWordSummaryList)
     return textSummary
 
 
@@ -257,7 +231,7 @@ def get_words_in_sentence(sentence_span, sentence, sentence_index):
         start = sentence_span[0] + word_start_in_sentence
         end = start + len(words.text[i])
 
-	# Find the sentence start and end indices
+        # Find the sentence start and end indices
         sentence_start = sentence_span[0]
         sentence_end = sentence_span[1]
 
@@ -367,12 +341,12 @@ def create_clusters_of_words(Words):
     previous = None
     cluster = []
     for Word in Words:
-        if not previous or Word.start - previous <= config.CLUSTER_DISTANCE:
+        if not previous or Word.position[0] - previous <= config.CLUSTER_DISTANCE:
             cluster.append(Word)
         else:
             yield cluster
             cluster = [Word]
-        previous = Word.start
+        previous = Word.position[0]
     if cluster:
         yield cluster
 

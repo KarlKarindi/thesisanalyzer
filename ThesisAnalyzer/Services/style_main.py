@@ -1,5 +1,5 @@
 from ThesisAnalyzer.Services.Analysis.Style import overused_word_analyzer, tag_analyzer, sentences_length_analyzer
-from ThesisAnalyzer.Services.Analysis.Style.overused_word_analyzer import TextSummmary, OverusedWordSummaryDAO
+from ThesisAnalyzer.Services.Analysis.Style.overused_word_analyzer import TextSummmary, OverusedWordSummary
 from ThesisAnalyzer.Services.Analysis.Style.Config import config
 from ThesisAnalyzer.Services.Analysis.Style.tag_analyzer import TagSummary
 from ThesisAnalyzer.Models.Feedback import StyleFeedback
@@ -31,17 +31,17 @@ def analyze(request):
         # Overused words analysis
         if config.ANALYZE_OVERUSED_WORDS:
             textSummary = overused_word_analyzer.analyze(text, sentences_layer)
-            styleSummary.textSummary = textSummary
+            styleSummary.text_summary = textSummary
 
         # Clause analysis
         if config.ANALYZE_SENTENCE_LENGTH:
             sentencesLengthSummary = sentences_length_analyzer.analyze(
                 text, sentences_layer)
-            styleSummary.sentencesLengthSummary = sentencesLengthSummary
+            styleSummary.sentences_length_summary = sentencesLengthSummary
 
     # Tag analysis
     if config.ANALYZE_TAGS:
         tagSummary = tag_analyzer.analyze(text)
-        styleSummary.tagSummary = tagSummary
+        styleSummary.tag_summary = tagSummary
 
     return utils.encode(styleSummary)
