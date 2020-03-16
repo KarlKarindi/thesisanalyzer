@@ -83,7 +83,7 @@ class WordSummary(object):
         self.end = end
         self.sentence_index = sentence_index
         self.sentence_start = sentence_start
-        self.sentnece_end = sentence_end
+        self.sentence_end = sentence_end
 
     def __repr__(self):
         return '<Word (text: {}, pos: {}, start: {}, end: {}, sentence_index: {}, sentence_start: {}, sentence_end: {})>'.format(self.text, self.pos, self.start, self.end, self.sentence_index, self.sentence_start, self.sentence_end)
