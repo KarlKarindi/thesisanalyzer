@@ -11,10 +11,8 @@ from flask import jsonify
 import jsonpickle
 
 
-@profiler.profile
-def analyze(request):
+def analyze(text):
     """ The main function that starts all analyses related to style in the text """
-    text = utils.json_to_text(request)
 
     # FIXME: Bandaid solution for issue #14
     text = text.replace("–", "-")

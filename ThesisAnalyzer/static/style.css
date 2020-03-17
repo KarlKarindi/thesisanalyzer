@@ -1,0 +1,52 @@
+body {
+  font-family: Ebrima;
+  background: #dcdcdc;
+}
+
+.header_title {
+  padding-top: 10px;
+  font-weight: 500;
+  text-align: center;
+  font-size: 40px;
+  color: #000000;
+}
+
+h3 {
+  width: 80%;
+  font-weight: 400;
+  color: #00001a;
+}
+
+.container {
+  margin: auto;
+  width: 80%;
+}
+
+.form-group {
+  padding: 1px 10x;
+  width: 100%;
+}
+
+textarea {
+  border-radius: 6px;
+  width: 100%;
+  padding-top: 8px;
+}
+
+.options_row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.documentation {
+  align-items: center;
+  display: flex;
+}
+
+footer {
+  text-align: center;
+  position: fixed;
+  bottom: 5px;
+  left: 0px;
+  right: 0px;
+}

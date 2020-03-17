@@ -7,9 +7,8 @@ from estnltk import Text
 import nltk
 
 
-def analyze(content):
+def analyze(text):
     """ Analyzes the content and returns general statistics about the text """
-    text = utils.json_to_text(content)
 
     # FIXME: Bandaid solution for issue #14
     text = text.replace("–", "-")
