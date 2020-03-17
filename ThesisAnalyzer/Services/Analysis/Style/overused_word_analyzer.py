@@ -187,6 +187,7 @@ def analyze(original_text, sentences_layer):
             ows.add_cluster(results)
 
         # Add cluster information to words
+        # The amount of nested for cycles is fine, as the cycles themselves are short
         for i, cluster in enumerate(ows.clusters):
 
             # Tag the cluster text to get the words and their positions.
@@ -199,22 +200,22 @@ def analyze(original_text, sentences_layer):
 
             # Iterate through each word
             for word in ows.words:
-
                 # Check if a word belongs to a cluster or not
-                if cluster.sentence_position[0] <= word.position[0] and word.position[1] <= cluster.sentence_position[1]:
+                if cluster.sentence_position[0] <= word.position[0] \
+                        and word.position[1] <= cluster.sentence_position[1]:
 
                     # Add word id to cluster indexes and add cluster index to word
                     word.cluster_index = i
                     ows.clusters[i].word_indexes.append(word.id)
 
-                    # Iterate through
+                    # Iterate through. start_index changes dynamically so that no word is analyzed twice
                     for j in range(start_index, len(cluster_word_position)):
                         # Necessary to take first element, as it's a list inside a list.
                         # curr_word in form [start, end, text]
                         curr_word = cluster_word_position[j][0]
 
                         if curr_word[2] == word.text:
-                            # Word has been found from cluster. Update words cluster position.
+                            # Word has been found from cluster. Update words cluster position
                             cluster_start = curr_word[0]
                             cluster_end = curr_word[1]
                             # Set start index to j + 1, so our next iteration continues after j
@@ -286,7 +287,8 @@ def get_words_in_sentence(sentence_span, sentence, sentence_index):
 
         word_summaries.append(
             {"text": words[i].text, "start": start, "end": end, "lemma": lemma,
-             "pos": pos, "sentence_index": sentence_index, "sentence_start": sentence_start, "sentence_end": sentence_end})
+             "pos": pos, "sentence_index": sentence_index,
+             "sentence_start": sentence_start, "sentence_end": sentence_end})
 
     return word_summaries
 
@@ -308,7 +310,9 @@ def map_lemma_to_word(words):
     # Iterate over all the words
     for i, word in enumerate(words):
         word_obj = WordSummary(
-            word["text"], word["pos"], [word["start"], word["end"]], word["sentence_index"], [word["sentence_start"], word["sentence_end"]])
+            word["text"], word["pos"], [word["start"],
+                                        word["end"]], word["sentence_index"],
+            [word["sentence_start"], word["sentence_end"]])
         lemma_to_word[word["lemma"]].add(word_obj)
 
     return lemma_to_word
