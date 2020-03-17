@@ -7,9 +7,17 @@
       integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
       crossorigin="anonymous"
     />
+    <link
+      href="{{ url_for('static', filename='style.css') }}"
+      type="text/css"
+      rel="stylesheet"
+    />
   </head>
 
   <body>
-    <h1>Siin on sinu tulemus {{ result }}</h1>
+    <div class="container">
+      <h1 class="header_title">Lõputöö analüsaator</h1>
+    <h1 class="header_results">Analüüsi tulemused</h1>
+    <p>{{result}}</p>
   </body>
 </html>

@@ -1,6 +1,7 @@
 import os
 from flask import Blueprint, request, render_template
 from ThesisAnalyzer.Services import style_main, utils, general_main
+import jsonpickle
 
 template_dir = os.path.abspath('../templates')
 mod = Blueprint('route', __name__, template_folder=template_dir)
@@ -10,7 +11,8 @@ mod = Blueprint('route', __name__, template_folder=template_dir)
 def index():
     if request.method == "POST":
         text = request.form["user_text"]
-        result = style_main.analyze(text)
+        result = jsonpickle.decode(style_main.analyze(text))
+
         return render_template('result.html', result=result)
 
     return render_template("index.html")
