@@ -20,6 +20,14 @@ body {
   padding-bottom: 25px;
 }
 
+.newAnalysis {
+  padding-top: 10px;
+  font-weight: 100;
+
+  font-size: 15px;
+  padding-bottom: 10px;
+}
+
 h3 {
   width: 80%;
   font-weight: 400;
@@ -91,6 +99,29 @@ footer {
 }
 
 .overusedAnalysis {
-  border-bottom: 1px solid;
+  border-top: 1px solid;
   border-color: #dcdcdc;
+}
+
+.overusedWordLemma {
+  padding-left: 30px;
+  padding-top: 20px;
+  text-align: center;
+  vertical-align: top;
+  border-right: 1px solid;
+  border-color: #dcdcdc;
+}
+
+.overusedWordSentence {
+  font-size: smaller;
+  padding-top: 20px;
+}
+
+.overusedWordCluster {
+  border-right: 1px solid;
+  border-color: #dcdcdc;
+}
+
+.sentence {
+  font-size: smaller;
 }
