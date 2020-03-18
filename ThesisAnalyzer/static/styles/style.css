@@ -89,3 +89,8 @@ footer {
 .btn .btn-link .text-right {
   text-align: right;
 }
+
+.overusedAnalysis {
+  border-bottom: 1px solid;
+  border-color: #dcdcdc;
+}
