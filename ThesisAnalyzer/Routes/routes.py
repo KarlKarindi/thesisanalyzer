@@ -11,9 +11,13 @@ mod = Blueprint('route', __name__, template_folder=template_dir)
 def index():
     if request.method == "POST":
         text = request.form["user_text"]
+        general_result = jsonpickle.decode(general_main.analyze(text))
         result = jsonpickle.decode(style_main.analyze(text))
 
-        return render_template('result.html', result=result)
+        is_impersonal = general_result["is_impersonal"]
+        sentences_with_pv = general_result["sentences_with_pv"]
+
+        return render_template('result.html', result=result, is_impersonal=is_impersonal, sentences_with_pv=sentences_with_pv)
 
     return render_template("index.html")
 

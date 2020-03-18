@@ -3,7 +3,7 @@ body {
   background: #dcdcdc;
 }
 
-.header_title {
+.headerTitle {
   padding-top: 10px;
   font-weight: 500;
   text-align: center;
@@ -11,12 +11,13 @@ body {
   color: #000000;
 }
 
-.header_results {
+.headerResults {
   padding-top: 10px;
   font-weight: 300;
   text-align: center;
   font-size: 25px;
   color: #000;
+  padding-bottom: 25px;
 }
 
 h3 {
@@ -57,4 +58,32 @@ footer {
   bottom: 5px;
   left: 0px;
   right: 0px;
+}
+
+.imageContainer {
+  width: 68px;
+  height: 68px;
+  border: 1px solid;
+  opacity: 0.9;
+  display: flex;
+}
+
+.image {
+  width: 66px;
+  height: 66px;
+}
+
+.imageContainer .right {
+  margin-top: 20px;
+  padding-left: 10px;
+  min-width: 800px;
+}
+
+.analysisHeader {
+  font-size: larger;
+  font-weight: 800;
+}
+
+.analysisResult {
+  margin-top: 5px;
 }
