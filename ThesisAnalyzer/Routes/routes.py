@@ -16,8 +16,17 @@ def index():
 
         is_impersonal = general_result["is_impersonal"]
         sentences_with_pv = general_result["sentences_with_pv"]
+        pv_in_sentences = []
 
-        return render_template('result.html', result=result, is_impersonal=is_impersonal, sentences_with_pv=sentences_with_pv)
+        for key in sentences_with_pv.keys():
+            words = ", ".join(sentences_with_pv[key])
+            pv_in_sentences.append(words)
+
+        long_sentences = result["sentences_length_summary"]["long_sentences"]
+
+        return render_template('result.html', result=result, is_impersonal=is_impersonal,
+                               sentences_with_pv=sentences_with_pv, pv_in_sentences=pv_in_sentences,
+                               long_sentences=long_sentences)
 
     return render_template("index.html")
 

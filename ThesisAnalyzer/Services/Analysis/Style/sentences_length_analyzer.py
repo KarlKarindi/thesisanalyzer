@@ -233,7 +233,7 @@ def is_sentence_too_long(clause_to_verb_chain_index):
 
     # TODO: Find optimal conditions that work the best
     # Conditions for deciding whether a sentence is too long
-    if total_clause_count > config.MAX_CLAUSE_AMOUNT and verb_chains_count >= half_of_clauses:
+    if total_clause_count > config.MAX_CLAUSE_AMOUNT and verb_chains_count >= half_of_clauses or verb_chains_count > 3:
         return True
 
     # If 5 or mmore clauses and at least 4 verbs
