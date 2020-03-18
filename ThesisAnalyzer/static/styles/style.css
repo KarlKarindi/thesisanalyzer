@@ -64,6 +64,7 @@ footer {
   width: 68px;
   height: 68px;
   border: 1px solid;
+  border-color: #eb8b0e;
   opacity: 0.9;
   display: flex;
 }
@@ -73,10 +74,12 @@ footer {
   height: 66px;
 }
 
-.imageContainer .right {
+.imageContainer .analysisHeader {
   margin-top: 20px;
   padding-left: 10px;
-  min-width: 800px;
+  white-space: nowrap;
+  font-size: larger;
+  font-weight: 800;
 }
 
 .analysisHeader {
@@ -86,4 +89,8 @@ footer {
 
 .analysisResult {
   margin-top: 5px;
+}
+
+.btn .btn-link .text-right {
+  text-align: right;
 }
