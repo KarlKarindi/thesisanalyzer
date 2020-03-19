@@ -1,6 +1,6 @@
 from ThesisAnalyzer.Models.LemmaStopword import LemmaStopword
 from ThesisAnalyzer.Models.Lemma import Lemma
-from ThesisAnalyzer.Services.Analysis.Style.Config import config
+from ThesisAnalyzer.Config import style as config
 from ThesisAnalyzer.Services import utils
 from estnltk.taggers import TokensTagger
 
