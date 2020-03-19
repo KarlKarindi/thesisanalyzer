@@ -3,12 +3,14 @@ from flask import Blueprint, request, render_template
 from ThesisAnalyzer.Services import style_main, utils, general_main
 import jsonpickle
 from pprint import pprint
+from ThesisAnalyzer.Services import profiler
 
 template_dir = os.path.abspath('../templates')
 mod = Blueprint('route', __name__, template_folder=template_dir)
 
 # For user input
 @mod.route('/', methods=["GET", "POST"])
+@profiler.profile
 def index():
     if request.method == "POST":
         text = request.form["user_text"]

@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from env import DB_PASSWORD
 
 
 # Globally accessible libraries
@@ -13,7 +14,7 @@ def create_app():
     Routes.init_app(app)
 
     # Database initialization
-    DB_URL = "postgresql://postgres:postgres@localhost:5432/analyzer"
+    DB_URL = "postgresql://postgres" + DB_PASSWORD + ":@localhost:5432/analyzer"
 
     app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
     # silence the deprecation warning
