@@ -44,8 +44,6 @@ def analyze(text):
             t1.start()
             threads.append(t1)
 
-            #summary.impersonality_summary = th.join()
-
         # Overused words analysis
         if config.ANALYZE_OVERUSED_WORDS:
             Lemma_list = Lemma.query.all()
