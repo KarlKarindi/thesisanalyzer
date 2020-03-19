@@ -14,12 +14,10 @@ class ImpersonalitySummary():
         self.sentences_with_pv = sentences_with_pv
 
 
-def analyze(text):
+def analyze(text, sentences_layer):
     """ Checks if text is fully impersonal. A text is personal if it contains personal verbs (pv).
         Returns: a dictionary of sentences with words that are personal.
     """
-
-    sentences = utils.get_sentences_layer(text)
 
     quote_analyzer = QuoteAnalyzer()
 
@@ -27,7 +25,7 @@ def analyze(text):
     sentences_with_pv = {}
 
     # Then analyze singular sentences
-    for sentence in sentences:
+    for sentence in sentences_layer:
         personal_verbs = find_pv_in_sentence(sentence, quote_analyzer)
 
         # If the sentence contains personal verbs, add the verbs to dict

@@ -1,6 +1,6 @@
 import os
 from flask import Blueprint, request, render_template
-from ThesisAnalyzer.Services import style_main, utils, general_main
+from ThesisAnalyzer.Services import analysis_main, utils
 import jsonpickle
 from pprint import pprint
 from ThesisAnalyzer.Services import profiler
@@ -13,11 +13,11 @@ mod = Blueprint('route', __name__, template_folder=template_dir)
 def index():
     if request.method == "POST":
         text = request.form["user_text"]
-        general_result = jsonpickle.decode(general_main.analyze(text))
-        result = jsonpickle.decode(style_main.analyze(text))
 
-        is_impersonal = general_result["is_impersonal"]
-        sentences_with_pv = general_result["sentences_with_pv"]
+        result = jsonpickle.decode(analysis_main.analyze(text))
+
+        is_impersonal = result["impersonality_summary"]["is_impersonal"]
+        sentences_with_pv = result["impersonality_summary"]["sentences_with_pv"]
         pv_in_sentences = []
 
         for key in sentences_with_pv.keys():
@@ -83,19 +83,11 @@ def index():
 
 @mod.route('/documentation/', methods=["GET"])
 def documentation():
-
     return render_template("documentation.html")
 
 # For Raimond's API
-@mod.route('/general/', methods=['POST'])
-def analyze_general():
+@mod.route('/analyze/', methods=['POST'])
+def analyze_API():
     print()  # useful for testing
     text = utils.json_to_text(request)
-    return general_main.analyze(text)
-
-
-@mod.route('/style/', methods=['POST'])
-def analyze_style():
-    print()  # useful for testing
-    text = utils.json_to_text(request)
-    return style_main.analyze(text)
+    return analysis_main.analyze(text)
