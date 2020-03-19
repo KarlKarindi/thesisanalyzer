@@ -10,7 +10,6 @@ class ImpersonalitySummary():
         self.is_impersonal = is_impersonal
         self.sentences_with_pv = sentences_with_pv
 
-
 # _____________________________________ #
 #        Overused Word analyzer         #
 

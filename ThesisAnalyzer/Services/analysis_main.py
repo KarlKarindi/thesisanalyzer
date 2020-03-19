@@ -10,6 +10,7 @@ from ThesisAnalyzer.Services import utils
 from ThesisAnalyzer.Services import profiler
 from ThesisAnalyzer.Models.Lemma import Lemma
 from ThesisAnalyzer.Models.LemmaStopword import LemmaStopword
+from ThesisAnalyzer.Models.Analysis import SentencesLengthSummary, ImpersonalitySummary, TextSummmary
 
 from flask import jsonify
 import jsonpickle
@@ -71,7 +72,12 @@ def analyze(text):
 
     while not que.empty():
         result = que.get()
-        print(result)
+        if type(result) is ImpersonalitySummary:
+            summary.impersonality_summary = result
+        elif type(result) is SentencesLengthSummary:
+            summary.sentences_length_summary = result
+        elif type(result) is TextSummmary:
+            summary.text_summary = result
 
     end = timer()
 
