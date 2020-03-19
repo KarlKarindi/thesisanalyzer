@@ -19,6 +19,7 @@ def index():
         data = user_form.format_data(text, analysis_result)
 
         return render_template('result.html',
+                               elapsed_time=data.elapsed_time,
                                sentences_with_pv=data.sentences_with_pv,
                                pv_in_sentences=data.pv_in_sentences,
                                long_sentences=data.long_sentences,

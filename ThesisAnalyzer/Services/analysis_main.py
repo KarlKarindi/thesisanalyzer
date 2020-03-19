@@ -79,7 +79,6 @@ def analyze(text):
 
     end = timer()
 
-    print("Threading: YES")
-    print("TIME ELAPSED", end - start)
+    summary.elapsed_time = round(end - start, 3)
 
     return utils.encode(summary)
