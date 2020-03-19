@@ -13,13 +13,15 @@ from flask import jsonify
 import jsonpickle
 
 
+@profiler.profile
 def analyze(text):
-    """ The main function that starts all analyses related to style in the text """
+    """ The main function that starts all analyses """
 
     # Set jsonpickle settings
     jsonpickle.set_preferred_backend("json")
     jsonpickle.set_encoder_options("json", ensure_ascii=False)
 
+    # The main summary to be returned from the API
     summary = Summary()
 
     # Since finding the sentences layer takes time, do it once and pass it as an argument for the analyzers
@@ -43,7 +45,6 @@ def analyze(text):
 
     # Tag analysis
     if config.ANALYZE_TAGS:
-        tagSummary = tag_analyzer.analyze(text)
-        summary.tag_summary = tagSummary
+        summary.tag_summary = tag_analyzer.analyze(text)
 
     return utils.encode(summary)

@@ -1,25 +1,14 @@
 from ThesisAnalyzer.Config import style as config
 from ThesisAnalyzer.Services.Analysis.TextAnalyzers.analyzers import QuoteAnalyzer, CitationAnalyzer
 from ThesisAnalyzer.Services import utils
+from ThesisAnalyzer.Models.Analysis import SentencesLengthSummary
 
-from estnltk import Text, Layer
 from estnltk.taggers import ClauseSegmenter, VerbChainDetector
+from estnltk import Text, Layer
 from collections import defaultdict
 from pprint import pprint
 
 import re
-
-
-class SentencesLengthSummary():
-
-    def add_sent_to_long_sentences(self, sentence):
-        """ Parameters:
-                sentence (string) - string sentence to be added to list of long_sentences
-        """
-        self.long_sentences.append(sentence)
-
-    def __init__(self):
-        self.long_sentences = []
 
 
 def analyze(text, sentences_layer):

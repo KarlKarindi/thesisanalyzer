@@ -1,17 +1,11 @@
 from ThesisAnalyzer.Services import utils
 from ThesisAnalyzer.Services.Analysis.TextAnalyzers.analyzers import QuoteAnalyzer
 from ThesisAnalyzer.Services.Constants import constants
+from ThesisAnalyzer.Models.Analysis import ImpersonalitySummary
 from pprint import pprint
 
 import estnltk
 from estnltk import Text, layer_operations
-
-
-class ImpersonalitySummary():
-
-    def __init__(self, is_impersonal, sentences_with_pv):
-        self.is_impersonal = is_impersonal
-        self.sentences_with_pv = sentences_with_pv
 
 
 def analyze(text, sentences_layer):

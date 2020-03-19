@@ -35,7 +35,7 @@
           <div id="collapseOne" class=" collapse in">
             <div class="card-body">
               <div class="analysisResult">
-                {% if is_impersonal %}
+                {% if sentences_with_pv|length == 0 %}
                 <h5>Tekstis ei leidu mina- või meie-vormi.</h5>
                 {% else %}
                 <h5>Järgnevates lausetes leidub mina- või meie-vormi:</h5>
