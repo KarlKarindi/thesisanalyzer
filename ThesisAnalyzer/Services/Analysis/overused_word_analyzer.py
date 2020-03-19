@@ -1,5 +1,4 @@
 from ThesisAnalyzer.Models.LemmaStopword import LemmaStopword
-from ThesisAnalyzer.Models.Lemma import Lemma
 from ThesisAnalyzer.Config import style as config
 from ThesisAnalyzer.Services import utils
 from ThesisAnalyzer.Models.Analysis import TextSummmary, OverusedWordSummary, WordSummary, ClusterContainer
@@ -31,13 +30,12 @@ def remove_duplicate_synonyms_for_lemma(lemma, syn_list):
     return result
 
 
-def analyze(original_text, sentences_layer):
+def analyze(original_text, sentences_layer, Lemma_list, Lemma_stopword_list):
     """ Analyzes repeating words using a method described in the Synonimity program
         Returns: TextSummary object
     """
 
     # Query the database for all lemmas that are known. Get list of model Lemma
-    Lemma_list = Lemma.query.all()
 
     # Creates a dictionary
     sentences = find_sentences_with_index_and_span(
@@ -55,7 +53,8 @@ def analyze(original_text, sentences_layer):
 
     # First, filter out all lemmas that aren't included in the text more than once,
     # Then find all the lemmas that are viable for analysis
-    repeating_lemmas = find_repeating_lemmas(lemma_to_word)
+    repeating_lemmas = find_repeating_lemmas(
+        lemma_to_word, Lemma_stopword_list)
     lemmas_for_analysis = find_lemmas_viable_for_analysis(
         Lemma_list, repeating_lemmas)
 
@@ -248,12 +247,12 @@ def map_lemma_to_word(words):
     return lemma_to_word
 
 
-def find_repeating_lemmas(lemma_to_word):
+def find_repeating_lemmas(lemma_to_word, Lemma_stopword_list):
     """ Returns: repeating lemmas from a list of all lemmas.
         Repeating lemmas do not include stopwords and must be alphabetical.
         An overused lemma must be used in the text at least config.MIN_COUNT_OF_LEMMA times.
     """
-    stop_words = [Lemma_sw.name for Lemma_sw in LemmaStopword.query.all()]
+    stop_words = [Lemma_sw.name for Lemma_sw in Lemma_stopword_list]
     return [lemma for lemma in lemma_to_word.keys() if len(lemma_to_word[lemma]) >= config.MIN_COUNT_OF_LEMMA and
             lemma not in stop_words and lemma.isalpha()]
 
