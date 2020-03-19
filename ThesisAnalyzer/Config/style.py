@@ -1,6 +1,7 @@
 # Config file for style analysis
 
 # Options for analysis
+ANALYZE_IMPERSONALITY = True
 ANALYZE_OVERUSED_WORDS = True
 ANALYZE_SENTENCE_LENGTH = True
 ANALYZE_TAGS = False
