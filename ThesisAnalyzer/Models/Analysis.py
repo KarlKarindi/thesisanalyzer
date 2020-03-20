@@ -17,9 +17,9 @@ class ImpersonalitySummary():
 class TextSummmary(object):
     """ Container class for OverusedWordSummary object """
 
-    def __init__(self, word_count, OverusedWordSummary):
-        # word_count does not include stopwords
+    def __init__(self, word_count, sentence_count, OverusedWordSummary):
         self.word_count = word_count
+        self.sentence_count = sentence_count
         self.overused_word_summary = OverusedWordSummary
 
 

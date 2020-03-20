@@ -48,10 +48,15 @@ def analyze(original_text, sentences_layer):
         words.extend(get_words_in_sentence(span, sentence, sentence_index))
         sentence_index += 1
 
+    # Get the amount of sentences and words
+    text_sentence_count = sentence_index
+    text_word_count = get_text_word_count(words)
+
     # Use the words list to map lemmas to the words the lemmas correspond to.
     lemma_to_word = map_lemma_to_word(words)
 
     user_word_count = len(words)
+    # pprint(words)
 
     # First, filter out all lemmas that aren't included in the text more than once,
     # Then find all the lemmas that are viable for analysis
@@ -157,7 +162,8 @@ def analyze(original_text, sentences_layer):
                     word.position_in_cluster = [cluster_start, cluster_end]
 
     # Return a textSummary object
-    textSummary = TextSummmary(user_word_count, overusedWordSummaryList)
+    textSummary = TextSummmary(
+        text_word_count, text_sentence_count, overusedWordSummaryList)
     return textSummary
 
 
@@ -222,6 +228,17 @@ def get_words_in_sentence(sentence_span, sentence, sentence_index):
              "sentence_start": sentence_start, "sentence_end": sentence_end})
 
     return word_summaries
+
+
+def get_text_word_count(words):
+    """ counts the number of words in a text.
+        Words are alphabetical.
+    """
+    count = 0
+    for w in words:
+        if w["text"].isalpha():
+            count += 1
+    return count
 
 
 def map_lemma_to_word(words):
