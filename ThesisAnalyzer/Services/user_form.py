@@ -1,7 +1,10 @@
 class FormData(object):
-    def __init__(self, elapsed_time, sentences_with_pv, pv_in_sentences, long_sentences,
-                 overused_words, highlighted_sentences, highlighted_clusters):
+    def __init__(self, elapsed_time, sentence_count, word_count, sentences_with_pv,
+                 pv_in_sentences, long_sentences, overused_words,
+                 highlighted_sentences, highlighted_clusters):
         self.elapsed_time = elapsed_time
+        self.sentence_count = sentence_count
+        self.word_count = word_count
         self.sentences_with_pv = sentences_with_pv
         self.pv_in_sentences = pv_in_sentences
         self.long_sentences = long_sentences
@@ -18,6 +21,8 @@ def format_data(text, result):
     """
 
     elapsed_time = result["elapsed_time"]
+    sentence_count = result["text_summary"]["sentence_count"]
+    word_count = result["text_summary"]["word_count"]
 
     # Impersonality
     is_impersonal = result["impersonality_summary"]["is_impersonal"]
@@ -79,5 +84,5 @@ def format_data(text, result):
         # Add all the clusters of one word summary to all_WS_clusters list.
         all_WS_clusters.append(one_WS_clusters)
 
-    return FormData(elapsed_time, sentences_with_pv, pv_in_sentences, long_sentences,
+    return FormData(elapsed_time, sentence_count, word_count, sentences_with_pv, pv_in_sentences, long_sentences,
                     overused_words, all_WS_sentences, all_WS_clusters)

@@ -20,6 +20,8 @@ def index():
 
         return render_template('result.html',
                                elapsed_time=data.elapsed_time,
+                               sentence_count=data.sentence_count,
+                               word_count=data.word_count,
                                sentences_with_pv=data.sentences_with_pv,
                                pv_in_sentences=data.pv_in_sentences,
                                long_sentences=data.long_sentences,
