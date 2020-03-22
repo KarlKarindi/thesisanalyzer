@@ -122,8 +122,15 @@ def create_clause_and_verb_chain_index(clauses, vc_detector):
         verb_chains = find_verb_chain_in_clause(
             clause_text_list, vc_detector)
 
-        clause_and_verb_chain_index[i] = {
-            "verb_chains": verb_chains, "clause": clause_text_list}
+        do_add = True
+        if clause_text_list[0] == "(" and clause_text_list[-1] == ")":
+            # If the clause is in parentheses and doesn't contain a verb, don't take it into account
+            if len(verb_chains) == 0:
+                do_add = False
+
+        if do_add:
+            clause_and_verb_chain_index[i] = {
+                "verb_chains": verb_chains, "clause": clause_text_list}
 
     return clause_and_verb_chain_index
 
@@ -199,7 +206,7 @@ def remove_quoted_parts_from_sentence(sentence, clusters):
     return clean_sentence.strip()
 
 
-def is_sentence_too_long(clause_to_verb_chain_index):
+def is_sentence_too_long(clause_and_verb_chain_index):
     """ Analyzes the clauses in a sentence.
         Looks at clause word length, sentence word length, clause amount,
         returns feedback accordingly.
@@ -210,10 +217,10 @@ def is_sentence_too_long(clause_to_verb_chain_index):
             boolean whether sentence is too long or not
     """
 
-    total_clause_count = len(clause_to_verb_chain_index)
+    total_clause_count = len(clause_and_verb_chain_index)
     verb_chains_count = 0
-    for i in clause_to_verb_chain_index:
-        verb_chains = clause_to_verb_chain_index[i]["verb_chains"]
+    for i in clause_and_verb_chain_index:
+        verb_chains = clause_and_verb_chain_index[i]["verb_chains"]
         if len(verb_chains) > 0:
             verb_chains_count += 1
 

@@ -28,7 +28,9 @@ def analyze(text):
     summary = Summary()
 
     # Since finding the sentences layer takes time, do it once and pass it as an argument for the analyzers
-    if config.ANALYZE_OVERUSED_WORDS or config.ANALYZE_SENTENCE_LENGTH or config.ANALYZE_IMPERSONALITY:
+    if config.ANALYZE_OVERUSED_WORDS or config.ANALYZE_SENTENCE_LENGTH or \
+            config.ANALYZE_IMPERSONALITY or config.ANALYZE_TAGS:
+
         sentences_layer = utils.get_sentences_layer(text)
 
         # Impersonality analyzer
@@ -46,9 +48,9 @@ def analyze(text):
             summary.sentences_length_summary = sentences_length_analyzer.analyze(
                 text, sentences_layer)
 
-    # Tag analysis
-    if config.ANALYZE_TAGS:
-        summary.tag_summary = tag_analyzer.analyze(text)
+        # Tag analysis
+        if config.ANALYZE_TAGS:
+            summary.tag_summary = tag_analyzer.analyze(text, sentences_layer)
 
     end = timer()
 

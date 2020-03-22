@@ -14,15 +14,15 @@ class TagSummary():
         self.pronoun_percentage = round(pronoun_count / word_count, 3)
 
 
-def analyze(text):
+def analyze(text, sentences_layer):
     """ Tags all the sentences and finds the percentage of certain types of words.
         Looks for adverbs (määrsõnad) and pronouns (asesõnad).
         Returns: TagSummary object
     """
 
-    sentences = Text(text).sentence_texts
+    tags = tag_words_in_sentences(sentences_layer)
 
-    tags = tag_words_in_sentences(sentences)
+    pprint(sentences_layer)
 
     total_count, adverb_count, pronoun_count = 0, 0, 0
 
@@ -41,20 +41,18 @@ def analyze(text):
 
 
 def tag_words_in_sentences(sentences):
-    """ Tag all the words in a list of sentences using vabamorf.
-
-        Parameters:
+    """ Parameters:
             sentences (list) - list of sentences
         Returns:
             list of tuplets (word, tag)
     """
 
-    tags = []
-    for sentence in sentences:
-        sentence_analysis = vabamorf.analyze(sentence)
-        for word in sentence_analysis:
-            text = word["text"]
-            tag = word["analysis"][0]["partofspeech"]
-            tags.append((text, tag))
+    # tags = []
+    # for sentence in sentences:
+    #     sentence_analysis = vabamorf.analyze(sentence)
+    #     for word in sentence_analysis:
+    #         text = word["text"]
+    #         tag = word["analysis"][0]["partofspeech"]
+    #         tags.append((text, tag))
 
-    return tags
+    # return tags
