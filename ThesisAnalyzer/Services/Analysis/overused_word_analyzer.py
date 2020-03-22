@@ -44,6 +44,7 @@ def analyze(original_text, sentences_layer):
         original_text, sentences_layer)
     words = []
 
+    sentence_index = 0  # Necessary in case there are no sentences
     for sentence_index, (span, sentence) in enumerate(sentences.items()):
         words.extend(get_words_in_sentence(span, sentence, sentence_index))
         sentence_index += 1
