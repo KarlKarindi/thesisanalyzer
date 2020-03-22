@@ -106,6 +106,11 @@ class TagSummary():
 
     def __init__(self, word_count, adverb_count, pronoun_count):
         self.adverb_count = adverb_count
-        self.adverb_percentage = round(adverb_count / word_count, 3)
         self.pronoun_count = pronoun_count
-        self.pronoun_percentage = round(pronoun_count / word_count, 3)
+
+        if word_count > 0:
+            self.adverb_percentage = round(adverb_count / word_count, 3)
+            self.pronoun_percentage = round(pronoun_count / word_count, 3)
+        else:
+            self.adverb_percentage = 0
+            self.pronoun_percentage = 0
