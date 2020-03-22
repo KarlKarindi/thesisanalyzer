@@ -14,29 +14,25 @@ class TagSummary():
         self.pronoun_percentage = round(pronoun_count / word_count, 3)
 
 
-def analyze(text, sentences_layer):
+def analyze(text, text_obj, word_count):
     """ Tags all the sentences and finds the percentage of certain types of words.
         Looks for adverbs (määrsõnad) and pronouns (asesõnad).
         Returns: TagSummary object
     """
 
-    tags = tag_words_in_sentences(sentences_layer)
+    morph_analysis = text_obj.morph_analysis
 
-    pprint(sentences_layer)
+    adverb_count, pronoun_count = 0, 0
 
-    total_count, adverb_count, pronoun_count = 0, 0, 0
-
-    for n in tags:
-        tag = n[1]
+    for n in morph_analysis:
+        tag = n["partofspeech"][0]
 
         if tag == constants.ADVERB:
             adverb_count += 1
         elif tag == constants.PRONOUN:
             pronoun_count += 1
 
-        total_count += 1
-
-    tagSummary = TagSummary(total_count, adverb_count, pronoun_count)
+    tagSummary = TagSummary(word_count, adverb_count, pronoun_count)
     return tagSummary
 
 

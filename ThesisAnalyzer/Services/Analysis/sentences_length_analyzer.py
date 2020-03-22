@@ -1,4 +1,4 @@
-from ThesisAnalyzer.Config import style as config
+from ThesisAnalyzer.Config import analysis as config
 from ThesisAnalyzer.Services.Analysis.TextAnalyzers.analyzers import QuoteAnalyzer, CitationAnalyzer
 from ThesisAnalyzer.Services import utils
 from ThesisAnalyzer.Models.Analysis import SentencesLengthSummary

@@ -28,7 +28,7 @@ def get_sentences_layer(text):
     """
     text = Text(text)
     text.tag_layer()
-    return text.sentences
+    return text
 
 
 def words_without_punctuation(text):

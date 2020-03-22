@@ -1,6 +1,5 @@
-from ThesisAnalyzer.Models.Lemma import Lemma
-from ThesisAnalyzer.Models.LemmaStopword import LemmaStopword
-from ThesisAnalyzer.Config import style as config
+from ThesisAnalyzer.Models.Lemma import Lemma, LemmaStopword
+from ThesisAnalyzer.Config import analysis as config
 from ThesisAnalyzer.Services import utils
 from ThesisAnalyzer.Models.Analysis import TextSummmary, OverusedWordSummary, WordSummary, ClusterContainer
 

@@ -6,13 +6,14 @@ from ThesisAnalyzer.Services.Analysis import \
 from ThesisAnalyzer.Models.Analysis import SentencesLengthSummary, ImpersonalitySummary, TextSummmary
 from ThesisAnalyzer.Models.Summary import Summary
 from ThesisAnalyzer.Services.Analysis.tag_analyzer import TagSummary
-from ThesisAnalyzer.Config import style as config
+from ThesisAnalyzer.Config import analysis as config
 from ThesisAnalyzer.Services import profiler
 from ThesisAnalyzer.Services import utils
 
+from timeit import default_timer as timer
+from estnltk import Text
 from flask import jsonify
 import jsonpickle
-from timeit import default_timer as timer
 import os
 
 
@@ -31,7 +32,8 @@ def analyze(text):
     if config.ANALYZE_OVERUSED_WORDS or config.ANALYZE_SENTENCE_LENGTH or \
             config.ANALYZE_IMPERSONALITY or config.ANALYZE_TAGS:
 
-        sentences_layer = utils.get_sentences_layer(text)
+        text_obj = Text(text).tag_layer()
+        sentences_layer = text_obj.sentences
 
         # Impersonality analyzer
         if config.ANALYZE_IMPERSONALITY:
@@ -50,7 +52,8 @@ def analyze(text):
 
         # Tag analysis
         if config.ANALYZE_TAGS:
-            summary.tag_summary = tag_analyzer.analyze(text, sentences_layer)
+            summary.tag_summary = tag_analyzer.analyze(
+                text, text_obj, summary.text_summary.word_count)
 
     end = timer()
 
