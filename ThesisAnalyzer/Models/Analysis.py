@@ -97,3 +97,15 @@ class SentencesLengthSummary():
 
     def __init__(self):
         self.long_sentences = []
+
+
+# _____________________________________ #
+#           Tag analyzer                #
+
+class TagSummary():
+
+    def __init__(self, word_count, adverb_count, pronoun_count):
+        self.adverb_count = adverb_count
+        self.adverb_percentage = round(adverb_count / word_count, 3)
+        self.pronoun_count = pronoun_count
+        self.pronoun_percentage = round(pronoun_count / word_count, 3)

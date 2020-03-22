@@ -1,17 +1,7 @@
-#from ThesisAnalyzer import vabamorf
+from ThesisAnalyzer.Models.Analysis import TagSummary
 from ThesisAnalyzer.Services.Constants import constants
 from estnltk import Text
 from pprint import pprint
-
-
-class TagSummary():
-
-    def __init__(self, word_count, adverb_count, pronoun_count):
-        self.word_count = word_count
-        self.adverb_count = adverb_count
-        self.adverb_percentage = round(adverb_count / word_count, 3)
-        self.pronoun_count = pronoun_count
-        self.pronoun_percentage = round(pronoun_count / word_count, 3)
 
 
 def analyze(text, text_obj, word_count):
