@@ -51,7 +51,7 @@ def analyze(text):
                 text, sentences_layer)
 
         # Tag analysis
-        if config.ANALYZE_TAGS:
+        if config.ANALYZE_TAGS and summary.text_summary is not None:
             summary.tag_summary = tag_analyzer.analyze(
                 text, text_obj, summary.text_summary.word_count)
 
