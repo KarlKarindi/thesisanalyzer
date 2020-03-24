@@ -1,6 +1,6 @@
 from ThesisAnalyzer.Services import utils
 from ThesisAnalyzer.Services.Analysis.TextAnalyzers.analyzers import QuoteAnalyzer
-from ThesisAnalyzer.Services.Constants import constants
+from ThesisAnalyzer.Constants import constants
 from ThesisAnalyzer.Models.Analysis import ImpersonalitySummary
 from pprint import pprint
 

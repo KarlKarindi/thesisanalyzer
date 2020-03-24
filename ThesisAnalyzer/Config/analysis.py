@@ -1,8 +1,9 @@
 # Config file for style analysis
+LOG_TO_DATABASE = True
 
 # Options for analysis
 ANALYZE_IMPERSONALITY = True
-ANALYZE_OVERUSED_WORDS = False
+ANALYZE_OVERUSED_WORDS = True
 ANALYZE_SENTENCE_LENGTH = True
 ANALYZE_TAGS = True
 

@@ -1,5 +1,5 @@
 from ThesisAnalyzer.Models.Analysis import TagSummary
-from ThesisAnalyzer.Services.Constants import constants
+from ThesisAnalyzer.Constants import constants
 from estnltk import Text
 from pprint import pprint
 

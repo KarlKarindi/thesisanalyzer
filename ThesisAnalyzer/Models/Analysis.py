@@ -45,9 +45,6 @@ class OverusedWordSummary(object):
         self.lemma_synonyms = []
         self.clusters = []
 
-    def __repr__(self):
-        return self.lemma
-
 
 class WordSummary(object):
 

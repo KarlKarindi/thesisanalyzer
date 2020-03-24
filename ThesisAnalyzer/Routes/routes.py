@@ -14,7 +14,8 @@ def index():
     if request.method == "POST":
         text = request.form["user_text"]
 
-        analysis_result = jsonpickle.decode(analysis_main.analyze(text))
+        analysis_result = jsonpickle.decode(
+            analysis_main.analyze(text, user_form=True))
 
         data = user_form.format_data(text, analysis_result)
 

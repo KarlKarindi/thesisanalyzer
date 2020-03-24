@@ -1,4 +1,4 @@
-from ThesisAnalyzer.Services.Constants import constants
+from ThesisAnalyzer.Constants import constants
 
 from flask import Flask, request, jsonify
 from estnltk import Text, layer_operations
@@ -51,3 +51,8 @@ def tag_text(text):
 def most_frequent_words(words, until=30):
     """ Creates a frequency distribution by lemmas """
     return nltk.FreqDist(words).most_common()[:until]
+
+
+def is_sentences_layer_necessary(config):
+    return config.ANALYZE_OVERUSED_WORDS or config.ANALYZE_SENTENCE_LENGTH or \
+        config.ANALYZE_IMPERSONALITY or config.ANALYZE_TAGS

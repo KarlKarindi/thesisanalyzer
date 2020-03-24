@@ -1,6 +1,6 @@
 # This module contains different analyzers for text processing.
 
-from ThesisAnalyzer.Services.Constants import constants
+from ThesisAnalyzer.Constants import constants
 
 from estnltk import Text
 
