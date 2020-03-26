@@ -7,9 +7,12 @@ class Formrequest(db.Model):
     id = db.Column(db.Integer,
                    primary_key=True)
     timestamp = db.Column(db.DateTime)
+    successful = db.Column(db.Boolean)
+    result = db.Column(db.String)
 
-    def __init__(self, timestamp):
+    def __init__(self, timestamp, successful=False):
         self.timestamp = timestamp
+        self.successful = successful
 
 
 class LongSentence(db.Model):
