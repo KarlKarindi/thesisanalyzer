@@ -1,20 +1,38 @@
 from ThesisAnalyzer.Models.Analysis import OfficialeseSummary, PooltTarindContainer
+from estnltk.converters.CG3_exporter import export_CG3
+from estnltk.taggers.syntax.visl_tagger import VISLCG3Pipeline
+from env import vislcg_path
 
 from estnltk import Text
 from pprint import pprint
 import jsonpickle
+import os
+import math
 
 
-def analyze(original_text, sentences_layer):
+def analyze(original_text, text_obj, sentences_layer):
     officialese_summary = OfficialeseSummary()
 
+    # The morph_extended layer is necessary for further syntactic analysis
+
     sentence_spans = sentences_layer[["start", "end"]]
+
+    text_obj.analyse("syntax_preprocessing")
+    cg3 = export_CG3(text_obj)
+
+    pipeline = VISLCG3Pipeline(vislcg_cmd=vislcg_path)
+    results = pipeline.process_lines(cg3, split_result=True, remove_info=True)
+
+   # print(results)
+    for r in results:
+        print(r.split(" "))
+        print()
 
     # Poolt-tarind analysis
     officialese_summary.poolt_tarind_summary = analyze_poolt_tarind(original_text,
                                                                     sentence_spans, sentences_layer)
 
-    #
+    analyze_saav(sentence_spans, sentences_layer)
 
     return officialese_summary
 
@@ -56,3 +74,7 @@ def analyze_poolt_tarind(original_text, sentence_spans, sentences_layer):
                 prev_word_is_in_genitiv = False
 
     return poolt_tarind_list
+
+
+def analyze_saav(sentence_spans, sentences_layer):
+    print()

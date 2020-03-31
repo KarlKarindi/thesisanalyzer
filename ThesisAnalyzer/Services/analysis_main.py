@@ -103,7 +103,7 @@ def analyze(text, user_form=False):
         # Officialese analysis
         if config.ANALYZE_OFFICIALESE:
             summary.officialese_summary = officialese_analyzer.analyze(
-                text, sentences_layer)
+                text, text_obj, sentences_layer)
 
     end = timer()
 
