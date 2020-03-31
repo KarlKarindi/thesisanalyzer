@@ -25,15 +25,13 @@ def analyze(original_text, text_obj, sentences_layer):
     sentences, words = utils.preprocess_text(original_text, sentences_layer)
     sentence_spans = sentences_layer[["start", "end"]]
 
-    # pprint(text_obj.morph_analysis)
-
-    # SyntaxDependencyRetagger("visl").retag(text_obj)
+    SyntaxDependencyRetagger("visl").retag(text_obj)
 
     # Poolt-tarind analysis
     officialese_summary.poolt_tarind_summary = analyze_poolt_tarind(original_text,
                                                                     sentence_spans, sentences_layer)
 
-    #analyze_saav(sentence_spans, text_obj, None)
+    analyze_saav(sentence_spans, text_obj, words)
 
     return officialese_summary
 
@@ -79,14 +77,16 @@ def analyze_poolt_tarind(original_text, sentence_spans, sentences_layer):
 
 
 def analyze_saav(sentence_spans, sentence, words):
-    for n in sentence.visl:
-        if '@ADVL' in n.deprel:
+    for i, word in enumerate(sentence.visl):
+        # Check if the word is an adverb (määrsõna) and if it's conditional (tingiv kõneviis)
+        if '@ADVL' in word.deprel and 'tr' in word.case:
             # Since the parent_id is a string, it is casted to int
             # Also, indexing starts at 1, since SyntaxDependencyRetagger's first node is the root node.
             # The lemma is taken from the words list, as visl doesn't give an accurate lemma.
             try:
-                parent_id = int(n.annotations[0].parent_span.id[0]) - 1
+                parent_id = int(word.annotations[0].parent_span.id[0]) - 1
             except ValueError:
                 parent_id = 0
+            print(words[i], words[parent_id])
 
             # print(words[parent_id])
