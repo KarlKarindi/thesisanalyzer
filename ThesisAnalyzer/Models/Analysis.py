@@ -111,3 +111,24 @@ class TagSummary():
         else:
             self.adverb_percentage = 0
             self.pronoun_percentage = 0
+
+# _____________________________________ #
+#         Officialese analyzer          #
+
+
+class OfficialeseSummary():
+    def __init__(self):
+        self.poolt_tarind_summary = []
+
+
+class PooltTarindContainer():
+    def __init__(self, text, sentence_text, sentence_position, position):
+        self.text = text
+        self.sentence_text = sentence_text
+        self.sentence_position = sentence_position
+        # Position starts with the word preceding "poolt"
+        self.position = position
+
+    def __repr__(self):
+        return '<PooltTarindContainer (text: {}, sentence_text: {}, sentence_position: {}, position: {})>' \
+            .format(self.text, self.sentence_text, self.sentence_position, self.position)

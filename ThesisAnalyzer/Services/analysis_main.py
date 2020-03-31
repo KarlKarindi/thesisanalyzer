@@ -1,7 +1,8 @@
 # Analyzers
 from ThesisAnalyzer.Services.Analysis import \
     overused_word_analyzer, tag_analyzer, \
-    sentences_length_analyzer, impersonality_analyzer
+    sentences_length_analyzer, impersonality_analyzer, \
+    officialese_analyzer
 
 # Database models
 from ThesisAnalyzer.Models.Database import Formrequest, LongSentence, TextStatistics, \
@@ -98,6 +99,11 @@ def analyze(text, user_form=False):
                                               summary.text_summary.word_count,
                                               summary.tag_summary.adverb_count,
                                               summary.tag_summary.pronoun_count))
+
+        # Officialese analysis
+        if config.ANALYZE_OFFICIALESE:
+            summary.officialese_summary = officialese_analyzer.analyze(
+                text, sentences_layer)
 
     end = timer()
 

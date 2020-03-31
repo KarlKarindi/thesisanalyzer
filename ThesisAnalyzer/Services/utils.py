@@ -55,4 +55,4 @@ def most_frequent_words(words, until=30):
 
 def is_sentences_layer_necessary(config):
     return config.ANALYZE_OVERUSED_WORDS or config.ANALYZE_SENTENCE_LENGTH or \
-        config.ANALYZE_IMPERSONALITY or config.ANALYZE_TAGS
+        config.ANALYZE_IMPERSONALITY or config.ANALYZE_TAGS or config.ANALYZE_OFFICIALESE

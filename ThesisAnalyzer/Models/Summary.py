@@ -12,3 +12,4 @@ class Summary(object):
         self.tag_summary = None
         self.sentences_length_summary = None
         self.text_summary = None
+        self.officialese_summary = None
