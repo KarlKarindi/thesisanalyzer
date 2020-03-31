@@ -1,5 +1,5 @@
 # Config file for style analysis
-LOG_TO_DATABASE = True
+LOG_TO_DATABASE = False
 
 # Options for analysis
 ANALYZE_IMPERSONALITY = True

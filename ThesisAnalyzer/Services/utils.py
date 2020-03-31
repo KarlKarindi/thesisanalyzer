@@ -19,38 +19,91 @@ def encode(Object):
     return(jsonpickle.encode(Object, unpicklable=False))
 
 
-def get_sentences_layer(text):
-    """ Finds all the sentences in a text.
+def preprocess_text(original_text, sentences_layer):
+    """ Preprocesses the text, calls out the functions
+        find_sentences_with_index_and_span() and get_words_in_sentence()
         Parameters:
-            text (string) - clean text to find sentences from.
+            original_text (string) - A string of the original text
+            sentences_layer (Layer) - The Text.sentences layer
         Returns:
-            sentences (list) - list of sentences as Text objects
+            sentences (dict) - output of find_sentences_with_index_and_span()
+            words (dict) - output of get_words_in_sentence()
+            sentence_index (int) - count of sentences
     """
-    text = Text(text)
+
+    sentences = find_sentences_with_index_and_span(
+        original_text, sentences_layer)
+    words = []
+
+    sentence_index = 0  # Necessary in case there are no sentences
+    for sentence_index, (span, sentence) in enumerate(sentences.items()):
+        words.extend(get_words_in_sentence(span, sentence, sentence_index))
+        sentence_index += 1
+
+    return sentences, words
+
+
+def find_sentences_with_index_and_span(text, sentences_layer):
+    """ Returns: dictionary with tuplet of (start, end) as key and
+        dictionary of sentence with index, text, start and end values
+    """
+
+    keys, values = [], []
+
+    sentence_spans = sentences_layer[["start", "end"]]
+
+    for i, sentence in enumerate(sentences_layer):
+        start = sentence_spans[i][0]
+        end = sentence_spans[i][1]
+        values.append(
+            ({"index": i, "text": sentence.enclosing_text, "start": start, "end": end}))
+        keys.append((start, end))
+
+    return dict(zip(keys, values))
+
+
+def get_words_in_sentence(sentence_span, sentence, sentence_index):
+    """ Returns a list of all words in a sentence.
+        Words in this case are dictionaries that have attributes:
+            text (string) - text string of the word
+            pos (string) - part of speech of the word
+            lemma (string) - lemma of the word
+            start (int) - start index of the word in the whole text
+            end (int) - end index of the word in the whole text
+            sentence_index (int) - index of the sentence this word belongs to
+
+        In the case of the word "See", start: 0 and end: 3
+        In the case of multiple analyses (for example many lemmas, many POS options),
+        only choose the first for now.
+    """
+
+    text = Text(sentence["text"])
+
+    word_summaries = []
     text.tag_layer()
-    return text
+    words = text.words
+    word_spans_in_sentence = words[["start", "end"]]
+    for i in range(len(words)):
 
+        # Find the indexes of words in the whole text
+        word_start_in_sentence = word_spans_in_sentence[i][0][0]
+        start = sentence_span[0] + word_start_in_sentence
+        end = start + len(words.text[i])
 
-def words_without_punctuation(text):
-    words_with_punct = Text(text).word_texts
-    words_without_punctuation = [w for w in words_with_punct if w.isalpha()]
-    return words_without_punctuation
+        # Find the sentence start and end indices
+        sentence_start = sentence_span[0]
+        sentence_end = sentence_span[1]
 
+        # Find the lemma and pos of the word
+        lemma = text.morph_analysis[i].lemma[0]
+        pos = text.morph_analysis[i].partofspeech[0]
 
-def lemmas_without_punctuation(text):
-    lemmas_with_punct = Text(text).lemmas
-    lemmas_without_punctuation = [w for w in lemmas_with_punct if w.isalpha()]
-    return lemmas_without_punctuation
+        word_summaries.append(
+            {"text": words[i].text, "start": start, "end": end, "lemma": lemma,
+             "pos": pos, "sentence_index": sentence_index,
+             "sentence_start": sentence_start, "sentence_end": sentence_end})
 
-
-def tag_text(text):
-    laused = nltk.sent_tokenize(text)
-    return [list(zip(Text(text).word_texts, Text(lause).postags)) for lause in laused]
-
-
-def most_frequent_words(words, until=30):
-    """ Creates a frequency distribution by lemmas """
-    return nltk.FreqDist(words).most_common()[:until]
+    return word_summaries
 
 
 def is_sentences_layer_necessary(config):
