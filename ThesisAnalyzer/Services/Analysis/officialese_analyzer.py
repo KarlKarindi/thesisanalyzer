@@ -16,23 +16,28 @@ def analyze(original_text, text_obj, sentences_layer):
     officialese_summary = OfficialeseSummary()
 
     # Syntax analysis setup.
-    text_obj.tag_layer(["morph_extended"])
-    # Create a VISLCG pipeline. vislcg_path refers to the binary vislcg file, then tag the text.
+    # Create a VISLCG pipeline. vislcg_path refers to the binary vislcg file.
     pipeline = VISLCG3Pipeline(vislcg_cmd=vislcg_path)
     visl_tagger = VislTagger(vislcg3_pipeline=pipeline)
-    visl_tagger.tag(text_obj)
 
     sentences, words = utils.preprocess_text(original_text, sentences_layer)
-    sentence_spans = sentences_layer[["start", "end"]]
 
-    SyntaxDependencyRetagger("visl").retag(text_obj)
+    # Tag the syntax for each sentence, then run analyses on the sentence.
+    # The loop is necessary, as the SyntaxDependencyRetagger can only take one sentence at a time.
+    for i, sentence in enumerate(sentences_layer):
+        sentence_text_obj = Text(sentence.enclosing_text)
+        sentence_text_obj.tag_layer(["morph_extended"])
+        visl_tagger.tag(sentence_text_obj)
+        SyntaxDependencyRetagger("visl").retag(sentence_text_obj)
+
+        # Analyze määrust saavas käändes
+        officialese_summary.maarus_saavas_summary.extend(
+            analyze_maarus_saavas(sentence_text_obj, i, words))
 
     # Poolt-tarind analysis
+    sentence_spans = sentences_layer[["start", "end"]]
     officialese_summary.poolt_tarind_summary = analyze_poolt_tarind(original_text,
                                                                     sentence_spans, sentences_layer)
-
-    officialese_summary.maarus_saavas_summary = analyze_maarus_saavas(
-        sentence_spans, text_obj, sentences, words)
 
     return officialese_summary
 
@@ -78,7 +83,22 @@ def analyze_poolt_tarind(original_text, sentence_spans, sentences_layer):
     return poolt_tarind_list
 
 
-def analyze_maarus_saavas(sentence_spans, sentence, sentences, words):
+def analyze_maarus_saavas(sentence, sentence_index, all_words_list):
+    """ Analyzes whether there is a määrus in saavas käändes officialese error.
+        Example (offending sentence -> what the sentence should be):
+             "Arsti sooviks on teha head" -> "Arst soovib teha head"
+        Parameters:
+            sentence (Text) - Sentence that has had syntax analysis done to it
+            sentence_index (int) - index of the sentence
+            all_words_list (list) - list of all the words in the original_text
+        Returns:
+            offenders (list) - List of MaarusSaavasContainer objects
+    """
+
+    # Only leave the words in the corresponding sentence
+    words = [word for word in all_words_list if
+             word["sentence_index"] == sentence_index]
+
     offenders = []
     for i, word in enumerate(sentence.visl):
         # Check if the word is an adverb (määrsõna) and if it's conditional (tingiv kõneviis)
@@ -98,10 +118,10 @@ def analyze_maarus_saavas(sentence_spans, sentence, sentences, words):
                                   words[i]["position"][1]]
                 parent_text = parent["text"]
                 child_text = words[i]["text"]
+                sentence_position = parent["sentence_position"]
 
-                offender = MaarusSaavasContainer(
-                    "lmao", [0, 1], parent_position, child_position, parent_text, child_text)
-                pprint(offender)
+                offender = MaarusSaavasContainer(sentence.text, sentence_position,
+                                                 parent_position, child_position, parent_text, child_text)
+                offenders.append(offender)
 
     return offenders
-    # print(words[parent_id])
