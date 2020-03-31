@@ -119,6 +119,7 @@ class TagSummary():
 class OfficialeseSummary():
     def __init__(self):
         self.poolt_tarind_summary = []
+        self.maarus_saavas_summary = []
 
 
 class PooltTarindContainer():
@@ -132,3 +133,19 @@ class PooltTarindContainer():
     def __repr__(self):
         return '<PooltTarindContainer (text: {}, sentence_text: {}, sentence_position: {}, position: {})>' \
             .format(self.text, self.sentence_text, self.sentence_position, self.position)
+
+
+class MaarusSaavasContainer():
+    def __init__(self, sentence_text, sentence_position, parent_position, child_position, parent_text, child_text):
+        self.sentence_text = sentence_text
+        self.sentence_position = sentence_position
+        self.parent_position = parent_position
+        self.child_position = child_position
+        self.parent_text = parent_text
+        self.child_text = child_text
+
+    def __repr__(self):
+        return '<MaarusSaavasContainer (sentence_text: {}, sentence_position: {}, parent_position: {}, ' \
+            'parent_text: {}, child_position: {}, child_text: {})>' \
+            .format(self.sentence_text, self.sentence_position, self.parent_position,
+                    self.parent_text, self.child_position, self.child_text)

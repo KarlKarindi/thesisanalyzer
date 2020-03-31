@@ -68,9 +68,9 @@ def get_words_in_sentence(sentence_span, sentence, sentence_index):
             text (string) - text string of the word
             pos (string) - part of speech of the word
             lemma (string) - lemma of the word
-            start (int) - start index of the word in the whole text
-            end (int) - end index of the word in the whole text
+            position (list) - [start, end] position of the word in the original text
             sentence_index (int) - index of the sentence this word belongs to
+            sentence_position [list] - [start, end] position of the sentence
 
         In the case of the word "See", start: 0 and end: 3
         In the case of multiple analyses (for example many lemmas, many POS options),
@@ -99,13 +99,12 @@ def get_words_in_sentence(sentence_span, sentence, sentence_index):
         pos = text.morph_analysis[i].partofspeech[0]
 
         word_summaries.append(
-            {"text": words[i].text, "start": start, "end": end, "lemma": lemma,
+            {"text": words[i].text, "position": [start, end], "lemma": lemma,
              "pos": pos, "sentence_index": sentence_index,
-             "sentence_start": sentence_start, "sentence_end": sentence_end})
+             "sentence_position": [sentence_start, sentence_end]})
 
     return word_summaries
 
 
 def is_sentences_layer_necessary(config):
-    return config.ANALYZE_OVERUSED_WORDS or config.ANALYZE_SENTENCE_LENGTH or \
-        config.ANALYZE_IMPERSONALITY or config.ANALYZE_TAGS or config.ANALYZE_OFFICIALESE
+    return config.ANALYZE_OVERUSED_WORDS or config.ANALYZE_SENTENCE_LENGTH or config.ANALYZE_IMPERSONALITY or config.ANALYZE_TAGS or config.ANALYZE_OFFICIALESE

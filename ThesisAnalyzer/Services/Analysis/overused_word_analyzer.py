@@ -187,10 +187,9 @@ def map_lemma_to_word(words):
 
     # Iterate over all the words
     for i, word in enumerate(words):
-        word_obj = WordSummary(
-            word["text"], word["pos"], [word["start"],
-                                        word["end"]], word["sentence_index"],
-            [word["sentence_start"], word["sentence_end"]])
+        word_obj = WordSummary(word["text"], word["pos"], [word["position"][0],
+                                                           word["position"][1]], word["sentence_index"],
+                               [word["sentence_position"][0], word["sentence_position"][1]])
         lemma_to_word[word["lemma"]].add(word_obj)
 
     return lemma_to_word
