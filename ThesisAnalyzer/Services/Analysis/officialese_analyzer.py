@@ -1,6 +1,7 @@
 from ThesisAnalyzer.Models.Analysis import OfficialeseSummary, PooltTarindContainer
 from estnltk.converters.CG3_exporter import export_CG3
 from estnltk.taggers.syntax.visl_tagger import VISLCG3Pipeline
+from estnltk.taggers import VislTagger, SyntaxDependencyRetagger
 from env import vislcg_path
 
 from estnltk import Text
@@ -13,20 +14,18 @@ import math
 def analyze(original_text, text_obj, sentences_layer):
     officialese_summary = OfficialeseSummary()
 
-    # The morph_extended layer is necessary for further syntactic analysis
-
     sentence_spans = sentences_layer[["start", "end"]]
 
-    text_obj.analyse("syntax_preprocessing")
-    cg3 = export_CG3(text_obj)
-
+    # Syntax analysis setup.
+    text_obj.tag_layer(["morph_extended"])
+    # Create a VISLCG pipeline. vislcg_path refers to the binary vislcg file, then tag the text.
     pipeline = VISLCG3Pipeline(vislcg_cmd=vislcg_path)
-    results = pipeline.process_lines(cg3, split_result=True, remove_info=True)
+    visl_tagger = VislTagger(vislcg3_pipeline=pipeline)
+    visl_tagger.tag(text_obj)
 
-   # print(results)
-    for r in results:
-        print(r.split(" "))
-        print()
+    SyntaxDependencyRetagger("visl").retag(text_obj)
+
+    print(text_obj.visl)
 
     # Poolt-tarind analysis
     officialese_summary.poolt_tarind_summary = analyze_poolt_tarind(original_text,
@@ -63,7 +62,7 @@ def analyze_poolt_tarind(original_text, sentence_spans, sentences_layer):
                                      [0][0], positions[w_i][0][1]]
                 sentence_position = [sentence_spans[s_i]
                                      [0], sentence_spans[s_i][1]]
-                offender_text = original_text[offender_position[0]:offender_position[1]]
+                offender_text = original_text[offender_position[0]                                              :offender_position[1]]
 
                 poolt_tarind_list.append(PooltTarindContainer(
                     offender_text, sentence.enclosing_text, sentence_position, offender_position))
