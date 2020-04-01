@@ -58,8 +58,7 @@ def analyze(text, user_form=False):
 
         # Impersonality analyzer
         if config.ANALYZE_IMPERSONALITY:
-            summary.impersonality_summary = impersonality_analyzer.analyze(
-                text, sentences_layer)
+            summary.impersonality_summary = impersonality_analyzer.analyze(text, sentences_layer)
             if log_to_database:
                 impers = summary.impersonality_summary
                 for sentence in impers.sentences_with_pv.keys():
@@ -82,16 +81,14 @@ def analyze(text, user_form=False):
 
         # Clause analysis
         if config.ANALYZE_SENTENCE_LENGTH:
-            summary.sentences_length_summary = sentences_length_analyzer.analyze(
-                text, sentences_layer)
+            summary.sentences_length_summary = sentences_length_analyzer.analyze(text, sentences_layer)
             if log_to_database:
                 for sentence in summary.sentences_length_summary.long_sentences:
                     db.session.add(LongSentence(summary.id, sentence))
 
         # Tag analysis
         if config.ANALYZE_TAGS and summary.text_summary is not None:
-            summary.tag_summary = tag_analyzer.analyze(
-                text, text_obj, summary.text_summary.word_count)
+            summary.tag_summary = tag_analyzer.analyze(text, text_obj, summary.text_summary.word_count)
             if log_to_database:
                 db.session.add(TextStatistics(summary.id,
                                               summary.text_summary.sentence_count,
@@ -101,8 +98,7 @@ def analyze(text, user_form=False):
 
         # Officialese analysis
         if config.ANALYZE_OFFICIALESE:
-            summary.officialese_summary = officialese_analyzer.analyze(
-                text, text_obj, sentences_layer)
+            summary.officialese_summary = officialese_analyzer.analyze(text, text_obj, sentences_layer)
 
     end = timer()
 

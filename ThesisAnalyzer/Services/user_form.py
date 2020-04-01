@@ -13,7 +13,8 @@ class FormData(object):
                  highlighted_sentences,
                  highlighted_clusters,
                  poolt_tarind_sentences,
-                 olema_kesksona_sentences
+                 olema_kesksona_sentences,
+                 maarus_saavas_sentences
                  ):
 
         self.elapsed_time = elapsed_time
@@ -27,10 +28,12 @@ class FormData(object):
         self.highlighted_clusters = highlighted_clusters
         self.poolt_tarind_sentences = poolt_tarind_sentences
         self.olema_kesksona_sentences = olema_kesksona_sentences
+        self.maarus_saavas_sentences = maarus_saavas_sentences
 
 
 def format_data(text, result):
     """ Format the data received from the user form.
+        ONLY CALLED OUT WHEN A REQUEST FROM THE USER FORM IS MADE
         Parameters:
             text (string) the original, full text
             result (Summary) - analysis result in decoded form
@@ -39,7 +42,8 @@ def format_data(text, result):
     # Initalize in case some analyses are turned off
     sentence_count, word_count, sentences_with_pv, pv_in_sentences, long_sentences, \
         overused_words, all_WS_sentences, all_WS_clusters, all_poolt_tarind_sentences, \
-        all_olema_kesksona_sentences = 1, 1, [], [], [], [], [], [], [], []
+        all_olema_kesksona_sentences, all_maarus_saavas_sentences \
+        = 1, 1, [], [], [], [], [], [], [], [], []
 
     elapsed_time = result["elapsed_time"]
     if config.ANALYZE_OVERUSED_WORDS:
@@ -115,12 +119,13 @@ def format_data(text, result):
         all_poolt_tarind_sentences = handle_olema_kesksona_and_poolt_tarind_list(
             poolt_tarind_list, text)
 
-        maarus_saavas_list = result["officialese_summary"]["maarus_saavas_summary"]
-        all_maarus_saavas_list = []
-
         olema_kesksona_list = result["officialese_summary"]["olema_kesksona_summary"]
         all_olema_kesksona_sentences = handle_olema_kesksona_and_poolt_tarind_list(
             olema_kesksona_list, text)
+
+        maarus_saavas_list = result["officialese_summary"]["maarus_saavas_summary"]
+        all_maarus_saavas_sentences = handle_maarus_saavas_list(
+            maarus_saavas_list, text)
 
     return FormData(elapsed_time,
                     sentence_count,
@@ -132,8 +137,8 @@ def format_data(text, result):
                     all_WS_sentences,
                     all_WS_clusters,
                     all_poolt_tarind_sentences,
-                    all_olema_kesksona_sentences
-                    )
+                    all_olema_kesksona_sentences,
+                    all_maarus_saavas_sentences)
 
 
 def handle_olema_kesksona_and_poolt_tarind_list(analysis_list, text):
@@ -143,8 +148,9 @@ def handle_olema_kesksona_and_poolt_tarind_list(analysis_list, text):
             sentence_text,
             text
     """
-
-    all_poolt_tarind_sentences = []
+    # Contains lists, where
+    # The first element is the sentence before bold, the second is the bold text, third is after bold.
+    all_analysis_sentences = []
 
     for offender in analysis_list:
         sentence_position = offender["sentence_position"]
@@ -153,7 +159,44 @@ def handle_olema_kesksona_and_poolt_tarind_list(analysis_list, text):
         sentence_before_bold = text[sentence_position[0]:position[0]]
         text_in_bold = text[position[0]:position[1]]
         sentence_after_bold = text[position[1]:sentence_position[1]]
-        all_poolt_tarind_sentences.append(
+        all_analysis_sentences.append(
             [sentence_before_bold, text_in_bold, sentence_after_bold])
 
-    return all_poolt_tarind_sentences
+    return all_analysis_sentences
+
+
+def handle_maarus_saavas_list(analysis_list, text):
+    # Contains lists, where:
+    # The first element is in before bold, second is bold, third is after the first bold,
+    # fourth is bold and the fifth is after bold.
+    all_maarus_saavas_sentences = []
+
+    for offender in analysis_list:
+        sentence_position = offender["sentence_position"]
+        first_position, second_position = find_first_and_second_position(
+            offender)
+
+        sentence_before_first_bold = text[sentence_position[0]:first_position[0]]
+        text_in_first_bold = text[first_position[0]:first_position[1]]
+        sentence_after_first_bold = text[first_position[1]:second_position[0]]
+        text_in_second_bold = text[second_position[0]:second_position[1]]
+        sentence_after_second_bold = text[second_position[1]:sentence_position[1]]
+
+        all_maarus_saavas_sentences.append(
+            [sentence_before_first_bold, text_in_first_bold, sentence_after_first_bold,
+             text_in_second_bold, sentence_after_second_bold])
+
+    return all_maarus_saavas_sentences
+
+
+def find_first_and_second_position(maarus_saavas_container):
+    if child_is_first_in_text(maarus_saavas_container):
+        return maarus_saavas_container["child_position"], maarus_saavas_container["parent_position"]
+    else:
+        return maarus_saavas_container["parent_position"], maarus_saavas_container["child_position"]
+
+
+def child_is_first_in_text(maarus_saavas_container):
+    if maarus_saavas_container["child_position"][0] < maarus_saavas_container["parent_position"][0]:
+        return True
+    return False

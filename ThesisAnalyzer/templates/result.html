@@ -123,8 +123,8 @@
                     </button>
                   </div>
                   <div class="analysisInfoContainer">
-                    <span class="analysisInfo">Poolt-tarind on võõrapärane vorm, mis jätab lauses tegija
-                      tagaplaanile.</span>
+                    <p class="analysisInfo">Poolt-tarind on võõrapärane vorm, mis jätab lauses tegija
+                      tagaplaanile.</p>
                   </div>
                 </div>
               </div>
@@ -133,10 +133,10 @@
                   {% if poolt_tarind_sentences|length == 0 %}
                   <h5>Analüüs ei tuvastanud ühtegi poolt-tarindit.</h5>
                   {% else %}
-                  <h6>Näiteks lause „Trahv oli politseiniku poolt tehtud.“ on kantseliitlik. Selle asemel on võimalik
-                    kasutada varianti "Politseinik tegi trahvi."
-                  </h6>
-                  <h6>Järgnevates lausetes leidub poolt-tarind:</h6>
+                  <h5>Näiteks lause „Trahv oli politseiniku poolt tehtud.“ saab paremini kirjutada "Politseinik tegi
+                    trahvi."
+                  </h5>
+                  <h5>Järgnevates lausetes leidub poolt-tarind:</h5>
                   <br>
                   {%- for sentence in poolt_tarind_sentences %}
                   <p>{{sentence[0]}}<b>{{sentence[1]}}</b>{{sentence[2]}}</p>
@@ -167,8 +167,8 @@
                     </button>
                   </div>
                   <div class="analysisInfoContainer">
-                    <span class="analysisInfo">Öeldistäiteks olev v- või tav- kesksõna võib mõjuda bürokraatlikult.
-                    </span>
+                    <p class="analysisInfo">Öeldistäiteks olev v- või tav- kesksõna võib mõjuda bürokraatlikult.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -177,9 +177,9 @@
                   {% if olema_kesksona_sentences|length == 0 %}
                   <h5>Analüüs ei tuvastanud ühtegi olema-kesksõna rikkumist.</h5>
                   {% else %}
-                  <h6>Näiteks „Pakkumine on kehtiv 6 kuud“ saab paremini öelda „Pakkumine kehtib kuus kuud“.
-                  </h6>
-                  <h6>Järgnevates lausetes leidub olema-kesksõna:</h6>
+                  <h5>Näiteks „Pakkumine on kehtiv 6 kuud“ saab paremini kirjutada „Pakkumine kehtib kuus kuud“.
+                  </h5>
+                  <h5>Järgnevates lausetes leidub olema-kesksõna:</h5>
                   <br>
                   {%- for sentence in olema_kesksona_sentences %}
                   <p>{{sentence[0]}}<b>{{sentence[1]}}</b>{{sentence[2]}}</p>
@@ -211,7 +211,7 @@
                   </div>
                   <div class="analysisInfoContainer">
                     <p class="analysisInfo">Märgib omaduste või seisundite juhuslikkust, ajutist iseloomu.<br>Parem on
-                      kasutada kindlamat kõneviisi
+                      kasutada kindlamat kõneviisi.
                     </p>
                   </div>
                 </div>
@@ -219,15 +219,17 @@
               <div id="collapseThreeThree" class="collapse" aria-labelledby="headingThreeThree"
                 data-parent="#accordion">
                 <div class="card-body">
-                  {% if olema_kesksona_sentences|length == 0 %}
+                  {% if maarus_saavas_sentences|length == 0 %}
                   <h5>Analüüs ei tuvastanud ühtegi määrust saavas käändes.</h5>
                   {% else %}
-                  <h6>Näiteks „Pakkumine on kehtiv 6 kuud“ saab paremini öelda „Pakkumine kehtib kuus kuud“.
-                  </h6>
-                  <h6>Järgnevates lausetes leidub olema-kesksõna:</h6>
+                  <h5>Näiteks „Põhiliseks eesmärgiks on..." saab paremini kirjutada „Põhiline eesmärk
+                    on...“.
+                    <br>
+                    Järgnevates lausetes leidub määrus saavas käändes:
+                  </h5>
                   <br>
-                  {%- for sentence in olema_kesksona_sentences %}
-                  <p>{{sentence[0]}}<b>{{sentence[1]}}</b>{{sentence[2]}}</p>
+                  {%- for sentence in maarus_saavas_sentences %}
+                  <p>{{sentence[0]}}<b>{{sentence[1]}}</b>{{sentence[2]}}<b>{{sentence[3]}}</b>{{sentence[4]}}</p>
                   {%- endfor %}
                   <br />
                   {% endif %}

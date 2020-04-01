@@ -30,7 +30,8 @@ def index():
                                highlighted_sentences=data.highlighted_sentences,
                                highlighted_clusters=data.highlighted_clusters,
                                poolt_tarind_sentences=data.poolt_tarind_sentences,
-                               olema_kesksona_sentences=data.olema_kesksona_sentences
+                               olema_kesksona_sentences=data.olema_kesksona_sentences,
+                               maarus_saavas_sentences=data.maarus_saavas_sentences
                                )
 
         id = analysis_result["id"]
