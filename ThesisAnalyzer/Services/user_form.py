@@ -12,7 +12,9 @@ class FormData(object):
                  overused_words,
                  highlighted_sentences,
                  highlighted_clusters,
-                 poolt_tarind_sentences):
+                 poolt_tarind_sentences,
+                 olema_kesksona_sentences
+                 ):
 
         self.elapsed_time = elapsed_time
         self.sentence_count = sentence_count
@@ -24,6 +26,7 @@ class FormData(object):
         self.highlighted_sentences = highlighted_sentences
         self.highlighted_clusters = highlighted_clusters
         self.poolt_tarind_sentences = poolt_tarind_sentences
+        self.olema_kesksona_sentences = olema_kesksona_sentences
 
 
 def format_data(text, result):
@@ -35,8 +38,8 @@ def format_data(text, result):
 
     # Initalize in case some analyses are turned off
     sentence_count, word_count, sentences_with_pv, pv_in_sentences, long_sentences, \
-        overused_words, all_WS_sentences, all_WS_clusters, all_poolt_tarind_sentences = \
-        1, 1, [], [], [], [], [], [], []
+        overused_words, all_WS_sentences, all_WS_clusters, all_poolt_tarind_sentences, \
+        all_olema_kesksona_sentences = 1, 1, [], [], [], [], [], [], [], []
 
     elapsed_time = result["elapsed_time"]
     if config.ANALYZE_OVERUSED_WORDS:
@@ -109,8 +112,15 @@ def format_data(text, result):
 
     if config.ANALYZE_OFFICIALESE:
         poolt_tarind_list = result["officialese_summary"]["poolt_tarind_summary"]
-        all_poolt_tarind_sentences = handle_poolt_tarind_list(
+        all_poolt_tarind_sentences = handle_olema_kesksona_and_poolt_tarind_list(
             poolt_tarind_list, text)
+
+        maarus_saavas_list = result["officialese_summary"]["maarus_saavas_summary"]
+        all_maarus_saavas_list = []
+
+        olema_kesksona_list = result["officialese_summary"]["olema_kesksona_summary"]
+        all_olema_kesksona_sentences = handle_olema_kesksona_and_poolt_tarind_list(
+            olema_kesksona_list, text)
 
     return FormData(elapsed_time,
                     sentence_count,
@@ -121,14 +131,22 @@ def format_data(text, result):
                     overused_words,
                     all_WS_sentences,
                     all_WS_clusters,
-                    all_poolt_tarind_sentences
+                    all_poolt_tarind_sentences,
+                    all_olema_kesksona_sentences
                     )
 
 
-def handle_poolt_tarind_list(poolt_tarind_list, text):
+def handle_olema_kesksona_and_poolt_tarind_list(analysis_list, text):
+    """ Handles objects that have the following attributes:
+            position,
+            sentence_position,
+            sentence_text,
+            text
+    """
+
     all_poolt_tarind_sentences = []
 
-    for offender in poolt_tarind_list:
+    for offender in analysis_list:
         sentence_position = offender["sentence_position"]
         position = offender["position"]
 

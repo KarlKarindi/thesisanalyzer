@@ -101,29 +101,40 @@
         </div>
         <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
           <div class="card-body">
+            <!-- Container starts -->
+
             <!-- Poolt-tarind -->
             <div class="card">
               <div class="card-header">
-                <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThreeOne" href="#"
-                  aria-expanded="false">
-                  <div class="imageContainer">
-                    <div class="left">
-                      <img class="image" src="{{ url_for('static', filename='images/puppy.png') }}" />
-                    </div>
-                    <div class="analysisHeader">
-                      Poolt-tarind kontroll
-                    </div>
+                <div class="flex-container">
+                  <div>
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThreeOne"
+                      href="#" aria-expanded="false">
+                      <div class="imageContainer">
+                        <div class="left">
+                          <img class="image" src="{{ url_for('static', filename='images/puppy.png') }}" />
+                        </div>
+                        <div class="analysisHeader">
+                          <div>
+                            Poolt-tarind kontroll
+                          </div>
+                        </div>
+                      </div>
+                    </button>
                   </div>
-                </button>
+                  <div>
+                    <span class="analysisInfo">Poolt-tarind on võõrapärane vorm, mis jätab lauses tegija
+                      tagaplaanile.</span>
+                  </div>
+                </div>
               </div>
               <div id="collapseThreeOne" class="collapse" aria-labelledby="headingThreeOne" data-parent="#accordion">
                 <div class="card-body">
                   {% if poolt_tarind_sentences|length == 0 %}
                   <h5>Analüüs ei tuvastanud ühtegi poolt-tarindit.</h5>
                   {% else %}
-                  <h6>Poolt-tarind on võõrapärane vorm, mis jätab lauses tegija tagaplaanile. Näiteks lause
-                    „Trahv oli politseiniku poolt tehtud.“ on kantseliitlik. Selle asemel on võimalik kasutada varianti
-                    "Politseinik tegi trahvi."
+                  <h6>Näiteks lause „Trahv oli politseiniku poolt tehtud.“ on kantseliitlik. Selle asemel on võimalik
+                    kasutada varianti "Politseinik tegi trahvi."
                   </h6>
                   <h6>Järgnevates lausetes leidub poolt-tarind:</h6>
                   <br>
@@ -135,6 +146,51 @@
                 </div>
               </div>
             </div>
+
+            <!-- Olema kesksõna -->
+            <div class="card">
+              <div class="card-header">
+                <div class="flex-container">
+                  <div>
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThreeTwo"
+                      href="#" aria-expanded="false">
+                      <div class="imageContainer">
+                        <div class="left">
+                          <img class="image" src="{{ url_for('static', filename='images/puppy.png') }}" />
+                        </div>
+                        <div class="analysisHeader">
+                          <div>
+                            Olema-kesksõna kontroll
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                  <div>
+                    <span class="analysisInfo">Öeldistäiteks olev v- või tav- kesksõna võib mõjuda bürokraatlikult.
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div id="collapseThreeTwo" class="collapse" aria-labelledby="headingThreeTwo" data-parent="#accordion">
+                <div class="card-body">
+                  {% if olema_kesksona_sentences|length == 0 %}
+                  <h5>Analüüs ei tuvastanud ühtegi olema-kesksõna rikkumist.</h5>
+                  {% else %}
+                  <h6>Näiteks „Pakkumine on kehtiv 6 kuud“ saab paremini öelda „Pakkumine kehtib kuus kuud“.
+                  </h6>
+                  <h6>Järgnevates lausetes leidub olema-kesksõna:</h6>
+                  <br>
+                  {%- for sentence in olema_kesksona_sentences %}
+                  <p>{{sentence[0]}}<b>{{sentence[1]}}</b>{{sentence[2]}}</p>
+                  {%- endfor %}
+                  <br />
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Container ends -->
           </div>
         </div>
       </div>

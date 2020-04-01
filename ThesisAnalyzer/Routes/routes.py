@@ -29,7 +29,8 @@ def index():
                                overused_words=data.overused_words,
                                highlighted_sentences=data.highlighted_sentences,
                                highlighted_clusters=data.highlighted_clusters,
-                               poolt_tarind_sentences=data.poolt_tarind_sentences
+                               poolt_tarind_sentences=data.poolt_tarind_sentences,
+                               olema_kesksona_sentences=data.olema_kesksona_sentences
                                )
 
         id = analysis_result["id"]

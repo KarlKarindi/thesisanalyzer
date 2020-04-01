@@ -85,7 +85,7 @@ footer {
   padding-left: 10px;
   white-space: nowrap;
   font-size: larger;
-  font-weight: 800;
+  font-weight: 650;
 }
 
 .analysisResult {
@@ -122,4 +122,14 @@ footer {
 
 .sentence {
   font-size: smaller;
+}
+
+.flex-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.analysisInfo {
+  text-align: center;
+  vertical-align: middle;
 }
