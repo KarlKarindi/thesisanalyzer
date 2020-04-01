@@ -18,8 +18,6 @@ def analyze(original_text, text_obj, sentences_layer):
 
     # Syntax analysis setup.
     # Create a VISLCG pipeline. vislcg_path refers to the binary vislcg file.
-    print(vislcg_path)
-    print()
     pipeline = VISLCG3Pipeline(vislcg_cmd=vislcg_path)
     visl_tagger = VislTagger(vislcg3_pipeline=pipeline)
 
