@@ -129,7 +129,11 @@ footer {
   justify-content: space-between;
 }
 
+.analysisInfoContainer {
+  flex-basis: 45%;
+}
+
 .analysisInfo {
-  text-align: center;
   vertical-align: middle;
+  font-size: smaller;
 }

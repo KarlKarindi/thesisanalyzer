@@ -122,7 +122,7 @@
                       </div>
                     </button>
                   </div>
-                  <div>
+                  <div class="analysisInfoContainer">
                     <span class="analysisInfo">Poolt-tarind on võõrapärane vorm, mis jätab lauses tegija
                       tagaplaanile.</span>
                   </div>
@@ -166,7 +166,7 @@
                       </div>
                     </button>
                   </div>
-                  <div>
+                  <div class="analysisInfoContainer">
                     <span class="analysisInfo">Öeldistäiteks olev v- või tav- kesksõna võib mõjuda bürokraatlikult.
                     </span>
                   </div>
@@ -190,6 +190,50 @@
               </div>
             </div>
 
+            <!-- Määrus saavas -->
+            <div class="card">
+              <div class="card-header">
+                <div class="flex-container">
+                  <div>
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThreeThree"
+                      href="#" aria-expanded="false">
+                      <div class="imageContainer">
+                        <div class="left">
+                          <img class="image" src="{{ url_for('static', filename='images/puppy.png') }}" />
+                        </div>
+                        <div class="analysisHeader">
+                          <div>
+                            Määrus saavas käändes kontroll
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                  <div class="analysisInfoContainer">
+                    <p class="analysisInfo">Märgib omaduste või seisundite juhuslikkust, ajutist iseloomu.<br>Parem on
+                      kasutada kindlamat kõneviisi
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div id="collapseThreeThree" class="collapse" aria-labelledby="headingThreeThree"
+                data-parent="#accordion">
+                <div class="card-body">
+                  {% if olema_kesksona_sentences|length == 0 %}
+                  <h5>Analüüs ei tuvastanud ühtegi määrust saavas käändes.</h5>
+                  {% else %}
+                  <h6>Näiteks „Pakkumine on kehtiv 6 kuud“ saab paremini öelda „Pakkumine kehtib kuus kuud“.
+                  </h6>
+                  <h6>Järgnevates lausetes leidub olema-kesksõna:</h6>
+                  <br>
+                  {%- for sentence in olema_kesksona_sentences %}
+                  <p>{{sentence[0]}}<b>{{sentence[1]}}</b>{{sentence[2]}}</p>
+                  {%- endfor %}
+                  <br />
+                  {% endif %}
+                </div>
+              </div>
+            </div>
             <!-- Container ends -->
           </div>
         </div>

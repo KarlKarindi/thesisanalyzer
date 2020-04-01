@@ -110,4 +110,8 @@ def get_words_in_sentence(sentence_span, sentence, sentence_index):
 
 
 def is_sentences_layer_necessary(config):
-    return config.ANALYZE_OVERUSED_WORDS or config.ANALYZE_SENTENCE_LENGTH or config.ANALYZE_IMPERSONALITY or config.ANALYZE_TAGS or config.ANALYZE_OFFICIALESE
+    return config.ANALYZE_OVERUSED_WORDS or \
+        config.ANALYZE_SENTENCE_LENGTH or \
+        config.ANALYZE_IMPERSONALITY or \
+        config.ANALYZE_TAGS or \
+        config.ANALYZE_OFFICIALESE
