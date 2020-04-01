@@ -24,21 +24,3 @@ def analyze(text, text_obj, word_count):
 
     tagSummary = TagSummary(word_count, adverb_count, pronoun_count)
     return tagSummary
-
-
-def tag_words_in_sentences(sentences):
-    """ Parameters:
-            sentences (list) - list of sentences
-        Returns:
-            list of tuplets (word, tag)
-    """
-
-    # tags = []
-    # for sentence in sentences:
-    #     sentence_analysis = vabamorf.analyze(sentence)
-    #     for word in sentence_analysis:
-    #         text = word["text"]
-    #         tag = word["analysis"][0]["partofspeech"]
-    #         tags.append((text, tag))
-
-    # return tags

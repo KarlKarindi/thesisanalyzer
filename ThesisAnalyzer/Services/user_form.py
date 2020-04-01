@@ -2,9 +2,18 @@ from ThesisAnalyzer.Config import analysis as config
 
 
 class FormData(object):
-    def __init__(self, elapsed_time, sentence_count, word_count, sentences_with_pv,
-                 pv_in_sentences, long_sentences, overused_words,
-                 highlighted_sentences, highlighted_clusters):
+    def __init__(self,
+                 elapsed_time,
+                 sentence_count,
+                 word_count,
+                 sentences_with_pv,
+                 pv_in_sentences,
+                 long_sentences,
+                 overused_words,
+                 highlighted_sentences,
+                 highlighted_clusters,
+                 poolt_tarind_sentences):
+
         self.elapsed_time = elapsed_time
         self.sentence_count = sentence_count
         self.word_count = word_count
@@ -14,6 +23,7 @@ class FormData(object):
         self.overused_words = overused_words
         self.highlighted_sentences = highlighted_sentences
         self.highlighted_clusters = highlighted_clusters
+        self.poolt_tarind_sentences = poolt_tarind_sentences
 
 
 def format_data(text, result):
@@ -25,7 +35,8 @@ def format_data(text, result):
 
     # Initalize in case some analyses are turned off
     sentence_count, word_count, sentences_with_pv, pv_in_sentences, long_sentences, \
-        overused_words, all_WS_sentences, all_WS_clusters = 1, 1, [], [], [], [], [], []
+        overused_words, all_WS_sentences, all_WS_clusters, all_poolt_tarind_sentences = \
+        1, 1, [], [], [], [], [], [], []
 
     elapsed_time = result["elapsed_time"]
     if config.ANALYZE_OVERUSED_WORDS:
@@ -96,5 +107,35 @@ def format_data(text, result):
             # Add all the clusters of one word summary to all_WS_clusters list.
             all_WS_clusters.append(one_WS_clusters)
 
-    return FormData(elapsed_time, sentence_count, word_count, sentences_with_pv, pv_in_sentences, long_sentences,
-                    overused_words, all_WS_sentences, all_WS_clusters)
+    if config.ANALYZE_OFFICIALESE:
+        poolt_tarind_list = result["officialese_summary"]["poolt_tarind_summary"]
+        all_poolt_tarind_sentences = handle_poolt_tarind_list(
+            poolt_tarind_list, text)
+
+    return FormData(elapsed_time,
+                    sentence_count,
+                    word_count,
+                    sentences_with_pv,
+                    pv_in_sentences,
+                    long_sentences,
+                    overused_words,
+                    all_WS_sentences,
+                    all_WS_clusters,
+                    all_poolt_tarind_sentences
+                    )
+
+
+def handle_poolt_tarind_list(poolt_tarind_list, text):
+    all_poolt_tarind_sentences = []
+
+    for offender in poolt_tarind_list:
+        sentence_position = offender["sentence_position"]
+        position = offender["position"]
+
+        sentence_before_bold = text[sentence_position[0]:position[0]]
+        text_in_bold = text[position[0]:position[1]]
+        sentence_after_bold = text[position[1]:sentence_position[1]]
+        all_poolt_tarind_sentences.append(
+            [sentence_before_bold, text_in_bold, sentence_after_bold])
+
+    return all_poolt_tarind_sentences

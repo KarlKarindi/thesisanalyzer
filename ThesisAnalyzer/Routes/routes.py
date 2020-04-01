@@ -28,7 +28,9 @@ def index():
                                long_sentences=data.long_sentences,
                                overused_words=data.overused_words,
                                highlighted_sentences=data.highlighted_sentences,
-                               highlighted_clusters=data.highlighted_clusters)
+                               highlighted_clusters=data.highlighted_clusters,
+                               poolt_tarind_sentences=data.poolt_tarind_sentences
+                               )
 
         id = analysis_result["id"]
         if id is not None:  # Meaning that the analysis is in the database

@@ -118,14 +118,20 @@
               </div>
               <div id="collapseThreeOne" class="collapse" aria-labelledby="headingThreeOne" data-parent="#accordion">
                 <div class="card-body">
-                  {% if long_sentences|length == 0 %}
-                  <h5>Analüüs ei tuvastanud ühtegi pikka lauset.</h5>
+                  {% if poolt_tarind_sentences|length == 0 %}
+                  <h5>Analüüs ei tuvastanud ühtegi poolt-tarindit.</h5>
                   {% else %}
-                  <h5>Järgnevaid lauseid võib pidada liiga pikaks:</h5>
-                  {%- for sentence in long_sentences %}
+                  <h6>Poolt-tarind on võõrapärane vorm, mis jätab lauses tegija tagaplaanile. Näiteks lause
+                    „Trahv oli politseiniku poolt tehtud.“ on kantseliitlik. Selle asemel on võimalik kasutada varianti
+                    "Politseinik tegi trahvi."
+                  </h6>
+                  <h6>Järgnevates lausetes leidub poolt-tarind:</h6>
+                  <br>
+                  {%- for sentence in poolt_tarind_sentences %}
+                  <p>{{sentence[0]}}<b>{{sentence[1]}}</b>{{sentence[2]}}</p>
+                  {%- endfor %}
                   <br />
-                  <p>{{sentence}}</p>
-                  {%- endfor %} {% endif %}
+                  {% endif %}
                 </div>
               </div>
             </div>
