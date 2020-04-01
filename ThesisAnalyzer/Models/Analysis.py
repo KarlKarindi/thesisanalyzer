@@ -120,6 +120,7 @@ class OfficialeseSummary():
     def __init__(self):
         self.poolt_tarind_summary = []
         self.maarus_saavas_summary = []
+        self.olema_kesksona_summary = []
 
 
 class PooltTarindContainer():
@@ -149,3 +150,15 @@ class MaarusSaavasContainer():
             'parent_text: {}, child_position: {}, child_text: {})>' \
             .format(self.sentence_text, self.sentence_position, self.parent_position,
                     self.parent_text, self.child_position, self.child_text)
+
+
+class OlemaKesksonaContainer():
+    def __init__(self, sentence_text, sentence_position, position, text):
+        self.sentence_text = sentence_text
+        self.sentence_position = sentence_position
+        self.position = position
+        self.text = text
+
+    def __repr__(self):
+        return '<OlemaKesksonaContainer (sentence_text: {}, sentence_position: {}, position: {}, text: {})>' \
+            .format(self.sentence_text, self.sentence_position, self.position, self.text)

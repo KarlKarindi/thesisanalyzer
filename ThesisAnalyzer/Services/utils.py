@@ -28,19 +28,22 @@ def preprocess_text(original_text, sentences_layer):
         Returns:
             sentences (dict) - output of find_sentences_with_index_and_span()
             words (dict) - output of get_words_in_sentence()
-            sentence_index (int) - count of sentences
+            sentence_words (dict) - index of sentences with the words in them
     """
 
+    sentence_words = {}
     sentences = find_sentences_with_index_and_span(
         original_text, sentences_layer)
     words = []
 
     sentence_index = 0  # Necessary in case there are no sentences
     for sentence_index, (span, sentence) in enumerate(sentences.items()):
-        words.extend(get_words_in_sentence(span, sentence, sentence_index))
+        __words = get_words_in_sentence(span, sentence, sentence_index)
+        words.extend(__words)
+        sentence_words[sentence_index] = __words
         sentence_index += 1
 
-    return sentences, words
+    return sentences, words, sentence_words
 
 
 def find_sentences_with_index_and_span(text, sentences_layer):

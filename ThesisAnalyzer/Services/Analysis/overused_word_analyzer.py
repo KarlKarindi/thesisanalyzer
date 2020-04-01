@@ -39,7 +39,8 @@ def analyze(original_text, sentences_layer):
     Lemma_list = Lemma.query.all()
 
     # Do the preprocessing
-    sentences, words = utils.preprocess_text(original_text, sentences_layer)
+    sentences, words, __ = utils.preprocess_text(
+        original_text, sentences_layer)
 
     # Get the amount of sentences and words
     text_sentence_count = len(sentences)
@@ -49,7 +50,6 @@ def analyze(original_text, sentences_layer):
     lemma_to_word = map_lemma_to_word(words)
 
     user_word_count = len(words)
-    # pprint(words)
 
     # First, filter out all lemmas that aren't included in the text more than once,
     # Then find all the lemmas that are viable for analysis

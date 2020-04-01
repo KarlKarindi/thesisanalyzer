@@ -1,6 +1,5 @@
 # Analyzers
-from ThesisAnalyzer.Services.Analysis import \
-    overused_word_analyzer, tag_analyzer, \
+from ThesisAnalyzer.Services.Analysis import overused_word_analyzer, tag_analyzer, \
     sentences_length_analyzer, impersonality_analyzer, \
     officialese_analyzer
 

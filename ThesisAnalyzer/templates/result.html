@@ -84,66 +84,117 @@
         </div>
       </div>
 
+      <!-- Kantseliit -->
       <div class="card">
         <div class="card-header">
           <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree"
             aria-controls="collapseThree" aria-expanded="false">
             <div class="imageContainer">
               <div class="left">
-                <img class="image" src="{{ url_for('static', filename='images/overusedWords.png') }}" />
+                <img class="image" src="{{ url_for('static', filename='images/kantseliit.png') }}" />
               </div>
               <div class="analysisHeader">
-                Sõnakorduste analüüs
+                Kantseliidi analüüs
               </div>
             </div>
           </button>
         </div>
         <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
           <div class="card-body">
-            {% if overused_words|length == 0 %}
-            <h5>Analüüs ei tuvastanud ühtegi suuremat sõnakordust.</h5>
-            {% else %}
-            <table cellspacing="6" cellpadding="20">
-              {%- for word in overused_words %}
-              <tr class="overusedAnalysis">
-                <td class="overusedWordLemma">
-                  <span><b> {{word.lemma}}</b></span><br>
-                  <span>{{word.times_used}}x</span>
-                </td>
-
-                <td colspan="8" class="overusedWordSentence">
-                  {%- for sentence in highlighted_sentences[loop.index0] %}
-                  <p>{{sentence[0]}}<b>{{sentence[1]}}</b>{{sentence[2]}}</p>
-                  {%- endfor %}
-              </tr>
-
-              {%- for clusters in highlighted_clusters[loop.index0] %}
-              <tr>
-                <td class="overusedWordCluster">
+            <!-- Poolt-tarind -->
+            <div class="card">
+              <div class="card-header">
+                <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThreeOne" href="#"
+                  aria-expanded="false">
                   <div class="imageContainer">
-                    <img class="image" src="{{ url_for('static', filename='images/overusedWordCluster.png') }}">
+                    <div class="left">
+                      <img class="image" src="{{ url_for('static', filename='images/puppy.png') }}" />
+                    </div>
+                    <div class="analysisHeader">
+                      Poolt-tarind kontroll
+                    </div>
                   </div>
-                </td>
-                <td class="sentence">
-                  <p>
-                    {%- for sentence_part in clusters %}
-                    {% if loop.index % 2 != 0 %}
-                    {{sentence_part}}
-                    {%else%}
-                    <b> {{sentence_part}} </b>
-                    {%endif%}
-                    {%- endfor %}
-                  </p>
-                  {%- endfor %}
-                  {%- endfor %}
-                </td>
-              </tr>
-            </table>
-            {% endif %}
+                </button>
+              </div>
+              <div id="collapseThreeOne" class="collapse" aria-labelledby="headingThreeOne" data-parent="#accordion">
+                <div class="card-body">
+                  {% if long_sentences|length == 0 %}
+                  <h5>Analüüs ei tuvastanud ühtegi pikka lauset.</h5>
+                  {% else %}
+                  <h5>Järgnevaid lauseid võib pidada liiga pikaks:</h5>
+                  {%- for sentence in long_sentences %}
+                  <br />
+                  <p>{{sentence}}</p>
+                  {%- endfor %} {% endif %}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Sõnakordused -->
+    <div class="card">
+      <div class="card-header">
+        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseFour"
+          aria-controls="collapseFour" aria-expanded="false">
+          <div class="imageContainer">
+            <div class="left">
+              <img class="image" src="{{ url_for('static', filename='images/overusedWords.png') }}" />
+            </div>
+            <div class="analysisHeader">
+              Sõnakorduste analüüs
+            </div>
+          </div>
+        </button>
+      </div>
+      <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordion">
+        <div class="card-body">
+          {% if overused_words|length == 0 %}
+          <h5>Analüüs ei tuvastanud ühtegi suuremat sõnakordust.</h5>
+          {% else %}
+          <table cellspacing="6" cellpadding="20">
+            {%- for word in overused_words %}
+            <tr class="overusedAnalysis">
+              <td class="overusedWordLemma">
+                <span><b> {{word.lemma}}</b></span><br>
+                <span>{{word.times_used}}x</span>
+              </td>
+
+              <td colspan="8" class="overusedWordSentence">
+                {%- for sentence in highlighted_sentences[loop.index0] %}
+                <p>{{sentence[0]}}<b>{{sentence[1]}}</b>{{sentence[2]}}</p>
+                {%- endfor %}
+            </tr>
+
+            {%- for clusters in highlighted_clusters[loop.index0] %}
+            <tr>
+              <td class="overusedWordCluster">
+                <div class="imageContainer">
+                  <img class="image" src="{{ url_for('static', filename='images/overusedWordCluster.png') }}">
+                </div>
+              </td>
+              <td class="sentence">
+                <p>
+                  {%- for sentence_part in clusters %}
+                  {% if loop.index % 2 != 0 %}
+                  {{sentence_part}}
+                  {%else%}
+                  <b> {{sentence_part}} </b>
+                  {%endif%}
+                  {%- endfor %}
+                </p>
+                {%- endfor %}
+                {%- endfor %}
+              </td>
+            </tr>
+          </table>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
   </div><!-- /container -->
 </body>
 
