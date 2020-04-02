@@ -10,12 +10,10 @@
 
 <body>
   <div class="container">
-
     <h1 class="headerTitle">Lõputöö analüsaator</h1>
     <p style="text-align: center;"><b>INFO: Lõputöö analüsaator ei salvesta sisestatud originaalteksti, aga salvestab
         edasiarenduse eesmärgil analüüsi
         tulemused.</b></p>
-
     <form method="POST" action="/">
       <div class="form-group">
         <textarea class="form-control" rows="20" type="text" name="user_text"
@@ -32,6 +30,20 @@
     </form>
   </div>
   <footer>© Karl Erik Karindi 2020</footer>
+  <div id="loader"></div>
+
+  <!-- Taken from here: http://www.marcorpsa.com/ee/t2228.html -->
+  <script src="http://code.jquery.com/jquery.js"></script>
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script>
+    var spinner = $('#loader');
+    $(function () {
+      $('form').submit(function (e) {
+        spinner.show();
+      });
+    });
+  </script>
 </body>
 
 </html>

@@ -30,7 +30,12 @@ def analyze(original_text, text_obj, sentences_layer):
         sentence_text_obj = Text(sentence.enclosing_text)
         sentence_text_obj.tag_layer(["morph_extended"])
         visl_tagger.tag(sentence_text_obj)
-        SyntaxDependencyRetagger("visl").retag(sentence_text_obj)
+        try:
+            SyntaxDependencyRetagger("visl").retag(sentence_text_obj)
+        # Sometimes the dependency retagger breaks. For example, if it starts to analyse a file path.
+        # Skip the sentence in that case.
+        except AssertionError:
+            continue
 
         # Leave only the words that correspond to this sentence
         sent_words = sentence_words[i]
