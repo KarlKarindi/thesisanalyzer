@@ -11,7 +11,7 @@ template_dir = os.path.abspath('../templates')
 mod = Blueprint('route', __name__, template_folder=template_dir)
 
 # For the user form
-@mod.route('/', methods=["GET", "POST"])
+@mod.route(INDEX_PAGE, methods=["GET", "POST"])
 def index():
     if request.method == "POST":
 
@@ -60,7 +60,7 @@ def index():
 def documentation():
     return render_template("documentation.html")
 
-# For Raimond's API
+# The API
 @mod.route('/analyze/', methods=['POST'])
 def analyze_API():
     print()  # useful for testing
