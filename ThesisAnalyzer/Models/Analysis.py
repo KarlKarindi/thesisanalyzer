@@ -125,20 +125,27 @@ class OfficialeseSummary():
         self.nominalisatsiooni_mine_vorm_summary = []
 
 
-class PooltTarindContainer():
-    def __init__(self, text, sentence_text, sentence_position, position):
-        self.text = text
+class NormalTextSliceContainer():
+    """ Contains text slices that should be marked in bold for the user form.
+        The text slice will be bold from start to finish.
+    """
+
+    def __init__(self, sentence_text, sentence_position, text, position):
         self.sentence_text = sentence_text
         self.sentence_position = sentence_position
-        # Position starts with the word preceding "poolt"
+        self.text = text
         self.position = position
 
     def __repr__(self):
-        return '<PooltTarindContainer (text: {}, sentence_text: {}, sentence_position: {}, position: {})>' \
+        return '<NormalTextSliceContainer (text: {}, sentence_text: {}, sentence_position: {}, position: {})>' \
             .format(self.text, self.sentence_text, self.sentence_position, self.position)
 
 
-class MaarusSaavasContainer():
+class ParentChildContainer():
+    """ Contains parent and child word positions in the text.
+        Used to bold words that might not be connected to each other.
+    """
+
     def __init__(self, sentence_text, sentence_position, parent_position, child_position, parent_text, child_text):
         self.sentence_text = sentence_text
         self.sentence_position = sentence_position
@@ -148,19 +155,7 @@ class MaarusSaavasContainer():
         self.child_text = child_text
 
     def __repr__(self):
-        return '<MaarusSaavasContainer (sentence_text: {}, sentence_position: {}, parent_position: {}, ' \
+        return '<ParentChildContainer (sentence_text: {}, sentence_position: {}, parent_position: {}, ' \
             'parent_text: {}, child_position: {}, child_text: {})>' \
             .format(self.sentence_text, self.sentence_position, self.parent_position,
                     self.parent_text, self.child_position, self.child_text)
-
-
-class OlemaKesksonaContainer():
-    def __init__(self, sentence_text, sentence_position, position, text):
-        self.sentence_text = sentence_text
-        self.sentence_position = sentence_position
-        self.position = position
-        self.text = text
-
-    def __repr__(self):
-        return '<OlemaKesksonaContainer (sentence_text: {}, sentence_position: {}, position: {}, text: {})>' \
-            .format(self.sentence_text, self.sentence_position, self.position, self.text)

@@ -125,7 +125,7 @@ def format_data(text, result):
             olema_kesksona_list, text)
 
         maarus_saavas_list = result["officialese_summary"]["maarus_saavas_summary"]
-        all_maarus_saavas_sentences = handle_maarus_saavas_list(
+        all_maarus_saavas_sentences = handle_parent_child_list(
             maarus_saavas_list, text)
 
     return FormData(elapsed_time,
@@ -166,16 +166,19 @@ def handle_olema_kesksona_and_poolt_tarind_list(analysis_list, text):
     return all_analysis_sentences
 
 
-def handle_maarus_saavas_list(analysis_list, text):
+def handle_parent_child_list(analysis_list, text):
+    """ Used for määrus saavas and nominalisatsiooni mine vorm analysis results.
+        Used to mark words in bold that might not be connected.
+        See class ParentChildContainer
+    """
     # Contains lists, where:
     # The first element is in before bold, second is bold, third is after the first bold,
     # fourth is bold and the fifth is after bold.
-    all_maarus_saavas_sentences = []
+    all_parent_child_sentences = []
 
     for offender in analysis_list:
         sentence_position = offender["sentence_position"]
-        first_position, second_position = find_first_and_second_position(
-            offender)
+        first_position, second_position = find_first_and_second_position(offender)
 
         sentence_before_first_bold = text[sentence_position[0]:first_position[0]]
         text_in_first_bold = text[first_position[0]:first_position[1]]
@@ -183,11 +186,11 @@ def handle_maarus_saavas_list(analysis_list, text):
         text_in_second_bold = text[second_position[0]:second_position[1]]
         sentence_after_second_bold = text[second_position[1]:sentence_position[1]]
 
-        all_maarus_saavas_sentences.append(
+        all_parent_child_sentences.append(
             [sentence_before_first_bold, text_in_first_bold, sentence_after_first_bold,
              text_in_second_bold, sentence_after_second_bold])
 
-    return all_maarus_saavas_sentences
+    return all_parent_child_sentences
 
 
 def find_first_and_second_position(maarus_saavas_container):

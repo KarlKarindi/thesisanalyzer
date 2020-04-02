@@ -1,5 +1,4 @@
-from ThesisAnalyzer.Models.Analysis import OfficialeseSummary, PooltTarindContainer, \
-    MaarusSaavasContainer, OlemaKesksonaContainer
+from ThesisAnalyzer.Models.Analysis import OfficialeseSummary, NormalTextSliceContainer, ParentChildContainer
 from ThesisAnalyzer.Services import utils, profiler
 from ThesisAnalyzer.Constants import constants
 from estnltk.taggers.syntax.visl_tagger import VISLCG3Pipeline
@@ -40,10 +39,6 @@ def analyze(original_text, text_obj, sentences_layer):
         # Leave only the words that correspond to this sentence
         sent_words = sentence_words[i]
 
-        # Analyze määrus saavas käändes
-        officialese_summary.maarus_saavas_summary.extend(
-            analyze_maarus_saavas(sentence_text_obj, sent_words))
-
         # Analyze olema kesksõna
         officialese_summary.olema_kesksona_summary.extend(
             analyze_olema_kesksona(original_text, sentence_text_obj, sent_words))
@@ -52,41 +47,15 @@ def analyze(original_text, text_obj, sentences_layer):
         officialese_summary.poolt_tarind_summary.extend(
             analyze_poolt_tarind(original_text, sentence_text_obj, sent_words))
 
+        # Analyze määrus saavas käändes
+        officialese_summary.maarus_saavas_summary.extend(
+            analyze_maarus_saavas(sentence_text_obj, sent_words))
+
+        # Analyze nominalisatsioon mine vormis
         officialese_summary.nominalisatsiooni_mine_vorm_summary.extend(
-            analyze_nominalisatsioon_mine_vorm(original_text, sentence_text_obj, sent_words))
+            analyze_nominalisatsioon_mine_vorm(sentence_text_obj, sent_words))
 
     return officialese_summary
-
-
-def analyze_maarus_saavas(sentence, words):
-    """ Analyzes whether there is a määrus in saavas käändes officialese error.
-        Example (offending sentence -> what the sentence should be):
-             "Arsti sooviks on teha head" -> "Arst soovib teha head"
-        Parameters:
-            sentence (Text) - Sentence that has had syntax analysis done to it
-            words (list) - All the words that are included in the sentence as WordSummary objects.
-        Returns:
-            offenders (list) - List of MaarusSaavasContainer objects
-    """
-    offenders = []
-    for i, word_analysis in enumerate(sentence.visl):
-        # Check if the word is an adverb (määrsõna) and if it's conditional (tingiv kõneviis)
-        if "@ADVL" in word_analysis.deprel and "tr" in word_analysis.case and word_analysis.text.lower() not in constants.MAARUS_SAAVAS_EXCEPTIONS:
-            # Since the parent_span.id is a string, it is cast to int
-            # Also, indexing starts at 1, since SyntaxDependencyRetagger's first node is the root node.
-            # The lemma is taken from the words list, as visl doesn't give an accurate lemma.
-            try:
-                parent_id = int(word_analysis.annotations[0].parent_span.id[0]) - 1
-            except ValueError:
-                continue
-            except AttributeError:
-                continue
-            # words list gives the correct lemma
-            if words[parent_id]["lemma"] == "olema":
-                offender = create_offender_from_parent_child_data(sentence, words, i, parent_id)
-                offenders.append(offender)
-
-    return offenders
 
 
 def analyze_olema_kesksona(original_text, sentence, words):
@@ -98,7 +67,7 @@ def analyze_olema_kesksona(original_text, sentence, words):
             sentence (Text) - Sentence that has had syntax analysis done to it
             words (list) - All the words that are included in the sentence as WordSummary objects
         Returns:
-            offenders (list) - List of OlemaKesksonaContainer objects
+            offenders (list) - List of NormalTextSliceContainer objects
     """
 
     offenders = []
@@ -127,8 +96,8 @@ def analyze_olema_kesksona(original_text, sentence, words):
                             max(parent_end, child_end)]
                 text = original_text[position[0]:position[1]]
 
-                offender = OlemaKesksonaContainer(sentence.text, sentence_position,
-                                                  position, text)
+                offender = NormalTextSliceContainer(sentence.text, sentence_position,
+                                                    text, position)
                 offenders.append(offender)
 
     return offenders
@@ -145,7 +114,7 @@ def analyze_poolt_tarind(original_text, sentence, words):
             sentence (Text) - Sentence that has had syntax analysis done to it
             words (list) - All the words that are included in the sentence as WordSummary objects
         Returns:
-            offenders (list) - List of PooltTarindContainer objects
+            offenders (list) - List of NormalTextSliceContainer objects
     """
 
     offenders = []
@@ -158,13 +127,11 @@ def analyze_poolt_tarind(original_text, sentence, words):
         if curr_root == "poolt" and prev_word_is_in_genitiv:
             # i - 1 is always >= 0, as this condition is accessed on the second word at the earliest
             # Take the previous word as an offender as well. Example: "Tema poolt"
-            offender_position = [words[i - 1]["position"][0], words[i]["position"][1]]
+            position = [words[i - 1]["position"][0], words[i]["position"][1]]
             sentence_position = words[i]["sentence_position"]
-            offender_text = original_text[offender_position[0]:
-                                          offender_position[1]]
+            text = original_text[position[0]:position[1]]
 
-            offenders.append(PooltTarindContainer(
-                offender_text, sentence.text, sentence_position, offender_position))
+            offenders.append(NormalTextSliceContainer(sentence.text, sentence_position, text, position))
 
         if curr_form == "sg g" or curr_form == "pl g":
             prev_word_is_in_genitiv = True
@@ -174,7 +141,48 @@ def analyze_poolt_tarind(original_text, sentence, words):
     return offenders
 
 
-def analyze_nominalisatsioon_mine_vorm(original_text, sentence, words):
+def analyze_maarus_saavas(sentence, words):
+    """ Analyzes whether there is a määrus in saavas käändes officialese error.
+        Example (offending sentence -> what the sentence should be):
+             "Arsti sooviks on teha head" -> "Arst soovib teha head"
+        Parameters:
+            sentence (Text) - Sentence that has had syntax analysis done to it
+            words (list) - All the words that are included in the sentence as WordSummary objects.
+        Returns:
+            offenders (list) - List of ParentChildContainer objects
+    """
+    offenders = []
+    for i, word_analysis in enumerate(sentence.visl):
+        # Check if the word is an adverb (määrsõna) and if it's conditional (tingiv kõneviis)
+        if "@ADVL" in word_analysis.deprel and "tr" in word_analysis.case and \
+                word_analysis.text.lower() not in constants.MAARUS_SAAVAS_EXCEPTIONS:
+            # Since the parent_span.id is a string, it is cast to int
+            # Also, indexing starts at 1, since SyntaxDependencyRetagger's first node is the root node.
+            # The lemma is taken from the words list, as visl doesn't give an accurate lemma.
+            try:
+                parent_id = int(word_analysis.annotations[0].parent_span.id[0]) - 1
+            except ValueError:
+                continue
+            except AttributeError:
+                continue
+            # words list gives the correct lemma
+            if words[parent_id]["lemma"] == "olema":
+                offender = create_parent_child_container_instance(sentence, words, i, parent_id)
+                offenders.append(offender)
+
+    return offenders
+
+
+def analyze_nominalisatsioon_mine_vorm(sentence, words):
+    """ Analyzes whether there is a nominalisatsioon in mine vorm officialese error.
+        Example (offending sentence -> what the sentence should be):
+            "Teostame kontrollimist" -> "Kontrollime"
+        Parameters:
+            sentence (Text) - Sentence that has had syntax analysis done to it
+            words (list) - All the words that are included in the sentence as WordSummary objects.
+        Returns:
+            offenders (list) - List of ParentChildContainer objects
+    """
 
     offenders = []
     for i, word_analysis in enumerate(sentence.visl):
@@ -186,21 +194,29 @@ def analyze_nominalisatsioon_mine_vorm(original_text, sentence, words):
             except AttributeError:
                 continue
             if words[parent_id]["lemma"] in constants.NOMINALISATSIOON_MINE_VORM_TRIGGERS:
-                offender = create_offender_from_parent_child_data(sentence, words, i, parent_id)
+                offender = create_parent_child_container_instance(sentence, words, i, parent_id)
                 offenders.append(offender)
 
-    pprint(offenders)
     return offenders
 
 
-def create_offender_from_parent_child_data(sentence, words, i, parent_id):
+def create_parent_child_container_instance(sentence, words, child_id, parent_id):
+    """ Helper function that creates a ParentChildContainer object from parent and child data
+        Parameters:
+            sentence (Text) - Sentence that has had syntax analysis done to it
+            words (list) - words (list) - All the words that are included in the sentence as WordSummary objects
+            child_id (int) - index of the child word
+            parent_id (int) - index of the parent word
+        Returns:
+            A ParentChildContainer object
+     """
     parent = words[parent_id]
     parent_position = [parent["position"][0],
                        parent["position"][1]]
-    child_position = [words[i]["position"][0],
-                      words[i]["position"][1]]
+    child_position = [words[child_id]["position"][0],
+                      words[child_id]["position"][1]]
     parent_text = parent["text"]
-    child_text = words[i]["text"]
+    child_text = words[child_id]["text"]
     sentence_position = parent["sentence_position"]
-    return MaarusSaavasContainer(sentence.text, sentence_position,
-                                 parent_position, child_position, parent_text, child_text)
+    return ParentChildContainer(sentence.text, sentence_position,
+                                parent_position, child_position, parent_text, child_text)
