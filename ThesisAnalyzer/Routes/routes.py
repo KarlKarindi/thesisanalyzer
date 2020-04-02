@@ -1,5 +1,6 @@
-from ThesisAnalyzer.Services import analysis_main, utils, user_form
-from ThesisAnalyzer.Services import profiler
+from ThesisAnalyzer.Services import analysis_main, utils, user_form, profiler
+from ThesisAnalyzer.Config import analysis as config
+
 from flask import Blueprint, request, render_template
 from pprint import pprint
 import jsonpickle
@@ -14,8 +15,12 @@ def index():
     if request.method == "POST":
 
         text = request.form["user_text"]
-        
-        utils.is_text_too_long(text)
+
+        input_length = len(text)
+        if utils.is_text_too_long(input_length):
+            return render_template('longtext.html',
+                                   allowed_length=config.ANALYSIS_MAX_CHAR_COUNT,
+                                   input_length=input_length)
 
         analysis_result = jsonpickle.decode(
             analysis_main.analyze(text, user_form=True))

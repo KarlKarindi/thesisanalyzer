@@ -1,6 +1,8 @@
 # Config file for style analysis
 LOG_TO_DATABASE = False
 
+ANALYSIS_MAX_CHAR_COUNT = 150000
+
 # Options for analysis
 ANALYZE_IMPERSONALITY = True
 ANALYZE_OVERUSED_WORDS = True

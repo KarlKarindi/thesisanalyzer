@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Lõputöö analüsaator</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous" />
+    <link href="{{ url_for('static', filename='styles/style.css') }}" type="text/css" rel="stylesheet" />
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="headerTitle">Lõputöö analüsaator</h1>
+
+        <p style="text-align: center;">Sisendteksti ei analüüsitud, kuna tekst oli liiga pikk.<br>
+            Lubatud teksti pikkus: {{allowed_length}} tähemärki.<br>
+            Sisendteksti pikkus: {{input_length}} tähemärki.<br>
+            <a class="newAnalysis" href="/">Uus analüüs</a>
+        </p>
+
+    </div>
+    <footer>© Karl Erik Karindi 2020</footer>
+</body>
+
+</html>
