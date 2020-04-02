@@ -11,7 +11,7 @@ template_dir = os.path.abspath('../templates')
 mod = Blueprint('route', __name__, template_folder=template_dir)
 
 # For the user form
-@mod.route(INDEX_PAGE, methods=["GET", "POST"])
+@mod.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
 
