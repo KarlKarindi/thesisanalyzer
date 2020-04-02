@@ -73,22 +73,23 @@ def format_data(text, result):
         all_WS_sentences = []
         all_WS_clusters = []
         for word_summary in overused_words:
-            one_WS_sentences = []  # Contains all the sentences of one word summary
+            if len(all_WS_sentences) < config.MAX_WS_EXAMPLE_SENTENCES_COUNT:
+                one_WS_sentences = []  # Contains all the sentences of one word summary
 
-            # Iterate over all the words for an overused word. Find the sentences the word is contained in.
-            for word in word_summary["words"]:
-                sentence_pos = word["sentence_position"]
-                word_pos = word["position"]
+                # Iterate over all the words for an overused word. Find the sentences the word is contained in.
+                for word in word_summary["words"]:
+                    sentence_pos = word["sentence_position"]
+                    word_pos = word["position"]
 
-                # Creates a list with 3 elements. Adds them to sentences list.
-                sentence_before_word = text[sentence_pos[0]:word_pos[0]]
-                word_in_bold = text[word_pos[0]:word_pos[1]]
-                sentence_after_word = text[word_pos[1]:sentence_pos[1]]
-                one_WS_sentences.append(
-                    [sentence_before_word, word_in_bold, sentence_after_word])
+                    # Creates a list with 3 elements. Adds them to sentences list.
+                    sentence_before_word = text[sentence_pos[0]:word_pos[0]]
+                    word_in_bold = text[word_pos[0]:word_pos[1]]
+                    sentence_after_word = text[word_pos[1]:sentence_pos[1]]
+                    one_WS_sentences.append(
+                        [sentence_before_word, word_in_bold, sentence_after_word])
 
-            # Add all the sentences of one word summary to highlighted_sentences list.
-            all_WS_sentences.append(one_WS_sentences)
+                # Add all the sentences of one word summary to highlighted_sentences list.
+                all_WS_sentences.append(one_WS_sentences)
 
             # Clusters
             one_WS_clusters = []
