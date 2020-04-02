@@ -1,5 +1,6 @@
 from ThesisAnalyzer.Services import analysis_main, utils, user_form, profiler
 from ThesisAnalyzer.Config import analysis as config
+from env import INDEX_PAGE
 
 from flask import Blueprint, request, render_template
 from pprint import pprint
@@ -19,6 +20,7 @@ def index():
         input_length = len(text)
         if utils.is_text_too_long(input_length):
             return render_template('longtext.html',
+                                   index_page=INDEX_PAGE,
                                    allowed_length=config.ANALYSIS_MAX_CHAR_COUNT,
                                    input_length=input_length)
 
@@ -28,6 +30,7 @@ def index():
         data = user_form.format_data(text, analysis_result)
 
         html = render_template('result.html',
+                               index_page=INDEX_PAGE,
                                elapsed_time=data.elapsed_time,
                                sentence_count=data.sentence_count,
                                word_count=data.word_count,
