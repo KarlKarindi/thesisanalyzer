@@ -122,6 +122,7 @@ class OfficialeseSummary():
         self.poolt_tarind_summary = []
         self.maarus_saavas_summary = []
         self.olema_kesksona_summary = []
+        self.nominalisatsiooni_mine_vorm_summary = []
 
 
 class PooltTarindContainer():

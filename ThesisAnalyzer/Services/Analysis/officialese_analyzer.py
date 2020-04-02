@@ -16,6 +16,7 @@ import math
 def analyze(original_text, text_obj, sentences_layer):
     officialese_summary = OfficialeseSummary()
 
+    
     # Syntax analysis setup.
     # Create a VISLCG pipeline. vislcg_path refers to the binary vislcg file.
     pipeline = VISLCG3Pipeline(vislcg_cmd=get_vislcg3_path())
@@ -29,12 +30,12 @@ def analyze(original_text, text_obj, sentences_layer):
     for i, sentence in enumerate(sentences_layer):
         sentence_text_obj = Text(sentence.enclosing_text)
         sentence_text_obj.tag_layer(["morph_extended"])
-        visl_tagger.tag(sentence_text_obj)
         try:
+            visl_tagger.tag(sentence_text_obj)
             SyntaxDependencyRetagger("visl").retag(sentence_text_obj)
         # Sometimes the dependency retagger breaks. For example, if it starts to analyse a file path (user_input)
         # Skip the sentence in that case.
-        except AssertionError:
+        except Exception as e:
             continue
 
         # Leave only the words that correspond to this sentence
@@ -52,6 +53,9 @@ def analyze(original_text, text_obj, sentences_layer):
         officialese_summary.poolt_tarind_summary.extend(
             analyze_poolt_tarind(original_text, sentence_text_obj, sent_words))
 
+        officialese_summary.nominalisatsiooni_mine_vorm_summary.extend(
+            analyze_nominalisatsioon_mine_vorm(original_text, sentence_text_obj, sent_words))
+
     return officialese_summary
 
 
@@ -61,7 +65,7 @@ def analyze_maarus_saavas(sentence, words):
              "Arsti sooviks on teha head" -> "Arst soovib teha head"
         Parameters:
             sentence (Text) - Sentence that has had syntax analysis done to it
-            words (list) - All the words that are included in the sentence as WordSummary objects
+            words (list) - All the words that are included in the sentence as WordSummary objects.
         Returns:
             offenders (list) - List of MaarusSaavasContainer objects
     """
@@ -78,6 +82,7 @@ def analyze_maarus_saavas(sentence, words):
                 continue
             except AttributeError:
                 continue
+            # words list gives the correct lemma
             if words[parent_id]["lemma"] == "olema":
                 parent = words[parent_id]
                 parent_position = [parent["position"][0],
@@ -157,7 +162,6 @@ def analyze_poolt_tarind(original_text, sentence, words):
     offenders = []
     prev_word_is_in_genitiv = False
 
-    # Iterate on the word level
     for i, morph_analysis in enumerate(sentence.morph_analysis):
         curr_root = morph_analysis.root[0]
         curr_form = morph_analysis.form[0]
@@ -177,5 +181,16 @@ def analyze_poolt_tarind(original_text, sentence, words):
             prev_word_is_in_genitiv = True
         else:
             prev_word_is_in_genitiv = False
+
+    return offenders
+
+
+def analyze_nominalisatsioon_mine_vorm(original_text, sentence, words):
+
+    offenders = []
+
+    for i, word in enumerate(sentence.visl):
+
+        pprint(word)
 
     return offenders

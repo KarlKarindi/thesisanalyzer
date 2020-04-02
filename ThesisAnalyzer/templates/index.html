@@ -45,9 +45,16 @@
         type: form.attr('method'),
         url: form.attr('action'),
         data: form.serialize(),
-      }).done(function (resp) {
-        spinner.hide();
-        document.write(resp);
+        success: function (response) {
+          if (response) {
+            spinner.hide();
+            document.write(response)
+          }
+        },
+        error: function (response) {
+          spinner.hide();
+          alert("Midagi läks analüüsis valesti.")
+        }
       });
     });
 
