@@ -4,7 +4,7 @@ from ThesisAnalyzer.Constants import constants
 from estnltk.converters.CG3_exporter import export_CG3
 from estnltk.taggers.syntax.visl_tagger import VISLCG3Pipeline
 from estnltk.taggers import VislTagger, SyntaxDependencyRetagger
-from env import vislcg_path
+from vislcg3 import get_vislcg3_path
 
 from estnltk import Text
 from pprint import pprint
@@ -18,7 +18,7 @@ def analyze(original_text, text_obj, sentences_layer):
 
     # Syntax analysis setup.
     # Create a VISLCG pipeline. vislcg_path refers to the binary vislcg file.
-    pipeline = VISLCG3Pipeline(vislcg_cmd=vislcg_path)
+    pipeline = VISLCG3Pipeline(vislcg_cmd=get_vislcg3_path())
     visl_tagger = VislTagger(vislcg3_pipeline=pipeline)
 
     sentences, words, sentence_words = utils.preprocess_text(
