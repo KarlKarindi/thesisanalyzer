@@ -14,7 +14,7 @@
     <p style="text-align: center;"><b>INFO: Lõputöö analüsaator ei salvesta sisestatud originaalteksti, aga salvestab
         edasiarenduse eesmärgil analüüsi
         tulemused.</b></p>
-    <form method="POST" action="/">
+    <form id="submitForm" method="POST" action="/">
       <div class="form-group">
         <textarea class="form-control" rows="20" type="text" name="user_text"
           placeholder="Sisesta siia oma lõputöö tekst"></textarea>
@@ -33,16 +33,24 @@
   <div id="loader"></div>
 
   <!-- Taken from here: http://www.marcorpsa.com/ee/t2228.html -->
-  <script src="http://code.jquery.com/jquery.js"></script>
-  <!-- Latest compiled and minified JavaScript -->
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+  <script src="https://code.jquery.com/jquery.js"></script>
   <script>
+    var form = $('#submitForm');
     var spinner = $('#loader');
-    $(function () {
-      $('form').submit(function (e) {
-        spinner.show();
+
+    form.submit(function (e) {
+      e.preventDefault();
+      spinner.show()
+      $.ajax({
+        type: form.attr('method'),
+        url: form.attr('action'),
+        data: form.serialize(),
+      }).done(function (resp) {
+        spinner.hide();
+        document.write(resp);
       });
     });
+
   </script>
 </body>
 

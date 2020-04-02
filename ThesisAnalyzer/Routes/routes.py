@@ -12,6 +12,7 @@ mod = Blueprint('route', __name__, template_folder=template_dir)
 @mod.route('/', methods=["GET", "POST"])
 def index():
     if request.method == "POST":
+
         text = request.form["user_text"]
 
         analysis_result = jsonpickle.decode(

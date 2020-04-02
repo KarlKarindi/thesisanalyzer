@@ -146,7 +146,7 @@ footer {
   right: 0;
   bottom: 0;
   width: 100%;
-  background: rgba(255, 255, 255, 0.65) url(loading_spinner.gif) no-repeat
-    center center;
+  background: rgba(255, 255, 255, 0.65) url(../images/loading_spinner.gif)
+    no-repeat center center;
   z-index: 10000;
 }
