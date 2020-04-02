@@ -1,7 +1,7 @@
-from ThesisAnalyzer.Models.Analysis import OfficialeseSummary, PooltTarindContainer, MaarusSaavasContainer, OlemaKesksonaContainer
+from ThesisAnalyzer.Models.Analysis import OfficialeseSummary, PooltTarindContainer, \
+    MaarusSaavasContainer, OlemaKesksonaContainer
 from ThesisAnalyzer.Services import utils, profiler
 from ThesisAnalyzer.Constants import constants
-from estnltk.converters.CG3_exporter import export_CG3
 from estnltk.taggers.syntax.visl_tagger import VISLCG3Pipeline
 from estnltk.taggers import VislTagger, SyntaxDependencyRetagger
 from vislcg3 import get_vislcg3_path
@@ -32,7 +32,7 @@ def analyze(original_text, text_obj, sentences_layer):
         visl_tagger.tag(sentence_text_obj)
         try:
             SyntaxDependencyRetagger("visl").retag(sentence_text_obj)
-        # Sometimes the dependency retagger breaks. For example, if it starts to analyse a file path.
+        # Sometimes the dependency retagger breaks. For example, if it starts to analyse a file path (user_input)
         # Skip the sentence in that case.
         except AssertionError:
             continue
@@ -40,60 +40,19 @@ def analyze(original_text, text_obj, sentences_layer):
         # Leave only the words that correspond to this sentence
         sent_words = sentence_words[i]
 
-        # Analyze määrust saavas käändes
+        # Analyze määrus saavas käändes
         officialese_summary.maarus_saavas_summary.extend(
             analyze_maarus_saavas(sentence_text_obj, sent_words))
 
+        # Analyze olema kesksõna
         officialese_summary.olema_kesksona_summary.extend(
             analyze_olema_kesksona(original_text, sentence_text_obj, sent_words))
 
-    # Poolt-tarind analysis
-    sentence_spans = sentences_layer[["start", "end"]]
-    officialese_summary.poolt_tarind_summary = analyze_poolt_tarind(original_text,
-                                                                    sentence_spans, sentences_layer)
+        # Analyze poolt-tarind
+        officialese_summary.poolt_tarind_summary.extend(
+            analyze_poolt_tarind(original_text, sentence_text_obj, sent_words))
 
     return officialese_summary
-
-
-def analyze_poolt_tarind(original_text, sentence_spans, sentences_layer):
-    """ Analyzes whether there is poolt-tarind in the text.
-        An example of poolt-tarind is the following:
-            "Kiirabi poolt korraldatud esmaabikursus."
-        In this case, the position of the poolt-tarind is going to be
-        [0, 13] or "Kiirabi poolt" in the original text
-        Returns:
-            poolt_tarind_list (list) - a list of PooltTarindContainer objects.
-    """
-
-    poolt_tarind_list = []
-    for s_i, sentence in enumerate(sentences_layer):
-        positions = sentence.words[["start", "end"]]
-        prev_word_is_in_genitiv = False
-
-        # Iterate on the word level
-        for w_i, morph_analysis in enumerate(sentence.morph_analysis):
-            curr_root = morph_analysis.root[0]
-            curr_form = morph_analysis.form[0]
-
-            if curr_root == "poolt" and prev_word_is_in_genitiv:
-                # i - 1 is always >= 0, as this condition is accessed on the second word at the earliest
-                offender_position = [positions[w_i - 1]
-                                     [0][0], positions[w_i][0][1]]
-                sentence_position = [sentence_spans[s_i]
-                                     [0], sentence_spans[s_i][1]]
-
-                offender_text = original_text[offender_position[0]:
-                                              offender_position[1]]
-
-                poolt_tarind_list.append(PooltTarindContainer(
-                    offender_text, sentence.enclosing_text, sentence_position, offender_position))
-
-            if curr_form == "sg g" or curr_form == "pl g":
-                prev_word_is_in_genitiv = True
-            else:
-                prev_word_is_in_genitiv = False
-
-    return poolt_tarind_list
 
 
 def analyze_maarus_saavas(sentence, words):
@@ -137,6 +96,16 @@ def analyze_maarus_saavas(sentence, words):
 
 
 def analyze_olema_kesksona(original_text, sentence, words):
+    """ Analyzes olema kesksõna.
+        Example (offending sentence -> what the sentence should be):
+            "Pakkumine on kehtiv 6 kuud" -> "Pakkumine kehtib 6 kuud"
+        Parameters:
+            original_text (String) - The original text as a string
+            sentence (Text) - Sentence that has had syntax analysis done to it
+            words (list) - All the words that are included in the sentence as WordSummary objects
+        Returns:
+            offenders (list) - List of OlemaKesksonaContainer objects
+    """
 
     offenders = []
     for i, word in enumerate(sentence.visl):
@@ -167,5 +136,46 @@ def analyze_olema_kesksona(original_text, sentence, words):
                 offender = OlemaKesksonaContainer(sentence.text, sentence_position,
                                                   position, text)
                 offenders.append(offender)
+
+    return offenders
+
+
+def analyze_poolt_tarind(original_text, sentence, words):
+    """ Analyzes whether there is poolt-tarind in the text.
+        An example of poolt-tarind is the following:
+            "Kiirabi poolt korraldatud esmaabikursus."
+        In this case, the position of the poolt-tarind is going to be
+        [0, 13] or "Kiirabi poolt" in the original text
+        Parameters:
+            original_text (String) - The original text as a string
+            sentence (Text) - Sentence that has had syntax analysis done to it
+            words (list) - All the words that are included in the sentence as WordSummary objects
+        Returns:
+            offenders (list) - List of PooltTarindContainer objects
+    """
+
+    offenders = []
+    prev_word_is_in_genitiv = False
+
+    # Iterate on the word level
+    for i, morph_analysis in enumerate(sentence.morph_analysis):
+        curr_root = morph_analysis.root[0]
+        curr_form = morph_analysis.form[0]
+
+        if curr_root == "poolt" and prev_word_is_in_genitiv:
+            # i - 1 is always >= 0, as this condition is accessed on the second word at the earliest
+            # Take the previous word as an offender as well. Example: "Tema poolt"
+            offender_position = [words[i - 1]["position"][0], words[i]["position"][1]]
+            sentence_position = words[i]["sentence_position"]
+            offender_text = original_text[offender_position[0]:
+                                          offender_position[1]]
+
+            offenders.append(PooltTarindContainer(
+                offender_text, sentence.text, sentence_position, offender_position))
+
+        if curr_form == "sg g" or curr_form == "pl g":
+            prev_word_is_in_genitiv = True
+        else:
+            prev_word_is_in_genitiv = False
 
     return offenders

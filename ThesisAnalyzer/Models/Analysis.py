@@ -50,15 +50,16 @@ class WordSummary(object):
 
     def __init__(self, text, part_of_speech, position, sentence_index, sentence_position,
                  id=None, cluster_index=None, position_in_cluster=None):
-        # Not initialized on start. Corresponds to it's index in the OverusedWordSummary words list.
+        # Id is not initialized on start. Corresponds to it's index in the OverusedWordSummary words list
         self.id = id
         self.text = text
         self.part_of_speech = part_of_speech
         self.position = position
         self.sentence_index = sentence_index
         self.sentence_position = sentence_position
-        self.cluster_index = cluster_index  # Not initalized on start.
-        # Not initalized on start.
+
+        # Following are not initalized on start
+        self.cluster_index = cluster_index
         self.position_in_cluster = position_in_cluster
 
     def __repr__(self):

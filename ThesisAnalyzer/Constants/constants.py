@@ -10,3 +10,6 @@ QUOTE_MARKS_ENDING = ['"', '”', '“']
 # Määrus saavas exceptions
 MAARUS_SAAVAS_EXCEPTIONS = ["näiteks", "lisaks",
                             "selleks", "selliseks", "tulemuseks"]
+
+# Nominalisatsiooni -mine vormid exceptions
+NOMINALISATSIOON_MINE_VORM_EXCEPTIONS = ["kuuluma", "teostama", "toimuma", "vajama"]
