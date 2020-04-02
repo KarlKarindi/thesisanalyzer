@@ -53,7 +53,8 @@ def index():
         return html
 
     # If a GET request is made, show index.html
-    return render_template("index.html")
+    return render_template("index.html",
+                           index_page=INDEX_PAGE)
 
 
 @mod.route('/documentation/', methods=["GET"])
