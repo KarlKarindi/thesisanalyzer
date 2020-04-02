@@ -113,7 +113,7 @@
                       href="#" aria-expanded="false">
                       <div class="imageContainer">
                         <div class="left">
-                          <img class="image" src="{{ url_for('static', filename='images/puppy.png') }}" />
+                          <img class="image" src="{{ url_for('static', filename='images/one.png') }}" />
                         </div>
                         <div class="analysisHeader">
                           <div>
@@ -158,7 +158,7 @@
                       href="#" aria-expanded="false">
                       <div class="imageContainer">
                         <div class="left">
-                          <img class="image" src="{{ url_for('static', filename='images/puppy.png') }}" />
+                          <img class="image" src="{{ url_for('static', filename='images/two.png') }}" />
                         </div>
                         <div class="analysisHeader">
                           <div>
@@ -201,7 +201,7 @@
                       href="#" aria-expanded="false">
                       <div class="imageContainer">
                         <div class="left">
-                          <img class="image" src="{{ url_for('static', filename='images/puppy.png') }}" />
+                          <img class="image" src="{{ url_for('static', filename='images/three.png') }}" />
                         </div>
                         <div class="analysisHeader">
                           <div>
@@ -238,6 +238,51 @@
                 </div>
               </div>
             </div>
+
+            <!-- Nominalisatsioon mine-vormis -->
+            <div class="card">
+              <div class="card-header">
+                <div class="flex-container">
+                  <div>
+                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThreeFour"
+                      href="#" aria-expanded="false">
+                      <div class="imageContainer">
+                        <div class="left">
+                          <img class="image" src="{{ url_for('static', filename='images/four.png') }}" />
+                        </div>
+                        <div class="analysisHeader">
+                          <div>
+                            Nominalisatsioon mine-vormis kontroll
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                  <div class="analysisInfoContainer">
+                    <p class="analysisInfo">Mine-vormi kasutus koos tühiverbiga.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div id="collapseThreeFour" class="collapse" aria-labelledby="headingThreeFour" data-parent="#accordion">
+                <div class="card-body">
+                  {% if nominalisatsioon_mine_vormis_sentences|length == 0 %}
+                  <h5>Analüüs ei tuvastanud ühtegi nominalisatsiooni mine-vormis.</h5>
+                  {% else %}
+                  <h5>Näiteks "Teostasime kontrollimist" saab paremini kirjutada "Kontrollisime"
+                    <br>
+                    Järgnevates lausetes esineb nominalisatsioon mine-vormis:
+                  </h5>
+                  <br>
+                  {%- for sentence in nominalisatsioon_mine_vormis_sentences %}
+                  <p>{{sentence[0]}}<b>{{sentence[1]}}</b>{{sentence[2]}}<b>{{sentence[3]}}</b>{{sentence[4]}}</p>
+                  {%- endfor %}
+                  <br />
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
             <!-- Container ends -->
           </div>
         </div>

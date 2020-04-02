@@ -14,8 +14,8 @@ class FormData(object):
                  highlighted_clusters,
                  poolt_tarind_sentences,
                  olema_kesksona_sentences,
-                 maarus_saavas_sentences
-                 ):
+                 maarus_saavas_sentences,
+                 nominalisatsioon_mine_vormis_sentences):
 
         self.elapsed_time = elapsed_time
         self.sentence_count = sentence_count
@@ -29,6 +29,7 @@ class FormData(object):
         self.poolt_tarind_sentences = poolt_tarind_sentences
         self.olema_kesksona_sentences = olema_kesksona_sentences
         self.maarus_saavas_sentences = maarus_saavas_sentences
+        self.nominalisatsioon_mine_vormis_sentences = nominalisatsioon_mine_vormis_sentences
 
 
 def format_data(text, result):
@@ -39,11 +40,12 @@ def format_data(text, result):
             result (Summary) - analysis result in decoded form
     """
 
-    # Initalize in case some analyses are turned off
+    # Initalize in case some analyses are turned off, avoids errors.
+    # if a new list is added, it must be initialized here first.
     sentence_count, word_count, sentences_with_pv, pv_in_sentences, long_sentences, \
         overused_words, all_WS_sentences, all_WS_clusters, all_poolt_tarind_sentences, \
-        all_olema_kesksona_sentences, all_maarus_saavas_sentences \
-        = 1, 1, [], [], [], [], [], [], [], [], []
+        all_olema_kesksona_sentences, all_maarus_saavas_sentences, all_nominalisatsioon_mine_vormis_sentences \
+        = 1, 1, [], [], [], [], [], [], [], [], [], []
 
     elapsed_time = result["elapsed_time"]
     if config.ANALYZE_OVERUSED_WORDS:
@@ -128,6 +130,10 @@ def format_data(text, result):
         all_maarus_saavas_sentences = handle_parent_child_list(
             maarus_saavas_list, text)
 
+        nominalisatsioon_mine_vormis_list = result["officialese_summary"]["nominalisatsioon_mine_vormis_summary"]
+        all_nominalisatsioon_mine_vormis_sentences = handle_parent_child_list(
+            nominalisatsioon_mine_vormis_list, text)
+
     return FormData(elapsed_time,
                     sentence_count,
                     word_count,
@@ -139,7 +145,9 @@ def format_data(text, result):
                     all_WS_clusters,
                     all_poolt_tarind_sentences,
                     all_olema_kesksona_sentences,
-                    all_maarus_saavas_sentences)
+                    all_maarus_saavas_sentences,
+                    all_nominalisatsioon_mine_vormis_sentences
+                    )
 
 
 def handle_olema_kesksona_and_poolt_tarind_list(analysis_list, text):

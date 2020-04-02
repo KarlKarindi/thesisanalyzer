@@ -51,8 +51,8 @@ def analyze(original_text, text_obj, sentences_layer):
         officialese_summary.maarus_saavas_summary.extend(
             analyze_maarus_saavas(sentence_text_obj, sent_words))
 
-        # Analyze nominalisatsioon mine vormis
-        officialese_summary.nominalisatsiooni_mine_vorm_summary.extend(
+        # Analyze nominalisatsioon mine-vormis
+        officialese_summary.nominalisatsioon_mine_vormis_summary.extend(
             analyze_nominalisatsioon_mine_vorm(sentence_text_obj, sent_words))
 
     return officialese_summary
