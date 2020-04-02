@@ -3,9 +3,9 @@ from ThesisAnalyzer.Models.Analysis import OfficialeseSummary, PooltTarindContai
 from ThesisAnalyzer.Services import utils, profiler
 from ThesisAnalyzer.Constants import constants
 from estnltk.taggers.syntax.visl_tagger import VISLCG3Pipeline
-from estnltk.taggers import VislTagger, SyntaxDependencyRetagger
+from estnltk.taggers import VislTagger, SyntaxDependencyRetagger, VabamorfAnalyzer
+from estnltk.resolve_layer_dag import make_resolver
 from vislcg3 import get_vislcg3_path
-
 from estnltk import Text
 from pprint import pprint
 import jsonpickle
@@ -16,7 +16,6 @@ import math
 def analyze(original_text, text_obj, sentences_layer):
     officialese_summary = OfficialeseSummary()
 
-    
     # Syntax analysis setup.
     # Create a VISLCG pipeline. vislcg_path refers to the binary vislcg file.
     pipeline = VISLCG3Pipeline(vislcg_cmd=get_vislcg3_path())
@@ -35,7 +34,7 @@ def analyze(original_text, text_obj, sentences_layer):
             SyntaxDependencyRetagger("visl").retag(sentence_text_obj)
         # Sometimes the dependency retagger breaks. For example, if it starts to analyse a file path (user_input)
         # Skip the sentence in that case.
-        except Exception as e:
+        except:
             continue
 
         # Leave only the words that correspond to this sentence
@@ -70,31 +69,21 @@ def analyze_maarus_saavas(sentence, words):
             offenders (list) - List of MaarusSaavasContainer objects
     """
     offenders = []
-    for i, word in enumerate(sentence.visl):
+    for i, word_analysis in enumerate(sentence.visl):
         # Check if the word is an adverb (määrsõna) and if it's conditional (tingiv kõneviis)
-        if "@ADVL" in word.deprel and "tr" in word.case and word.text.lower() not in constants.MAARUS_SAAVAS_EXCEPTIONS:
+        if "@ADVL" in word_analysis.deprel and "tr" in word_analysis.case and word_analysis.text.lower() not in constants.MAARUS_SAAVAS_EXCEPTIONS:
             # Since the parent_span.id is a string, it is cast to int
             # Also, indexing starts at 1, since SyntaxDependencyRetagger's first node is the root node.
             # The lemma is taken from the words list, as visl doesn't give an accurate lemma.
             try:
-                parent_id = int(word.annotations[0].parent_span.id[0]) - 1
+                parent_id = int(word_analysis.annotations[0].parent_span.id[0]) - 1
             except ValueError:
                 continue
             except AttributeError:
                 continue
             # words list gives the correct lemma
             if words[parent_id]["lemma"] == "olema":
-                parent = words[parent_id]
-                parent_position = [parent["position"][0],
-                                   parent["position"][1]]
-                child_position = [words[i]["position"][0],
-                                  words[i]["position"][1]]
-                parent_text = parent["text"]
-                child_text = words[i]["text"]
-                sentence_position = parent["sentence_position"]
-
-                offender = MaarusSaavasContainer(sentence.text, sentence_position,
-                                                 parent_position, child_position, parent_text, child_text)
+                offender = create_offender_from_parent_child_data(sentence, words, i, parent_id)
                 offenders.append(offender)
 
     return offenders
@@ -113,10 +102,10 @@ def analyze_olema_kesksona(original_text, sentence, words):
     """
 
     offenders = []
-    for i, word in enumerate(sentence.visl):
+    for i, word_analysis in enumerate(sentence.visl):
         # Check if the word is a predicate (predikaat) and if it's a verb (V) or an adjective (A)
         # Nouns must be filtered out. Otherwise "See on suur arv" is an offender.
-        if ("@PRD" in word.deprel) and \
+        if ("@PRD" in word_analysis.deprel) and \
                 ("A" in sentence.visl[i]["partofspeech"] or "V" in sentence.visl[i]["partofspeech"]) and \
                 (words[i]["text"].endswith("tav") or words[i]["text"].endswith("v")):
 
@@ -124,7 +113,7 @@ def analyze_olema_kesksona(original_text, sentence, words):
             # Also, indexing starts at 1, since SyntaxDependencyRetagger's first node is the root node.
             # The lemma is taken from the words list, as visl doesn't give an accurate lemma.
             try:
-                parent_id = int(word.annotations[0].parent_span.id[0]) - 1
+                parent_id = int(word_analysis.annotations[0].parent_span.id[0]) - 1
             except ValueError:
                 continue
             except AttributeError:
@@ -188,9 +177,30 @@ def analyze_poolt_tarind(original_text, sentence, words):
 def analyze_nominalisatsioon_mine_vorm(original_text, sentence, words):
 
     offenders = []
+    for i, word_analysis in enumerate(sentence.visl):
+        if words[i]["lemma"].endswith("mine"):
+            try:
+                parent_id = int(word_analysis.annotations[0].parent_span.id[0]) - 1
+            except ValueError:
+                continue
+            except AttributeError:
+                continue
+            if words[parent_id]["lemma"] in constants.NOMINALISATSIOON_MINE_VORM_TRIGGERS:
+                offender = create_offender_from_parent_child_data(sentence, words, i, parent_id)
+                offenders.append(offender)
 
-    for i, word in enumerate(sentence.visl):
-
-        pprint(word)
-
+    pprint(offenders)
     return offenders
+
+
+def create_offender_from_parent_child_data(sentence, words, i, parent_id):
+    parent = words[parent_id]
+    parent_position = [parent["position"][0],
+                       parent["position"][1]]
+    child_position = [words[i]["position"][0],
+                      words[i]["position"][1]]
+    parent_text = parent["text"]
+    child_text = words[i]["text"]
+    sentence_position = parent["sentence_position"]
+    return MaarusSaavasContainer(sentence.text, sentence_position,
+                                 parent_position, child_position, parent_text, child_text)

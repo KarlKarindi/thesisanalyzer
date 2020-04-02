@@ -12,4 +12,4 @@ MAARUS_SAAVAS_EXCEPTIONS = ["näiteks", "lisaks",
                             "selleks", "selliseks", "tulemuseks"]
 
 # Nominalisatsiooni -mine vormid exceptions
-NOMINALISATSIOON_MINE_VORM_EXCEPTIONS = ["kuuluma", "teostama", "toimuma", "vajama"]
+NOMINALISATSIOON_MINE_VORM_TRIGGERS = ["kuuluma", "teostama", "toimuma", "vajama"]
