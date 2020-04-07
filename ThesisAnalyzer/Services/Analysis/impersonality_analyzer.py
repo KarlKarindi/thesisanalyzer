@@ -47,8 +47,6 @@ def find_pv_in_sentence(sentence, quote_analyzer):
         word = analysis.text
 
         # Check if word is in quotes or not
-        # FIXME: Kaldkirjas tekst ka sama, mis tsitaadis
-        # FIXME: Võõrkeelsed asjad esile tõstetud kaldkirjaga
         in_quotes = quote_analyzer.is_word_in_quotes(word)
 
         if not in_quotes:

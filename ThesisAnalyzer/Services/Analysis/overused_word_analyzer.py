@@ -1,6 +1,7 @@
 from ThesisAnalyzer.Models.Lemma import Lemma, LemmaStopword
 from ThesisAnalyzer.Config import analysis as config
 from ThesisAnalyzer.Services import utils
+from ThesisAnalyzer.Services.Analysis.TextAnalyzers.analyzers import QuoteAnalyzer
 from ThesisAnalyzer.Models.Analysis import TextSummmary, OverusedWordSummary, WordSummary, ClusterContainer
 
 from collections import defaultdict
@@ -47,7 +48,8 @@ def analyze(original_text, sentences_layer):
     text_word_count = get_text_word_count(words)
 
     # Use the words list to map lemmas to the words the lemmas correspond to.
-    lemma_to_word = map_lemma_to_word(words)
+    quote_analyzer = QuoteAnalyzer()
+    lemma_to_word = map_lemma_to_word(words, quote_analyzer)
 
     user_word_count = len(words)
 
@@ -171,8 +173,9 @@ def get_text_word_count(words):
     return count
 
 
-def map_lemma_to_word(words):
+def map_lemma_to_word(words, quote_analyzer):
     """ Maps all the words that are used to their respective lemmas.
+        Only takes into account words not in quotes.
         Parameters:
             words (list) - list of words that in the format of get_words_in_sentence() output.
             Contains all the words in the text.
@@ -184,13 +187,14 @@ def map_lemma_to_word(words):
     """
 
     lemma_to_word = defaultdict(set)
-
     # Iterate over all the words
     for i, word in enumerate(words):
-        word_obj = WordSummary(word["text"], word["pos"], [word["position"][0],
-                                                           word["position"][1]], word["sentence_index"],
-                               [word["sentence_position"][0], word["sentence_position"][1]])
-        lemma_to_word[word["lemma"]].add(word_obj)
+        in_quotes = quote_analyzer.is_word_in_quotes(word["text"])
+        print(word, in_quotes)
+        if not in_quotes:
+            word_obj = WordSummary(word["text"], word["pos"], [word["position"][0], word["position"][1]],
+                                   word["sentence_index"], [word["sentence_position"][0], word["sentence_position"][1]])
+            lemma_to_word[word["lemma"]].add(word_obj)
 
     return lemma_to_word
 
