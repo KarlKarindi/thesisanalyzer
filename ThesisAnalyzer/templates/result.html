@@ -318,9 +318,30 @@
               </td>
 
               <td colspan="8" class="overusedWordSentence">
-                {%- for sentence in highlighted_sentences[loop.index0] %}
+                {% set count = namespace(value=0) %}
+                {% for sentence in highlighted_sentences[loop.index0] %}
+                {% set count.value = count.value + 1 %}
+
+                {%- if count.value <= 19 %}
                 <p>{{sentence[0]}}<b>{{sentence[1]}}</b>{{sentence[2]}}</p>
+
+                {%- if count.value == 19 %}
+                <button id="showMoreButton" class="btn btn-primary btn-sm" data-toggle="collapse"
+                  data-target="#collapseFourExtra" aria-controls="collapseFourExtra" aria-expanded="false">Näita rohkem
+                  lauseid...
+                </button>
+                {% endif %}
+
+                {% else %}
+                <div id="collapseFourExtra" class="collapse" aria-labelledby="headingFourExtra"
+                  data-parent="#accordion">
+                  <p>{{sentence[0]}}<b>{{sentence[1]}}</b>{{sentence[2]}}</p>
+                </div>
+
+
+                {% endif %}
                 {%- endfor %}
+              </td>
             </tr>
 
             {%- for clusters in highlighted_clusters[loop.index0] %}

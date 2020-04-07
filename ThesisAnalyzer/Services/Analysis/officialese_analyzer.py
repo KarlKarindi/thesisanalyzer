@@ -35,7 +35,8 @@ def analyze(original_text, orig_text_obj, sentences_layer):
         try:
             visl_tagger.tag(sentence_text_obj)
             SyntaxDependencyRetagger("visl").retag(sentence_text_obj)
-        # Sometimes the dependency retagger breaks. For example, if it starts to analyse a file path (user_input)
+        # Sometimes the dependency retagger breaks for unknown reasons.
+        # For example, if the user input a file path for some reason.
         # Skip the sentence in that case.
         except:
             continue

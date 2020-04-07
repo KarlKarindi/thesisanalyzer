@@ -150,3 +150,7 @@ footer {
     no-repeat center center;
   z-index: 10000;
 }
+
+#showMoreButton {
+  margin-bottom: 20px;
+}
