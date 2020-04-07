@@ -37,8 +37,8 @@ class QuoteAnalyzer(object):
         if self.previous_word is not None and self.in_quotes:
             # Check if the last letter is an ending quotation mark.
             # The last letter is necessary, as sometimes words are marked as !",
-            # so just checking previous_word isn't enough.
-            if self.previous_word[-1] in constants.QUOTE_MARKS_ENDING:
+            # so just checking previous_word isn't enough. Also check if qurrent word isn't a starting quote mark.
+            if self.previous_word[-1] in constants.QUOTE_MARKS_ENDING and word not in constants.QUOTE_MARKS_STARTING:
                 self.in_quotes = False
 
             # Sometimes an ending quote word is 2 symbols together.
@@ -47,7 +47,9 @@ class QuoteAnalyzer(object):
             # First, check if word is longer than 1 to avoid out of bounds exception.
             elif len(self.previous_word) > 1:
                 # If second to last letter is an ending quotation mark, set in_quotes to false
-                if self.previous_word[-2] in constants.QUOTE_MARKS_ENDING:
+                # Also, make sure to check if current word isn't a starting quote mark.
+                if self.previous_word[-2] in constants.QUOTE_MARKS_ENDING and \
+                        word not in constants.QUOTE_MARKS_STARTING:
                     self.in_quotes = False
 
         # Starting the quote

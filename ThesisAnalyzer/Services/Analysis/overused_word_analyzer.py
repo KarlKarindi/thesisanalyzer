@@ -190,7 +190,6 @@ def map_lemma_to_word(words, quote_analyzer):
     # Iterate over all the words
     for i, word in enumerate(words):
         in_quotes = quote_analyzer.is_word_in_quotes(word["text"])
-        print(word, in_quotes)
         if not in_quotes:
             word_obj = WordSummary(word["text"], word["pos"], [word["position"][0], word["position"][1]],
                                    word["sentence_index"], [word["sentence_position"][0], word["sentence_position"][1]])
