@@ -4,7 +4,7 @@ from ThesisAnalyzer.Constants import constants
 from estnltk.taggers.syntax.visl_tagger import VISLCG3Pipeline
 from estnltk.taggers import VislTagger, SyntaxDependencyRetagger, VabamorfAnalyzer
 from estnltk.resolve_layer_dag import make_resolver
-from vislcg3 import get_vislcg3_path
+from env import get_vislcg3_path
 from estnltk import Text
 from pprint import pprint
 import jsonpickle
@@ -12,9 +12,13 @@ import os
 import math
 
 
-def analyze(original_text, text_obj, sentences_layer):
+def analyze(original_text, orig_text_obj, sentences_layer):
     officialese_summary = OfficialeseSummary()
 
+    text_obj = orig_text_obj
+    resolver = make_resolver(disambiguate=False, guess=True)
+    del text_obj.morph_analysis
+    text_obj.tag_layer(resolver=resolver)["morph_analysis"]
     # Syntax analysis setup.
     # Create a VISLCG pipeline. vislcg_path refers to the binary vislcg file.
     pipeline = VISLCG3Pipeline(vislcg_cmd=get_vislcg3_path())
@@ -153,7 +157,7 @@ def analyze_maarus_saavas(sentence, words):
     """
     offenders = []
     for i, word_analysis in enumerate(sentence.visl):
-        # Check if the word is an adverb (määrsõna) and if it's conditional (tingiv kõneviis)
+        # Check if the word is an adverb (määrsõna) and if its case is tr
         if "@ADVL" in word_analysis.deprel and "tr" in word_analysis.case and \
                 word_analysis.text.lower() not in constants.MAARUS_SAAVAS_EXCEPTIONS:
             # Since the parent_span.id is a string, it is cast to int
@@ -193,6 +197,10 @@ def analyze_nominalisatsioon_mine_vorm(sentence, words):
                 continue
             except AttributeError:
                 continue
+
+            pprint(word_analysis)
+            print()
+
             if words[parent_id]["lemma"] in constants.NOMINALISATSIOON_MINE_VORM_TRIGGERS:
                 offender = create_parent_child_container_instance(sentence, words, i, parent_id)
                 offenders.append(offender)

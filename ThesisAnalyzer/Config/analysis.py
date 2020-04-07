@@ -1,5 +1,7 @@
-# Config file for style analysis
-LOG_TO_DATABASE = False
+# Config file for analysis
+from env import LOG_TO_DATABASE
+
+LOG_TO_DATABASE = LOG_TO_DATABASE
 
 ANALYSIS_MAX_CHAR_COUNT = 150000
 
