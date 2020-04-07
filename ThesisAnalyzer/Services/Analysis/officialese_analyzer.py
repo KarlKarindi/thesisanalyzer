@@ -198,9 +198,6 @@ def analyze_nominalisatsioon_mine_vorm(sentence, words):
             except AttributeError:
                 continue
 
-            pprint(word_analysis)
-            print()
-
             if words[parent_id]["lemma"] in constants.NOMINALISATSIOON_MINE_VORM_TRIGGERS:
                 offender = create_parent_child_container_instance(sentence, words, i, parent_id)
                 offenders.append(offender)
