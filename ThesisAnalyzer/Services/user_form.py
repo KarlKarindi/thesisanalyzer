@@ -1,4 +1,6 @@
 from ThesisAnalyzer.Config import analysis as config
+from copy import deepcopy
+from pprint import pprint
 
 
 class FormData(object):
@@ -75,23 +77,9 @@ def format_data(text, result):
         all_WS_sentences = []
         all_WS_clusters = []
         for word_summary in overused_words:
-            if len(all_WS_sentences) < config.MAX_WS_EXAMPLE_SENTENCES_COUNT:
-                one_WS_sentences = []  # Contains all the sentences of one word summary
-
-                # Iterate over all the words for an overused word. Find the sentences the word is contained in.
-                for word in word_summary["words"]:
-                    sentence_pos = word["sentence_position"]
-                    word_pos = word["position"]
-
-                    # Creates a list with 3 elements. Adds them to sentences list.
-                    sentence_before_word = text[sentence_pos[0]:word_pos[0]]
-                    word_in_bold = text[word_pos[0]:word_pos[1]]
-                    sentence_after_word = text[word_pos[1]:sentence_pos[1]]
-                    one_WS_sentences.append(
-                        [sentence_before_word, word_in_bold, sentence_after_word])
-
-                # Add all the sentences of one word summary to highlighted_sentences list.
-                all_WS_sentences.append(one_WS_sentences)
+            # Add all the sentences of one word summary to highlighted_sentences list.
+            one_WS_sentences = handle_sentences_for_one_OWS(text, word_summary)
+            all_WS_sentences.append(one_WS_sentences)
 
             # Clusters
             one_WS_clusters = []
@@ -148,6 +136,58 @@ def format_data(text, result):
                     all_maarus_saavas_sentences,
                     all_nominalisatsioon_mine_vormis_sentences
                     )
+
+
+def handle_sentences_for_one_OWS(text, word_summary):
+    """ Iterate over all the words for an overused word.
+        Find the sentences the word is contained in.
+    """
+
+    one_WS_sentences = []
+
+    # Create a copy of the words list, as we don't want to modify the original one
+    words = deepcopy(word_summary["words"])
+
+    # Every element with an even-numbered index is the word to be marked in bold.
+    # For example, if we are looking for the word "verb", our final singular sentence would be
+    # ["See siin on mitme ", "verbiga", " lause, sest siin sisaldub mitu ", "verbi", ", kuna see on mu lemmiksõna."]
+    # Further on, the comments will explain building this sentence.
+    sentence = []
+    a_pos = None
+    last_sentence_pos = None
+    last_sentence_index = None
+    is_first_elem = True
+
+    while len(words) > 0:
+        # Comments will play through the example found further up.
+        word = words.pop(0)
+        sent_index = word["sentence_index"]
+        sentence_pos = word["sentence_position"]
+        word_pos = word["position"]
+
+        # If it's the first element, set a_pos as the start of the sentence
+        if is_first_elem:
+            a_pos = sentence_pos[0]
+
+        if not is_first_elem:
+            if last_sentence_index != sent_index:
+                # A new sentence has started.
+                # Add the remainder of the sentence: ", kuna see on mu lemmiksõna."
+                sentence.append(text[a_pos:last_sentence_pos[1]])
+                one_WS_sentences.append(sentence)  # Add sentence to this WS sentences
+                # Initialize a new sentence list and set a_pos to the start of the new sentence
+                a_pos = sentence_pos[0]
+                sentence = []
+
+        sentence.append(text[a_pos:word_pos[0]])  # Add "See siin on mitme ", then " lause, sest siin sisaldub mitu "
+        sentence.append(text[word_pos[0]:word_pos[1]])  # Add "verbiga", then "verbi"
+
+        a_pos = word_pos[1]  # Set a_pos to the end of the word "verbiga", then "verbi"
+        last_sentence_pos = sentence_pos
+        last_sentence_index = sent_index
+        is_first_elem = False
+
+    return one_WS_sentences
 
 
 def handle_olema_kesksona_and_poolt_tarind_list(analysis_list, text):

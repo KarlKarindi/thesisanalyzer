@@ -323,7 +323,15 @@
                 {% set count.value = count.value + 1 %}
 
                 {%- if count.value <= 19 %}
-                <p>{{sentence[0]}}<b>{{sentence[1]}}</b>{{sentence[2]}}</p>
+                <p>
+                  {%- for sentence_part in sentence %}
+                  {% if loop.index % 2 != 0 %}
+                  {{sentence_part}}
+                  {%else%}
+                  <b> {{sentence_part}} </b>
+                  {%endif%}
+                  {%- endfor %}
+                </p>
 
                 {%- if count.value == 19 %}
                 <button id="showMoreButton" class="btn btn-primary btn-sm" data-toggle="collapse"
@@ -335,7 +343,15 @@
                 {% else %}
                 <div id="collapseFourExtra" class="collapse" aria-labelledby="headingFourExtra"
                   data-parent="#accordion">
-                  <p>{{sentence[0]}}<b>{{sentence[1]}}</b>{{sentence[2]}}</p>
+                  <p>
+                    {%- for sentence_part in sentence %}
+                    {% if loop.index % 2 != 0 %}
+                    {{sentence_part}}
+                    {%else%}
+                    <b> {{sentence_part}} </b>
+                    {%endif%}
+                    {%- endfor %}
+                  </p>
                 </div>
 
 
