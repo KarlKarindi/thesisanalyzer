@@ -333,14 +333,13 @@
                   {%- endfor %}
                 </p>
 
-                {%- if count.value == 19 %}
+                {% else %}
+                {%- if count.value == 20 %}
                 <button id="showMoreButton" class="btn btn-primary btn-sm" data-toggle="collapse"
                   data-target="#collapseFourExtra" aria-controls="collapseFourExtra" aria-expanded="false">Näita rohkem
                   lauseid...
                 </button>
                 {% endif %}
-
-                {% else %}
                 <div id="collapseFourExtra" class="collapse" aria-labelledby="headingFourExtra"
                   data-parent="#accordion">
                   <p>
