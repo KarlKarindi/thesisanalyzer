@@ -80,6 +80,10 @@ footer {
   height: 66px;
 }
 
+.imagecontainer .image {
+  text-align: center;
+}
+
 .imageContainer .analysisHeader {
   margin-top: 20px;
   padding-left: 10px;
