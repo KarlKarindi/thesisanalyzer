@@ -179,21 +179,21 @@ def map_lemma_to_word(words, quote_analyzer):
         Parameters:
             words (list) - list of words that in the format of get_words_in_sentence() output.
             Contains all the words in the text.
+            quote_analyzer - instance of QuoteAnalyzer
         Returns:
             lemma_to_word (defaultdict) - WordSummary objects mapped to lemmas
         Return example:
-            'olema': {<Word (index: 367, text: "on", pos: V)>,
-                    <Word (index: 357, text: "on", pos: V)>}
+            'olema': {word_summary_object_1, word_summary_object_2, ...}
     """
 
     lemma_to_word = defaultdict(set)
     # Iterate over all the words
     for i, word in enumerate(words):
-        in_quotes = quote_analyzer.is_word_in_quotes(word["text"])
-        if not in_quotes:
-            word_obj = WordSummary(word["text"], word["pos"], [word["position"][0], word["position"][1]],
-                                   word["sentence_index"], [word["sentence_position"][0], word["sentence_position"][1]])
-            lemma_to_word[word["lemma"]].add(word_obj)
+        #in_quotes = quote_analyzer.is_word_in_quotes(word["text"])
+        # if not in_quotes:
+        word_obj = WordSummary(word["text"], word["pos"], [word["position"][0], word["position"][1]],
+                               word["sentence_index"], [word["sentence_position"][0], word["sentence_position"][1]])
+        lemma_to_word[word["lemma"]].add(word_obj)
 
     return lemma_to_word
 

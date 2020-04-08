@@ -161,7 +161,7 @@ def handle_sentences_for_one_OWS(text, word_summary):
     while len(words) > 0:
         # Comments will play through the example found further up.
         word = words.pop(0)
-        sent_index = word["sentence_index"]
+        sentence_index = word["sentence_index"]
         sentence_pos = word["sentence_position"]
         word_pos = word["position"]
 
@@ -170,7 +170,7 @@ def handle_sentences_for_one_OWS(text, word_summary):
             a_pos = sentence_pos[0]
 
         if not is_first_elem:
-            if last_sentence_index != sent_index:
+            if last_sentence_index != sentence_index:
                 # A new sentence has started.
                 # Add the remainder of the sentence: ", kuna see on mu lemmiksõna."
                 sentence.append(text[a_pos:last_sentence_pos[1]])
@@ -184,7 +184,7 @@ def handle_sentences_for_one_OWS(text, word_summary):
 
         a_pos = word_pos[1]  # Set a_pos to the end of the word "verbiga", then "verbi"
         last_sentence_pos = sentence_pos
-        last_sentence_index = sent_index
+        last_sentence_index = sentence_index
         is_first_elem = False
 
     return one_WS_sentences
