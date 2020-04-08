@@ -7,6 +7,8 @@ PRONOUN = "P"
 QUOTE_MARKS_STARTING = ['"', '”', '“', '„', '„']
 QUOTE_MARKS_ENDING = ['"', '”', '“']
 
+OLEMA_KESKSONA_EXCEPTIONS = ["huvitav", "vaieldav"]
+
 # Määrus saavas exceptions
 MAARUS_SAAVAS_EXCEPTIONS = ["näiteks", "lisaks",
                             "selleks", "selliseks", "tulemuseks"]

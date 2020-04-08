@@ -81,7 +81,8 @@ def analyze_olema_kesksona(original_text, sentence, words):
         # Nouns must be filtered out. Otherwise "See on suur arv" is an offender.
         if ("@PRD" in word_analysis.deprel) and \
                 ("A" in sentence.visl[i]["partofspeech"] or "V" in sentence.visl[i]["partofspeech"]) and \
-                (words[i]["text"].endswith("tav") or words[i]["text"].endswith("v")):
+                (words[i]["text"].endswith("tav") or words[i]["text"].endswith("v")) and \
+                (words[i]["text"].lower() not in constants.OLEMA_KESKSONA_EXCEPTIONS):
 
             # Since the parent_span.id is a string, it is cast to int
             # Also, indexing starts at 1, since SyntaxDependencyRetagger's first node is the root node.
