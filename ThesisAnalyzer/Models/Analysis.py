@@ -85,16 +85,23 @@ class ClusterContainer(object):
 #       Sentence length analyzer        #
 
 
-class SentencesLengthSummary():
+class SentencesSummary():
 
-    def add_sent_to_long_sentences(self, sentence):
+    def add_sentence_to_long_sentences(self, sentence):
         """ Parameters:
                 sentence (string) - string sentence to be added to list of long_sentences
         """
         self.long_sentences.append(sentence)
 
+    def add_sentence_to_sentences_with_missing_commas(self, sentence):
+        """ Parameters:
+                sentence (string) - string sentence to be added to list of sentences_with_missing_commas
+        """
+        self.sentences_with_missing_commas.append(sentence)
+
     def __init__(self):
         self.long_sentences = []
+        self.sentences_with_missing_commas = []
 
 
 # _____________________________________ #

@@ -67,7 +67,7 @@ def format_data(text, result):
 
     # Long sentences
     if config.ANALYZE_SENTENCE_LENGTH:
-        long_sentences = result["sentences_length_summary"]["long_sentences"]
+        long_sentences = result["sentences_summary"]["long_sentences"]
 
     # Overused words
     if config.ANALYZE_OVERUSED_WORDS:

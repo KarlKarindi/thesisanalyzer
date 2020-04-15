@@ -1,13 +1,13 @@
 # Analyzers
 from ThesisAnalyzer.Services.Analysis import overused_word_analyzer, tag_analyzer, \
-    sentences_length_analyzer, impersonality_analyzer, \
+    sentences_analyzer, impersonality_analyzer, \
     officialese_analyzer
 
 # Database models
 from ThesisAnalyzer.Models.Database import Formrequest, LongSentence, TextStatistics, \
     PersonalSentence, OverusedWord, ClusterOverusedWord
 
-from ThesisAnalyzer.Models.Analysis import SentencesLengthSummary, ImpersonalitySummary, TextSummmary
+from ThesisAnalyzer.Models.Analysis import SentencesSummary, ImpersonalitySummary, TextSummmary
 from ThesisAnalyzer.Models.Summary import Summary
 from ThesisAnalyzer.Services.Analysis.tag_analyzer import TagSummary
 from ThesisAnalyzer.Config import analysis as config
@@ -81,9 +81,9 @@ def analyze(text, user_form=False):
 
         # Clause analysis
         if config.ANALYZE_SENTENCE_LENGTH:
-            summary.sentences_length_summary = sentences_length_analyzer.analyze(text, sentences_layer)
+            summary.sentences_summary = sentences_analyzer.analyze(text, sentences_layer)
             if log_to_database:
-                for sentence in summary.sentences_length_summary.long_sentences:
+                for sentence in summary.sentences_summary.long_sentences:
                     db.session.add(LongSentence(summary.id, sentence))
 
         # Tag analysis

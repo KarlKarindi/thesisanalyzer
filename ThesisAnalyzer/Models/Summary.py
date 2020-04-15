@@ -10,6 +10,6 @@ class Summary(object):
         self.elapsed_time = None
         self.impersonality_summary = None
         self.tag_summary = None
-        self.sentences_length_summary = None
+        self.sentences_summary = None
         self.text_summary = None
         self.officialese_summary = None

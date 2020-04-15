@@ -83,6 +83,7 @@ class CitationAnalyzer(object):
 
     def find_citation_indexes_in_sentence(self, sentence):
         """ Finds the indexes of citations in a sentence.
+            Called out in get_sentence_without_citations function.
             Indexes are on a char level.
             Parameters:
                 sentence (string) - sentence text

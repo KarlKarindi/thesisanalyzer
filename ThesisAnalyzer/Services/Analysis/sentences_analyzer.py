@@ -1,7 +1,8 @@
 from ThesisAnalyzer.Config import analysis as config
 from ThesisAnalyzer.Services.Analysis.TextAnalyzers.analyzers import QuoteAnalyzer, CitationAnalyzer
 from ThesisAnalyzer.Services import utils
-from ThesisAnalyzer.Models.Analysis import SentencesLengthSummary
+from ThesisAnalyzer.Constants import constants
+from ThesisAnalyzer.Models.Analysis import SentencesSummary
 
 from estnltk.taggers import ClauseSegmenter, VerbChainDetector
 from estnltk import Text, Layer
@@ -19,7 +20,7 @@ def analyze(text, sentences_layer):
     # Leave only the enclosing text
     sentences = [Text(sent.enclosing_text) for sent in sentences_layer]
 
-    sentencesLengthSummary = SentencesLengthSummary()
+    sentencesLengthSummary = SentencesSummary()
 
     # Initialize a ClauseSegmenter instance
     clause_segmenter = ClauseSegmenter()
@@ -49,14 +50,14 @@ def analyze(text, sentences_layer):
             enumerate(create_clusters_of_words_not_in_quotes(word_indexes_that_are_not_in_quotes)))
 
         # Create a sentence text that doesn't have any quotes
-        sentence_text_without_quotes_unchecked = remove_quoted_parts_from_sentence(
+        sentence_text_without_quotes = remove_quoted_parts_from_sentence(
             sentence, clusters)
 
         cleaned_sentence = citation_analyzer.get_sentence_without_citations(
-            sentence_text_without_quotes_unchecked)
+            sentence_text_without_quotes)
 
         # If sentence_text_without_quotes is empty, it's completely in quotes and shouldn't be analysed further.
-        if len(sentence_text_without_quotes_unchecked) > 0:
+        if len(sentence_text_without_quotes) > 0:
             # Create a copy of the cleaned sentence before it's tagged by the clause segmenter
             cleaned_sentence_copy = copy(cleaned_sentence)
 
@@ -69,21 +70,21 @@ def analyze(text, sentences_layer):
             clause_and_verb_chain_index_with_missing_commas = create_clause_and_verb_chain_index(
                 clauses_using_missing_commas_segmenter, vc_detector)
 
-            # if len(clause_and_verb_chain_index_with_missing_commas) > len(clause_and_verb_chain_index):
-            #     print(sentence.text)
-            #     pprint(clause_and_verb_chain_index)
-            #     print("------")
-            #     pprint(clause_and_verb_chain_index_with_missing_commas)
-
-            #     print("\n\n==========\n\n")
+            if len(clause_and_verb_chain_index_with_missing_commas) > len(clause_and_verb_chain_index):
+                sentencesLengthSummary.add_sentence_to_sentences_with_missing_commas(sentence.text)
 
             sentence_is_long = is_sentence_too_long(clause_and_verb_chain_index)
 
             if sentence_is_long:
-                sentencesLengthSummary.add_sent_to_long_sentences(sentence.text)
+                sentencesLengthSummary.add_sentence_to_long_sentences(sentence.text)
 
-    # Terminate the ClauseSegmenter process
+    # Terminate the ClauseSegmenter processes
     clause_segmenter.close()
+    clause_segmenter_that_ignores_missing_commas.close()
+
+    for i in sentencesLengthSummary.sentences_with_missing_commas:
+        print(i)
+        print()
 
     return sentencesLengthSummary
 
@@ -210,20 +211,22 @@ def remove_quoted_parts_from_sentence(sentence, clusters):
     # Iterate over all the clusters
     for i in range(len(clusters)):
         words = clusters[i]
-        print(words)
 
         # Take the first and last index
         start = words[0]
         end = words[-1]
 
+        # The first check ensures we don't accidentally wrap around to the end of the sentence with [start - 1]
+        if i != 0:
+            # Fix for issue #65.
+            # Check if the previous ending quote has a length of 2.
+            # If so, add the second character (usually a comma) to the clean_sentence too.
+            ending_quote = sentence.words[start - 1].enclosing_text
+            if len(ending_quote) == 2 and ending_quote[0] in constants.QUOTE_MARKS_ENDING:
+                clean_sentence += ending_quote[1]
+
         # Add to the clean_sentence. Range is until n + 1, as n must be included
         clean_sentence += " " + sentence.words[start:end + 1].enclosing_text
-
-    print()
-    print("SIIN")
-    print(clean_sentence)
-    print()
-    print()
 
     return clean_sentence.strip()
 
