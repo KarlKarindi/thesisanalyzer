@@ -66,7 +66,7 @@ def format_data(text, result):
                 pv_in_sentences.append(words)
 
     # Long sentences
-    if config.ANALYZE_SENTENCE_LENGTH:
+    if config.ANALYZE_SENTENCES:
         long_sentences = result["sentences_summary"]["long_sentences"]
 
     # Overused words

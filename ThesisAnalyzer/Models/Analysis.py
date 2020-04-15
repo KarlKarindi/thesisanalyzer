@@ -82,7 +82,7 @@ class ClusterContainer(object):
 
 
 # _____________________________________ #
-#       Sentence length analyzer        #
+#           Sentences analyzer          #
 
 
 class SentencesSummary():

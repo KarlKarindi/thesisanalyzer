@@ -20,7 +20,7 @@ def analyze(text, sentences_layer):
     # Leave only the enclosing text
     sentences = [Text(sent.enclosing_text) for sent in sentences_layer]
 
-    sentencesLengthSummary = SentencesSummary()
+    sentencesSummary = SentencesSummary()
 
     # Initialize a ClauseSegmenter instance
     clause_segmenter = ClauseSegmenter()
@@ -71,22 +71,22 @@ def analyze(text, sentences_layer):
                 clauses_using_missing_commas_segmenter, vc_detector)
 
             if len(clause_and_verb_chain_index_with_missing_commas) > len(clause_and_verb_chain_index):
-                sentencesLengthSummary.add_sentence_to_sentences_with_missing_commas(sentence.text)
+                sentencesSummary.add_sentence_to_sentences_with_missing_commas(sentence.text)
 
             sentence_is_long = is_sentence_too_long(clause_and_verb_chain_index)
 
             if sentence_is_long:
-                sentencesLengthSummary.add_sentence_to_long_sentences(sentence.text)
+                sentencesSummary.add_sentence_to_long_sentences(sentence.text)
 
     # Terminate the ClauseSegmenter processes
     clause_segmenter.close()
     clause_segmenter_that_ignores_missing_commas.close()
 
-    for i in sentencesLengthSummary.sentences_with_missing_commas:
+    for i in sentencesSummary.sentences_with_missing_commas:
         print(i)
         print()
 
-    return sentencesLengthSummary
+    return sentencesSummary
 
 
 def find_indexes_of_words_not_in_quotes(sentence, quote_analyzer):

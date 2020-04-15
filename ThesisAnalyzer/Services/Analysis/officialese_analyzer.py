@@ -12,7 +12,7 @@ import os
 import math
 
 
-def analyze(original_text, orig_text_obj, sentences_layer):
+def analyze(original_text, preprocessed_text, orig_text_obj, sentences_layer):
     officialese_summary = OfficialeseSummary()
 
     text_obj = orig_text_obj
@@ -24,8 +24,8 @@ def analyze(original_text, orig_text_obj, sentences_layer):
     pipeline = VISLCG3Pipeline(vislcg_cmd=get_vislcg3_path())
     visl_tagger = VislTagger(vislcg3_pipeline=pipeline)
 
-    sentences, words, sentence_words = utils.preprocess_text(
-        original_text, sentences_layer)
+    sentence_words = preprocessed_text.sentence_words
+    
 
     # Tag the syntax for each sentence, then run analyses on the sentence.
     # The loop is necessary, as the SyntaxDependencyRetagger can only take one sentence at a time.

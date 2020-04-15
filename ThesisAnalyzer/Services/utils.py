@@ -119,7 +119,7 @@ def is_text_too_long(length):
 
 def is_sentences_layer_necessary(config):
     return config.ANALYZE_OVERUSED_WORDS or \
-        config.ANALYZE_SENTENCE_LENGTH or \
+        config.ANALYZE_SENTENCES or \
         config.ANALYZE_IMPERSONALITY or \
         config.ANALYZE_TAGS or \
         config.ANALYZE_OFFICIALESE

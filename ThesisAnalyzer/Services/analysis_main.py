@@ -56,6 +56,9 @@ def analyze(text, user_form=False):
         text_obj = Text(text).tag_layer()
         sentences_layer = text_obj.sentences
 
+        sentences, words, sentence_words = utils.preprocess_text(
+            text, sentences_layer)
+
         # Impersonality analyzer
         if config.ANALYZE_IMPERSONALITY:
             summary.impersonality_summary = impersonality_analyzer.analyze(text, sentences_layer)
@@ -80,7 +83,7 @@ def analyze(text, user_form=False):
                             insert_data.id, cluster.text, cluster.sentence_position[0], cluster.sentence_position[1]))
 
         # Clause analysis
-        if config.ANALYZE_SENTENCE_LENGTH:
+        if config.ANALYZE_SENTENCES:
             summary.sentences_summary = sentences_analyzer.analyze(text, sentences_layer)
             if log_to_database:
                 for sentence in summary.sentences_summary.long_sentences:
