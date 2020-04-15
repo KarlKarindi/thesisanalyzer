@@ -42,12 +42,12 @@ def analyze(text, preprocessed_text, sentences_layer):
         sentence.tag_layer(["words"])
 
         # Find the indexes of words and whether they are in quotes or not
-        word_indexes_that_are_not_in_quotes = find_indexes_of_words_not_in_quotes(
+        indexes_of_words_not_in_quotes = find_indexes_of_words_not_in_quotes(
             sentence, quote_analyzer)
 
         # Find clusters of words that are not in quotes
         clusters = dict(
-            enumerate(create_clusters_of_words_not_in_quotes(word_indexes_that_are_not_in_quotes)))
+            enumerate(create_clusters_of_words_not_in_quotes(indexes_of_words_not_in_quotes)))
 
         # Create a sentence text that doesn't have any quotes
         sentence_text_without_quotes = remove_quoted_parts_from_sentence(
@@ -65,19 +65,17 @@ def analyze(text, preprocessed_text, sentences_layer):
 
             clause_and_verb_chain_index = create_clause_and_verb_chain_index(clauses, vc_detector)
 
-            clauses_using_missing_commas_segmenter = find_clauses_in_sentence(
-                cleaned_sentence_copy, clause_segmenter_that_ignores_missing_commas)
-            clause_and_verb_chain_index_with_missing_commas = create_clause_and_verb_chain_index(
-                clauses_using_missing_commas_segmenter, vc_detector)
+            sentences_with_missing_commas = find_sentences_with_missing_commas(
+                cleaned_sentence_copy, clause_segmenter_that_ignores_missing_commas,
+                vc_detector, clause_and_verb_chain_index, preprocessed_text.sentences[i])
 
-            if len(clause_and_verb_chain_index_with_missing_commas) > len(clause_and_verb_chain_index):
-                sentencesSummary.add_sentence_to_sentences_with_missing_commas(sentence.text)
+            pprint(sentences_with_missing_commas)
 
             sentence_is_long = is_sentence_too_long(clause_and_verb_chain_index)
 
             if sentence_is_long:
-                print(preprocessed_text.sentences[i])
-                sentencesSummary.add_sentence_to_long_sentences(sentence.text)
+                # Add the sentence dictionary from the preprocessed_text.sentences. Contains position info and text.
+                sentencesSummary.add_sentence_to_long_sentences(preprocessed_text.sentences[i])
 
     # Terminate the ClauseSegmenter processes
     clause_segmenter.close()
@@ -230,6 +228,32 @@ def remove_quoted_parts_from_sentence(sentence, clusters):
         clean_sentence += " " + sentence.words[start:end + 1].enclosing_text
 
     return clean_sentence.strip()
+
+
+def find_sentences_with_missing_commas(cleaned_sentence_copy, clause_segmenter_that_ignores_missing_commas,
+                                       vc_detector, clause_and_verb_chain_index, preprocessed_text_sentence):
+    """ Finds all the sentences that might potentally be missing some commas.
+        Compares the original clause segmenter's result with the one that ignores missing commas.
+        Parameters:
+            cleaned_sentence_copy (string) - Copy of the original cleaned sentence
+            clause_segmenter_that_ignores_missing_commas (ClauseSegmenter) - instance of ClauseSegmenter
+            vc_detector (VerbChainDetector) - instance of VerbChainDetector
+            clause_and_verb_chain_index (dict) - the original clause to verb chain dictionary
+            preprocessed_text_sentence (dict) - dictionary value from preprocessed_text.sentences[i]
+        Returns:
+            a list of SentenceWithMissingCommas objects.
+        """
+
+    sentences_missing_commas = []
+    clauses_using_missing_commas_segmenter = find_clauses_in_sentence(
+        cleaned_sentence_copy, clause_segmenter_that_ignores_missing_commas)
+    clause_and_verb_chain_index_with_missing_commas = create_clause_and_verb_chain_index(
+        clauses_using_missing_commas_segmenter, vc_detector)
+
+    if len(clause_and_verb_chain_index_with_missing_commas) > len(clause_and_verb_chain_index):
+        sentences_missing_commas.append(preprocessed_text_sentence)
+
+    return sentences_missing_commas
 
 
 def is_sentence_too_long(clause_and_verb_chain_index):

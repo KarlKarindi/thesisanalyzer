@@ -89,13 +89,13 @@ class SentencesSummary():
 
     def add_sentence_to_long_sentences(self, sentence):
         """ Parameters:
-                sentence (string) - string sentence to be added to list of long_sentences
+                sentence (dict) - Contains keys "position" and "text"
         """
         self.long_sentences.append(sentence)
 
     def add_sentence_to_sentences_with_missing_commas(self, sentence):
         """ Parameters:
-                sentence (string) - string sentence to be added to list of sentences_with_missing_commas
+                sentence (SentenceWithMissingCommas) - instance of SentenceWithMissingCommas
         """
         self.sentences_with_missing_commas.append(sentence)
 
@@ -104,8 +104,16 @@ class SentencesSummary():
         self.sentences_with_missing_commas = []
 
 
+class SentenceWithMissingCommas():
+
+    def __init__(self, text, position, comma_positions):
+        self.text = text
+        self.sentence_position = position
+        self.comma_positions = comma_positions
+
 # _____________________________________ #
 #           Tag analyzer                #
+
 
 class TagSummary():
 

@@ -34,8 +34,7 @@ def preprocess_text(original_text, sentences_layer):
     """
 
     sentence_words = {}
-    sentences = create_dict_of_sentences(
-        original_text, sentences_layer)
+    sentences = create_dict_of_sentences(original_text, sentences_layer)
     words = []
 
     sentence_index = 0  # Necessary in case there are no sentences
@@ -58,8 +57,7 @@ def create_dict_of_sentences(text, sentences_layer):
     for i, sentence in enumerate(sentences_layer):
         start = sentence_spans[i][0]
         end = sentence_spans[i][1]
-        values.append(
-            ({"position": [start, end], "text": sentence.enclosing_text}))
+        values.append({"position": [start, end], "text": sentence.enclosing_text})
         keys.append(i)
 
     return dict(zip(keys, values))
