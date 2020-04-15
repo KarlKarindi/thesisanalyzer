@@ -1,4 +1,5 @@
 from ThesisAnalyzer.Constants import constants
+from ThesisAnalyzer.Models.Preprocess import PreprocessedText
 from ThesisAnalyzer.Config import analysis as config
 
 from flask import Flask, request, jsonify
@@ -44,7 +45,7 @@ def preprocess_text(original_text, sentences_layer):
         sentence_words[sentence_index] = __words
         sentence_index += 1
 
-    return sentences, words, sentence_words
+    return PreprocessedText(sentences, words, sentence_words)
 
 
 def find_sentences_with_index_and_span(text, sentences_layer):

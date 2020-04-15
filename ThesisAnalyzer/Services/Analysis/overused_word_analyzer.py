@@ -31,7 +31,7 @@ def remove_duplicate_synonyms_for_lemma(lemma, syn_list):
     return result
 
 
-def analyze(original_text, sentences_layer):
+def analyze(original_text, preprocessed_text, sentences_layer):
     """ Analyzes repeating words using a method described in the Synonimity program
         Returns: TextSummary object
     """
@@ -39,9 +39,9 @@ def analyze(original_text, sentences_layer):
     # Query the database for all lemmas that are known. Get list of model Lemma
     Lemma_list = Lemma.query.all()
 
-    # Do the preprocessing
-    sentences, words, __ = utils.preprocess_text(
-        original_text, sentences_layer)
+    # Get preprocessed info
+    sentences = preprocessed_text.sentences
+    words = preprocessed_text.words
 
     # Get the amount of sentences and words
     text_sentence_count = len(sentences)

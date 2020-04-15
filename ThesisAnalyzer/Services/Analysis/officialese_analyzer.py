@@ -12,10 +12,10 @@ import os
 import math
 
 
-def analyze(original_text, preprocessed_text, orig_text_obj, sentences_layer):
+def analyze(original_text, preprocessed_text, text_obj, sentences_layer):
     officialese_summary = OfficialeseSummary()
 
-    text_obj = orig_text_obj
+    # Do morph_analysis again with a custom resolver.
     resolver = make_resolver(disambiguate=False, guess=True)
     del text_obj.morph_analysis
     text_obj.tag_layer(resolver=resolver)["morph_analysis"]
@@ -25,7 +25,6 @@ def analyze(original_text, preprocessed_text, orig_text_obj, sentences_layer):
     visl_tagger = VislTagger(vislcg3_pipeline=pipeline)
 
     sentence_words = preprocessed_text.sentence_words
-    
 
     # Tag the syntax for each sentence, then run analyses on the sentence.
     # The loop is necessary, as the SyntaxDependencyRetagger can only take one sentence at a time.

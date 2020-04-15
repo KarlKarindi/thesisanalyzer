@@ -56,8 +56,7 @@ def analyze(text, user_form=False):
         text_obj = Text(text).tag_layer()
         sentences_layer = text_obj.sentences
 
-        sentences, words, sentence_words = utils.preprocess_text(
-            text, sentences_layer)
+        preprocessed_text = utils.preprocess_text(text, sentences_layer)
 
         # Impersonality analyzer
         if config.ANALYZE_IMPERSONALITY:
@@ -70,7 +69,7 @@ def analyze(text, user_form=False):
         # Overused words analysis
         if config.ANALYZE_OVERUSED_WORDS:
             summary.text_summary = overused_word_analyzer.analyze(
-                text, sentences_layer)
+                text, preprocessed_text, sentences_layer)
             if log_to_database:
                 ows_list = summary.text_summary.overused_word_summary
                 for ows in ows_list:
@@ -101,7 +100,8 @@ def analyze(text, user_form=False):
 
         # Officialese analysis
         if config.ANALYZE_OFFICIALESE:
-            summary.officialese_summary = officialese_analyzer.analyze(text, text_obj, sentences_layer)
+            summary.officialese_summary = officialese_analyzer.analyze(
+                text, preprocessed_text, text_obj, sentences_layer)
 
     end = timer()
 
@@ -110,7 +110,7 @@ def analyze(text, user_form=False):
     if log_to_database:
         Formrequest.query.get(summary.id).successful = True
         db.session.commit()
-        print("Logged request to database.")
+        print("Logged request with id", summary.id, "to database.")
 
     return utils.encode(summary)
 
