@@ -34,13 +34,13 @@ def preprocess_text(original_text, sentences_layer):
     """
 
     sentence_words = {}
-    sentences = find_sentences_with_index_and_span(
+    sentences = create_dict_of_sentences(
         original_text, sentences_layer)
     words = []
 
     sentence_index = 0  # Necessary in case there are no sentences
-    for sentence_index, (span, sentence) in enumerate(sentences.items()):
-        __words = get_words_in_sentence(span, sentence, sentence_index)
+    for index, sentence in sentences.items():
+        __words = get_words_in_sentence(sentence, index)
         words.extend(__words)
         sentence_words[sentence_index] = __words
         sentence_index += 1
@@ -48,10 +48,8 @@ def preprocess_text(original_text, sentences_layer):
     return PreprocessedText(sentences, words, sentence_words)
 
 
-def find_sentences_with_index_and_span(text, sentences_layer):
-    """ Returns: dictionary with tuplet of (start, end) as key and
-        dictionary of sentence with index, text, start and end values
-    """
+def create_dict_of_sentences(text, sentences_layer):
+    """ Returns: dictionary with index as key and text and position as values """
 
     keys, values = [], []
 
@@ -61,13 +59,13 @@ def find_sentences_with_index_and_span(text, sentences_layer):
         start = sentence_spans[i][0]
         end = sentence_spans[i][1]
         values.append(
-            ({"index": i, "text": sentence.enclosing_text, "start": start, "end": end}))
-        keys.append((start, end))
+            ({"position": [start, end], "text": sentence.enclosing_text}))
+        keys.append(i)
 
     return dict(zip(keys, values))
 
 
-def get_words_in_sentence(sentence_span, sentence, sentence_index):
+def get_words_in_sentence(sentence, sentence_index):
     """ Returns a list of all words in a sentence.
         Words in this case are dictionaries that have attributes:
             text (string) - text string of the word
@@ -83,6 +81,7 @@ def get_words_in_sentence(sentence_span, sentence, sentence_index):
     """
 
     text = Text(sentence["text"])
+    sentence_span = sentence["position"]
 
     word_summaries = []
     text.tag_layer()

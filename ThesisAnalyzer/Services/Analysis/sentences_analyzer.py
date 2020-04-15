@@ -13,7 +13,7 @@ from copy import copy
 import re
 
 
-def analyze(text, sentences_layer):
+def analyze(text, preprocessed_text, sentences_layer):
     """ Analyzes all the sentences and brings out all sentences that might be too long.
         On deciding on whether a sentence is long or not, see function is_sentence_too_long()
     """
@@ -36,7 +36,7 @@ def analyze(text, sentences_layer):
     citation_analyzer = CitationAnalyzer()
 
     # Iterate through the sentences.
-    for sentence in sentences:
+    for i, sentence in enumerate(sentences):
 
         # Add the words layer to the sentence
         sentence.tag_layer(["words"])
@@ -76,6 +76,7 @@ def analyze(text, sentences_layer):
             sentence_is_long = is_sentence_too_long(clause_and_verb_chain_index)
 
             if sentence_is_long:
+                print(preprocessed_text.sentences[i])
                 sentencesSummary.add_sentence_to_long_sentences(sentence.text)
 
     # Terminate the ClauseSegmenter processes
@@ -83,7 +84,7 @@ def analyze(text, sentences_layer):
     clause_segmenter_that_ignores_missing_commas.close()
 
     for i in sentencesSummary.sentences_with_missing_commas:
-        print(i)
+        print("MISSING COMMA", i)
         print()
 
     return sentencesSummary

@@ -101,8 +101,7 @@ def analyze_olema_kesksona(original_text, sentence, words):
                             max(parent_end, child_end)]
                 text = original_text[position[0]:position[1]]
 
-                offender = NormalTextSliceContainer(sentence.text, sentence_position,
-                                                    text, position)
+                offender = NormalTextSliceContainer(sentence.text, sentence_position, text, position)
                 offenders.append(offender)
 
     return offenders

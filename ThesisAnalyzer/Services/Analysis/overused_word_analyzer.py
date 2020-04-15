@@ -343,8 +343,8 @@ def format_text(original_text, sentences_in_clusters):
     for cluster in sentences_in_clusters:
 
         # Find the start and end indexes, as these are necessary anyway
-        start = cluster[0]["start"]
-        end = cluster[len(cluster) - 1]["end"]
+        start = cluster[0]["position"][0]
+        end = cluster[len(cluster) - 1]["position"][1]
 
         # Decide formatting style on whether all the sentences are connected or not
         if sentences_are_connected(cluster):
@@ -375,10 +375,9 @@ def sentences_are_connected(sentences_in_cluster):
     connected = True
 
     prev = None
-    for sent in sentences_in_cluster:
-        current = sent["index"]
-        if prev is not None and current - prev != 1:
+    for current_index in range(len(sentences_in_cluster)):
+        if prev is not None and current_index - prev != 1:
             connected = False
-        prev = current
+        prev = current_index
 
     return connected

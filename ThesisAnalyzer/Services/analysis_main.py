@@ -56,6 +56,7 @@ def analyze(text, user_form=False):
         text_obj = Text(text).tag_layer()
         sentences_layer = text_obj.sentences
 
+        # Do the preprocessing. Get a ProcessedText object.
         preprocessed_text = utils.preprocess_text(text, sentences_layer)
 
         # Impersonality analyzer
@@ -83,7 +84,7 @@ def analyze(text, user_form=False):
 
         # Clause analysis
         if config.ANALYZE_SENTENCES:
-            summary.sentences_summary = sentences_analyzer.analyze(text, sentences_layer)
+            summary.sentences_summary = sentences_analyzer.analyze(text, preprocessed_text, sentences_layer)
             if log_to_database:
                 for sentence in summary.sentences_summary.long_sentences:
                     db.session.add(LongSentence(summary.id, sentence))
@@ -116,5 +117,6 @@ def analyze(text, user_form=False):
 
 
 def add_html_to_database(id, html):
+    """ Once analysis is done in the frontend. Add the HTML result to the database """
     Formrequest.query.get(id).result = html
     db.session.commit()
