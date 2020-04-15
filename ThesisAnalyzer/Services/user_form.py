@@ -139,9 +139,7 @@ def format_data(text, result):
 
 
 def handle_sentences_for_one_OWS(text, word_summary):
-    """ Iterate over all the words for an overused word.
-        Find the sentences the word is contained in.
-    """
+    """ Iterate over all the words for an overused word. """
 
     one_WS_sentences = []
 
