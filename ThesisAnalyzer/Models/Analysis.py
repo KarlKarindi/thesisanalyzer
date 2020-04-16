@@ -14,7 +14,7 @@ class ImpersonalitySummary():
 #        Overused Word analyzer         #
 
 
-class TextSummmary(object):
+class TextSummmary():
     """ Container class for OverusedWordSummary object """
 
     def __init__(self, word_count, sentence_count, OverusedWordSummary):
@@ -23,7 +23,7 @@ class TextSummmary(object):
         self.overused_word_summary = OverusedWordSummary
 
 
-class OverusedWordSummary(object):
+class OverusedWordSummary():
     """ Container object for word usage analysis. """
 
     # Adds another cluster to the summary's list of clusters.
@@ -46,7 +46,7 @@ class OverusedWordSummary(object):
         self.clusters = []
 
 
-class WordSummary(object):
+class WordSummary():
 
     def __init__(self, text, part_of_speech, position, sentence_index, sentence_position,
                  id=None, cluster_index=None, position_in_cluster=None):
@@ -68,7 +68,7 @@ class WordSummary(object):
                                 self.sentence_index, self.sentence_position[0], self.sentence_position[1])
 
 
-class ClusterContainer(object):
+class ClusterContainer():
     """ Used for containing cluster information """
 
     def __init__(self, text, start, end):
@@ -87,32 +87,35 @@ class ClusterContainer(object):
 
 class SentencesSummary():
 
-    def add_sentence_to_long_sentences(self, sentence):
-        """ Parameters:
-                sentence (dict) - Contains keys "position" and "text"
-        """
-        self.long_sentences.append(sentence)
-
     def __init__(self):
         self.long_sentences = []
         self.sentences_with_missing_commas = []
 
 
+class LongSentence():
+
+    def __init__(self, sentence_information, clause_positions):
+        self.text = sentence_information["text"]
+        self.position = sentence_information["position"]
+        self.clause_positions = [[clause_pos[0], clause_pos[1]] for clause_pos in clause_positions]
+
+
 class SentenceWithMissingComma():
 
-    def __init__(self, sentence_information, missing_comma):
+    def __init__(self, sentence_information, missing_commas, clause_positions):
         # missing_comma is an instance of MissingComma
         self.text = sentence_information["text"]
         self.position = sentence_information["position"]
-        self.missing_comma_position_in_sentence = missing_comma.comma_position_in_sentence
-        self.clause_after_missing_comma = missing_comma.following_clause
+        self.missing_comma_positions_in_sentence = missing_commas.comma_positions_in_sentence
+        self.clauses_after_missing_comma = missing_commas.following_clauses
+        self.clause_positions = [[clause_pos[0], clause_pos[1]] for clause_pos in clause_positions]
 
 
 class MissingComma():
-
-    def __init__(self, comma_position_in_sentence, following_clause):
-        self.comma_position_in_sentence = comma_position_in_sentence
-        self.following_clause = following_clause
+    def __init__(self, comma_positions_in_sentence, following_clauses):
+        # Both fields are lists
+        self.comma_positions_in_sentence = comma_positions_in_sentence
+        self.following_clauses = following_clauses
 
 # _____________________________________ #
 #           Tag analyzer                #
