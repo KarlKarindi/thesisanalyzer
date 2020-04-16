@@ -71,6 +71,7 @@ def analyze(text, preprocessed_text, sentences_layer):
                 preprocessed_text.sentence_words[i])
 
             if len(missing_commas) > 0:
+                print(missing_commas)
 
             sentence_is_long = is_sentence_too_long(clause_and_verb_chain_index)
 
@@ -263,34 +264,36 @@ def find_if_sentence_is_missing_commas(cleaned_sentence_copy, clause_segmenter_t
         original = dict(copy(clause_and_verb_chain_index))
         fixed = dict(copy(clause_and_verb_chain_index_with_missing_commas))
 
-        pprint(preprocessed_text_sentence["text"])
-
-        found_broken_clause = False
-        for k, v in fixed.items():
-            if found_broken_clause:
-                break
-
-            fixed_clause = fixed[k]["clause"]
-
-            try:
-                original_clause = original[k]["clause"]
-                clauses_are_the_same = all(word in fixed_clause for word in original_clause)
-                if not clauses_are_the_same:
-                    # In the original_clause there is a clause A that should be divided to clauses M and N.
-                    # This means that a comma should be put in front of clause N.
-                    if k + 1 != len(fixed):
-                        print("2, SIIA ETTE KÄIB KOMA")
-                        print(fixed[k + 1]["clause"])
-                        print()
-                        found_broken_clause = True
-            except KeyError:
-                # This clause didn't exist in the original index.
-                # It should not get to this exception, but it's added for extra safety.
-                print("1, SIIA ETTE KÄIB KOMA")
-                pprint(fixed_clause)
-                found_broken_clause = True
+        clause_needing_comma = find_clause_needing_comma(original, fixed)
+        
 
     return sentences_missing_commas
+
+
+def find_clause_needing_comma(original, fixed):
+    """ Finds the clause that a comma should be put in front of.
+        Parameters:
+            original (dict) - the original clause_to_verb_chain_index
+            fixed (dict) - the clause_to_verb_chain_index_with_missing_commas
+        Returns:
+            fixed[key] for the clause that should have a comma in front of it
+    """
+    for k, v in fixed.items():
+
+        fixed_clause = fixed[k]["clause"]
+        try:
+            original_clause = original[k]["clause"]
+            clauses_are_the_same = all(word in fixed_clause for word in original_clause)
+            if not clauses_are_the_same:
+                # In the original_clause there is a clause A that should be divided to clauses M and N.
+                # This means that a comma should be put in front of clause N.
+                if k + 1 != len(fixed):
+                    return fixed[k + 1]
+
+        except KeyError:
+            # This clause didn't exist in the original index.
+            # It should not get to this exception, but it's added for extra safety.
+            return fixed_clause
 
 
 def is_sentence_too_long(clause_and_verb_chain_index):
