@@ -1,5 +1,5 @@
 from ThesisAnalyzer.Models.Analysis import SentencesSummary, MissingCommas, SentenceWithMissingCommas, LongSentence
-from ThesisAnalyzer.Services.Analysis.TextAnalyzers.analyzers import QuoteAnalyzer, CitationAnalyzer
+from ThesisAnalyzer.Services.Analysis.TextAnalyzers.analyzers import QuoteAnalyzer, CitationAnalyzer, QuoteRemover
 from ThesisAnalyzer.Services.Analysis import missing_commas_analyzer
 from ThesisAnalyzer.Config import analysis as config
 from ThesisAnalyzer.Services import utils
@@ -17,6 +17,7 @@ import re
 def analyze(text, preprocessed_text, sentences_layer):
     """ Analyzes all the sentences and brings out all sentences that might be too long.
         On deciding on whether a sentence is long or not, see function is_sentence_too_long()
+        Also checks whethere there are any missing commas in the text.
     """
     # Leave only the enclosing text
     sentences = [Text(sent.enclosing_text) for sent in sentences_layer]
@@ -31,8 +32,9 @@ def analyze(text, preprocessed_text, sentences_layer):
     # Initalize a VerbChainDetector instance
     vc_detector = VerbChainDetector()
 
-    # Initialize a QuoteAnalyzer instance
+    # Initialize QuoteAnalyzer and QuoteRemover instances
     quote_analyzer = QuoteAnalyzer()
+    quote_remover = QuoteRemover()
 
     citation_analyzer = CitationAnalyzer()
 
@@ -43,15 +45,14 @@ def analyze(text, preprocessed_text, sentences_layer):
         sentence.tag_layer(["words"])
 
         # Find the indexes of words and whether they are in quotes or not
-        indexes_of_words_not_in_quotes = find_indexes_of_words_not_in_quotes(
-            sentence, quote_analyzer)
+        indexes_of_words_not_in_quotes = quote_analyzer.find_indexes_of_words_not_in_quotes(sentence)
 
         # Find clusters of words that are not in quotes
-        clusters = dict(
-            enumerate(create_clusters_of_words_not_in_quotes(indexes_of_words_not_in_quotes)))
+        clusters = dict(enumerate(
+            quote_analyzer.create_clusters_of_words_not_in_quotes(indexes_of_words_not_in_quotes)))
 
         # Create a sentence text that doesn't have any quotes
-        sentence_text_without_quotes = remove_quoted_parts_from_sentence(
+        sentence_text_without_quotes = quote_remover.remove_quoted_parts_from_sentence(
             sentence, clusters)
 
         cleaned_sentence = citation_analyzer.get_sentence_without_citations(
@@ -88,24 +89,6 @@ def analyze(text, preprocessed_text, sentences_layer):
     mc_clause_segmenter.close()
 
     return sentencesSummary
-
-
-def find_indexes_of_words_not_in_quotes(sentence, quote_analyzer):
-    """ Creates a list of word indexes that are not in quotes
-        Parameters:
-            sentence (Layer) - a sentence layer that has the words layer
-        Returns:
-            indexes_of_words_not_in_quotes (list) - list of word indexes that aren't in quotes
-    """
-
-    indexes_of_words_not_in_quotes = []
-
-    for i, word in enumerate(sentence.words):
-        in_quotes = quote_analyzer.is_word_in_quotes(word.text)
-        if in_quotes is False:
-            indexes_of_words_not_in_quotes.append(i)
-
-    return indexes_of_words_not_in_quotes
 
 
 def create_clause_and_verb_chain_index(clauses, vc_detector):
@@ -161,66 +144,6 @@ def find_verb_chain_in_clause(clause_text_list, vc_detector):
     _verb_chains = clause_text.verb_chains
 
     return " ".join(_verb_chains.text)
-
-
-def create_clusters_of_words_not_in_quotes(word_indexes_that_are_not_in_quotes):
-    """ Generator function that creates clusters of viable words.
-        Viable words are words that aren't in quotes.
-        Searches for words that aren't further away from each-other than 1 word
-        Clustering function found here:
-        https://stackoverflow.com/questions/15800895/finding-clusters-of-numbers-in-a-list
-    """
-
-    previous = None
-    cluster = []
-    for index in word_indexes_that_are_not_in_quotes:
-        if not previous or index - previous == 1:
-            cluster.append(index)
-        else:
-            yield cluster
-            cluster = [index]
-        previous = index
-    if cluster:
-        yield cluster
-
-
-def remove_quoted_parts_from_sentence(sentence, clusters):
-    """ Creates a clean sentence that doesn't contain any words in quotes.
-        Parameters:
-            sentence (Text) - Text object
-            clusters (dict) - clusters of word spans where clusters are words next to each other
-        Returns:
-            clean_sentence (string) - cleaned sentence text without any quoted words.
-            If a sentence is completely surrounded by quotes, clean_sentence is an empty string.
-    """
-
-    # Create a clean_sentence variable to later add to
-    clean_sentence = ""
-
-    # Iterate over all the clusters
-    for i in range(len(clusters)):
-        words = clusters[i]
-
-        # Take the first and last index
-        start = words[0]
-        end = words[-1]
-
-        # The first check ensures we don't accidentally wrap around to the end of the sentence with [start - 1]
-        if i != 0:
-            # Fix for issue #65.
-            # Check if the previous ending quote has a length of 2.
-            # If so, add the second character (usually a comma) to the clean_sentence too.
-            ending_quote = sentence.words[start - 1].enclosing_text
-            if len(ending_quote) == 2 and ending_quote[0] in constants.QUOTE_MARKS_ENDING:
-                clean_sentence += ending_quote[1]
-            # Also check for cases where the ending quote is 3 lettered. Like '",
-            elif len(ending_quote) == 3 and ending_quote[1] in constants.QUOTE_MARKS_ENDING:
-                clean_sentence += ending_quote[2]
-
-        # Add to the clean_sentence. Range is until n + 1, as n must be included
-        clean_sentence += " " + sentence.words[start:end + 1].enclosing_text
-
-    return clean_sentence.strip()
 
 
 def is_sentence_too_long(clause_and_verb_chain_index):

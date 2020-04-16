@@ -8,6 +8,7 @@ def get_sentence_with_missing_comma(i, mc_clause_segmenter, vc_detector,
                                     preprocessed_text):
     """ Analyzes a single sentence. Is called out in the sentences_analyzer module
         when iterating over all the sentences.
+
         Parameters:
             i (int) - the index of the current sentence under observation
             mc_clause_segmenter (ClauseSegmenter) - missing commas clause segmenter.
@@ -17,19 +18,20 @@ def get_sentence_with_missing_comma(i, mc_clause_segmenter, vc_detector,
             sentence_copy (Text) - a copy of the cleaned (!) sentence
             clause_and_verb_chain_index (dict) - an index of values: clauses and corresponding verb chains
             preprocessed_text (PreprocessedText) - output of utils.preprocess_text()
+
         Returns:
             None if the sentence doesn't have a missing comma.
             Instance of SentenceWithMissingCommas if there is a missing comma in the sentence
     """
-    
+
     # Tag the sentence copy using mc_clause_segmenter
     mc_clause_segmenter.tag(sentence_copy)
-    
+
     clauses_using_mc_segmenter = sentence_copy.clauses
-    
+
     mc_clause_and_verb_chain_index = sentences_analyzer.create_clause_and_verb_chain_index(
         clauses_using_mc_segmenter, vc_detector)
-    
+
     clause_positions_with_mc_segmenter = clauses_using_mc_segmenter[["start", "end"]]
 
     # Find the missing commas in a sentence. missing_commas is of type MissingCommas
@@ -41,7 +43,7 @@ def get_sentence_with_missing_comma(i, mc_clause_segmenter, vc_detector,
     if missing_commas is not None:
         # Add the sentence dictionary from the preprocessed_text.sentences, contains position info and text.
         return SentenceWithMissingCommas(preprocessed_text.sentences[i],
-                                        missing_commas, clause_positions_with_mc_segmenter)
+                                         missing_commas, clause_positions_with_mc_segmenter)
 
     return None
 

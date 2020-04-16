@@ -7,7 +7,7 @@ from estnltk import Text
 import re
 
 
-class QuoteAnalyzer(object):
+class QuoteAnalyzer():
     """ QuoteAnalyzer checks whether a certain word in a sentence is in quotes or not.
 
         Usage:
@@ -64,8 +64,94 @@ class QuoteAnalyzer(object):
 
         return self.in_quotes
 
+    def find_indexes_of_words_not_in_quotes(self, sentence):
+        """ Creates a list of word indexes that are not in quotes in a sentence
+            Parameters:
+                sentence (Layer) - a sentence layer that has the words layer
+            Returns:
+                indexes_of_words_not_in_quotes (list) - list of word indexes that aren't in quotes
+        """
 
-class CitationAnalyzer(object):
+        indexes_of_words_not_in_quotes = []
+
+        for i, word in enumerate(sentence.words):
+            in_quotes = self.is_word_in_quotes(word.text)
+            if in_quotes is False:
+                indexes_of_words_not_in_quotes.append(i)
+
+        return indexes_of_words_not_in_quotes
+
+    def create_clusters_of_words_not_in_quotes(self, word_indexes_that_are_not_in_quotes):
+        """ Usage:
+            Call out with
+            dict(enumerate(quote_analyzer.create_clusters_of_words_not_in_quotes(indexes)))
+
+            Generator function that creates clusters of words not in quotes.
+            Searches for words that aren't further away from each-other than 1 word
+            Clustering function found here:
+            https://stackoverflow.com/questions/15800895/finding-clusters-of-numbers-in-a-list
+        """
+
+        previous = None
+        cluster = []
+        for index in word_indexes_that_are_not_in_quotes:
+            if not previous or index - previous == 1:
+                cluster.append(index)
+            else:
+                yield cluster
+                cluster = [index]
+            previous = index
+        if cluster:
+            yield cluster
+
+
+class QuoteRemover():
+    """ Used to remove quoted parts in a sentence """
+
+    def __init__(self):
+        self.removed_indexes = []
+
+    def remove_quoted_parts_from_sentence(self, sentence, clusters):
+        """ Creates a clean sentence that doesn't contain any words in quotes.
+            Parameters:
+                sentence(Text) - Text object
+                clusters(dict) - clusters of word spans where clusters are words next to each other
+            Returns:
+                clean_sentence(string) - cleaned sentence text without any quoted words.
+                If a sentence is completely surrounded by quotes, clean_sentence is an empty string.
+        """
+
+        # Create a clean_sentence variable to later add to
+        clean_sentence = ""
+
+        # Iterate over all the clusters
+        for i in range(len(clusters)):
+            words = clusters[i]
+
+            # Take the first and last index
+            start = words[0]
+            end = words[-1]
+
+            # Handling corner cases.
+            # The first check ensures we don't accidentally wrap around to the end of the sentence with [start - 1]
+            if i != 0:
+                # Fix for issue #65.
+                # Check if the previous ending quote has a length of 2.
+                # If so, add the second character (usually a comma) to the clean_sentence too.
+                ending_quote = sentence.words[start - 1].enclosing_text
+                if len(ending_quote) == 2 and ending_quote[0] in constants.QUOTE_MARKS_ENDING:
+                    clean_sentence += ending_quote[1]
+                # Also check for cases where the ending quote is 3 lettered. Like '",
+                elif len(ending_quote) == 3 and ending_quote[1] in constants.QUOTE_MARKS_ENDING:
+                    clean_sentence += ending_quote[2]
+
+            # Add to the clean_sentence. Range is until n + 1, as n must be included
+            clean_sentence += " " + sentence.words[start:end + 1].enclosing_text
+
+        return clean_sentence.strip()
+
+
+class CitationAnalyzer():
     """ Analyzer for citations in text.
         Usage:
             1. Initalize a new instance of CitationAnalyzer.

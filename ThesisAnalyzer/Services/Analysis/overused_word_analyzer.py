@@ -64,9 +64,6 @@ def analyze(original_text, preprocessed_text, sentences_layer):
     lemma_to_rank_and_count = create_database_lemma_to_rank_and_count(
         Lemma_list)
 
-    # Occurence of the most used lemma in Estonian
-    most_used_frequency = get_frequency_of_most_used_word(Lemma_list)
-
     # Create a set of lemmas that will be analysed.
     lemmas = set(lemmas_for_analysis)
 
@@ -76,8 +73,7 @@ def analyze(original_text, preprocessed_text, sentences_layer):
 
     for lemma in lemmas:
 
-        expected_freq = get_lemma_expected_frequency(most_used_frequency,
-                                                     lemma_to_rank_and_count[lemma][0])
+        expected_freq = get_lemma_expected_frequency(lemma_to_rank_and_count[lemma][0])
         actual_freq = get_lemma_actual_frequency(
             len(lemma_to_word[lemma]), user_word_count)
 
@@ -236,24 +232,9 @@ def create_database_lemma_to_rank_and_count(Lemma_list):
     return lemma_to_rank_and_count
 
 
-def get_frequency_of_most_used_word(Lemma_list):
-    """ Gets the frequency of the most used lemma in Estonian. """
-
-    Lemma_list_sorted = sorted(
-        Lemma_list, key=lambda x: x.count, reverse=True)
-
-    most_used_count = Lemma_list_sorted[0].count
-    total_count = 0
-    # Must be iterated over to add to total_count, as Lemma_list is a list of Lemma objects
-    for Lem in Lemma_list_sorted:
-        total_count += Lem.count
-
-    return round(most_used_count / total_count, 3)
-
-
-def get_lemma_expected_frequency(most_used_word_frequency, rank):
-    """ We find the expected frequency by dividing the most used word frequency with the rank of our lemma """
-    return most_used_word_frequency / rank
+def get_lemma_expected_frequency(rank):
+    """ We find the expected frequency by dividing 1 with the rank of our lemma """
+    return 1 / rank
 
 
 def get_lemma_actual_frequency(lemma_count, total_count):
