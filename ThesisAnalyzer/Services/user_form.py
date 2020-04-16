@@ -75,7 +75,7 @@ def format_data(text, result):
         long_sentences = [s["text"] for s in long_sentence_object_list]
 
         missing_comma_sentence_object_list = result["sentences_summary"]["sentences_with_missing_commas"]
-        missing_comma_sentences = [[s["text"], ", ".join(s["clauses_after_missing_comma"])]
+        missing_comma_sentences = [[s["text"], " ; ".join(s["clauses_after_missing_comma"])]
                                    for s in missing_comma_sentence_object_list]
 
     # Overused words

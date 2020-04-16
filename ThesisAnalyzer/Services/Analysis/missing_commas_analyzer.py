@@ -1,6 +1,7 @@
 from ThesisAnalyzer.Services.Analysis import sentences_analyzer
 from ThesisAnalyzer.Models.Analysis import SentenceWithMissingCommas, MissingCommas
 from copy import copy
+from pprint import pprint
 
 
 def get_sentence_with_missing_comma(i, mc_clause_segmenter, vc_detector,
@@ -100,30 +101,59 @@ def find_indexes_of_clauses_needing_comma(original, fixed):
     """
     indexes = []
 
-    skip = False
-    for k, v in fixed.items():
-        if skip:
-            skip = False
-            continue
+    counter = 0
+    for i, v in original.items():
 
-        fixed_clause = fixed[k]["clause"]
-        try:
-            original_clause = original[k]["clause"]
-            clauses_are_the_same = all(word in fixed_clause for word in original_clause)
-            if not clauses_are_the_same:
-                # In the original_clause there is a clause A that should be divided to clauses M and N.
-                # This means that a comma should be put in front of clause N.
-                if k + 1 < len(fixed):
-                    indexes.append(k + 1)
-                    # Skip the next one
-                    skip = True
-                    # FIXME: Continue cycle
-                    return indexes
+        original_clause = original[i]["clause"]
+        fixed_clause = fixed[counter]["clause"]
 
-        except KeyError:
-            print("keyerror", k, v)
-            # This clause didn't exist in the original index.
-            # It should not get to this exception, but it's added for extra safety.
-            # indexes.append(k)
+        clauses_are_the_same = all(word in fixed_clause for word in original_clause)
+        if not clauses_are_the_same:
+            clause_comes_after_comma = False  # Clause comes after comma if it's not the first clause in fixed.
+            # Start to iterate over the following fixed clauses.
+            # If they are a sublist of the original clause, they need a comma
+            while counter < len(fixed) and is_sublist(fixed_clause, original_clause):
+                if clause_comes_after_comma:
+                    indexes.append(counter)
+
+                counter += 1
+
+                if counter >= len(fixed):
+                    break
+
+                fixed_clause = fixed[counter]["clause"]
+                clause_comes_after_comma = True  # It's not the first clause anymore, so start adding comas
+        else:
+            counter += 1
 
     return indexes
+
+# if skip:
+#             skip = False
+#             continue
+
+#         fixed_clause = fixed[k]["clause"]
+#         try:
+#             original_clause = original[k]["clause"]
+#             clauses_are_the_same = all(word in fixed_clause for word in original_clause)
+#             if not clauses_are_the_same:
+#                 # In the original_clause there is a clause A that should be divided to clauses M and N.
+#                 # This means that a comma should be put in front of clause N.
+#                 if k + 1 < len(fixed):
+#                     indexes.append(k + 1)
+#                     # Skip the next one
+#                     skip = True
+
+#         except KeyError:
+#             print("keyerror", k, v)
+#             # This clause didn't exist in the original index.
+#             # It should not get to this exception, but it's added for extra safety.
+#             # indexes.append(k)
+
+
+def is_sublist(pattern, bigger_list):
+    matches = []
+    for i in range(len(bigger_list)):
+        if bigger_list[i] == pattern[0] and bigger_list[i:i + len(pattern)] == pattern:
+            matches.append(pattern)
+    return matches
