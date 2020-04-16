@@ -1,4 +1,4 @@
-from ThesisAnalyzer.Models.Analysis import SentencesSummary, MissingComma, SentenceWithMissingComma, LongSentence
+from ThesisAnalyzer.Models.Analysis import SentencesSummary, MissingCommas, SentenceWithMissingCommas, LongSentence
 from ThesisAnalyzer.Services.Analysis.TextAnalyzers.analyzers import QuoteAnalyzer, CitationAnalyzer
 from ThesisAnalyzer.Services.Analysis import missing_commas_analyzer
 from ThesisAnalyzer.Config import analysis as config
@@ -26,7 +26,7 @@ def analyze(text, preprocessed_text, sentences_layer):
     # Initialize a ClauseSegmenter instance
     clause_segmenter = ClauseSegmenter()
     # Initialize a second ClauseSegmenter instance that ignores missing commas
-    clause_segmenter_that_ignores_missing_commas = ClauseSegmenter(ignore_missing_commas=True)
+    mc_clause_segmenter = ClauseSegmenter(ignore_missing_commas=True)
 
     # Initalize a VerbChainDetector instance
     vc_detector = VerbChainDetector()
@@ -66,12 +66,12 @@ def analyze(text, preprocessed_text, sentences_layer):
             clause_segmenter.tag(cleaned_sentence)
             clauses = cleaned_sentence.clauses
             clause_and_verb_chain_index = create_clause_and_verb_chain_index(clauses, vc_detector)
-            clause_positions_with_original_segmenter = clauses[["start", "end"]]
+            clause_positions_original = clauses[["start", "end"]]
 
             # Use the clause segmenter that ignores missing commas to check for comma errors
             sentence_with_missing_comma = missing_commas_analyzer.get_sentence_with_missing_comma(
-                i, clause_segmenter_that_ignores_missing_commas, vc_detector,
-                cleaned_sentence_copy, clause_and_verb_chain_index, preprocessed_text)
+                i, mc_clause_segmenter, vc_detector, cleaned_sentence_copy,
+                clause_and_verb_chain_index, preprocessed_text)
 
             if sentence_with_missing_comma is not None:
                 sentencesSummary.sentences_with_missing_commas.append(sentence_with_missing_comma)
@@ -80,12 +80,12 @@ def analyze(text, preprocessed_text, sentences_layer):
             if sentence_is_long:
                 # Add the sentence dictionary from the preprocessed_text.sentences, contains position info and text.
 
-                longSentence = LongSentence(preprocessed_text.sentences[i], clause_positions_with_original_segmenter)
+                longSentence = LongSentence(preprocessed_text.sentences[i], clause_positions_original)
                 sentencesSummary.long_sentences.append(longSentence)
 
     # Terminate the ClauseSegmenter processes
     clause_segmenter.close()
-    clause_segmenter_that_ignores_missing_commas.close()
+    mc_clause_segmenter.close()
 
     return sentencesSummary
 

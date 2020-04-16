@@ -100,10 +100,10 @@ class LongSentence():
         self.clause_positions = [[clause_pos[0], clause_pos[1]] for clause_pos in clause_positions]
 
 
-class SentenceWithMissingComma():
+class SentenceWithMissingCommas():
 
     def __init__(self, sentence_information, missing_commas, clause_positions):
-        # missing_comma is an instance of MissingComma
+        # missing_commas is an instance of MissingComma
         self.text = sentence_information["text"]
         self.position = sentence_information["position"]
         self.missing_comma_positions_in_sentence = missing_commas.comma_positions_in_sentence
@@ -111,7 +111,7 @@ class SentenceWithMissingComma():
         self.clause_positions = [[clause_pos[0], clause_pos[1]] for clause_pos in clause_positions]
 
 
-class MissingComma():
+class MissingCommas():
     def __init__(self, comma_positions_in_sentence, following_clauses):
         # Both fields are lists
         self.comma_positions_in_sentence = comma_positions_in_sentence
