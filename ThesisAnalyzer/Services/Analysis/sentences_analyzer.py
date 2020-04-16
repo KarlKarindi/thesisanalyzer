@@ -41,8 +41,7 @@ def analyze(text, preprocessed_text, sentences_layer):
     # Iterate through the sentences.
     for i, sentence in enumerate(sentences):
 
-        # Add the words layer to the sentence
-        sentence.tag_layer(["words"])
+        sentence.tag_layer()
 
         # Find the indexes of words and whether they are in quotes or not
         indexes_of_words_not_in_quotes = quote_analyzer.find_indexes_of_words_not_in_quotes(sentence)
@@ -61,23 +60,28 @@ def analyze(text, preprocessed_text, sentences_layer):
         # If sentence_text_without_quotes is empty, it's completely in quotes and shouldn't be analysed further.
         if len(sentence_text_without_quotes) > 0:
             # Create a copy of the cleaned sentence before it's tagged by the clause segmenter
-            cleaned_sentence_copy = copy(cleaned_sentence)
+            sentence_copy = copy(sentence)
 
+            clause_segmenter.tag(sentence)
             # Use the normal clause segmenter
-            clause_segmenter.tag(cleaned_sentence)
-            clauses = cleaned_sentence.clauses
+
+            clauses = sentence.clauses
             clause_and_verb_chain_index = create_clause_and_verb_chain_index(clauses, vc_detector)
             clause_positions_original = clauses[["start", "end"]]
 
             # Use the clause segmenter that ignores missing commas to check for comma errors
             sentence_with_missing_comma = missing_commas_analyzer.get_sentence_with_missing_comma(
-                i, mc_clause_segmenter, vc_detector, cleaned_sentence_copy,
+                i, mc_clause_segmenter, vc_detector, sentence_copy,
                 clause_and_verb_chain_index, preprocessed_text)
 
             if sentence_with_missing_comma is not None:
                 sentencesSummary.sentences_with_missing_commas.append(sentence_with_missing_comma)
 
-            sentence_is_long = is_sentence_too_long(clause_and_verb_chain_index)
+            clause_segmenter.tag(cleaned_sentence)
+            cleaned_clauses = cleaned_sentence.clauses
+            cleaned_clause_and_verb_chain_index = create_clause_and_verb_chain_index(cleaned_clauses, vc_detector)
+
+            sentence_is_long = is_sentence_too_long(cleaned_clause_and_verb_chain_index)
             if sentence_is_long:
                 # Add the sentence dictionary from the preprocessed_text.sentences, contains position info and text.
 
