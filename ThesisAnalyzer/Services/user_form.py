@@ -17,7 +17,9 @@ class FormData(object):
                  poolt_tarind_sentences,
                  olema_kesksona_sentences,
                  maarus_saavas_sentences,
-                 nominalisatsioon_mine_vormis_sentences):
+                 nominalisatsioon_mine_vormis_sentences,
+                 missing_comma_sentences
+                 ):
 
         self.elapsed_time = elapsed_time
         self.sentence_count = sentence_count
@@ -32,6 +34,7 @@ class FormData(object):
         self.olema_kesksona_sentences = olema_kesksona_sentences
         self.maarus_saavas_sentences = maarus_saavas_sentences
         self.nominalisatsioon_mine_vormis_sentences = nominalisatsioon_mine_vormis_sentences
+        self.missing_comma_sentences = missing_comma_sentences
 
 
 def format_data(text, result):
@@ -46,8 +49,9 @@ def format_data(text, result):
     # if a new list is added, it must be initialized here first.
     sentence_count, word_count, sentences_with_pv, pv_in_sentences, long_sentences, \
         overused_words, all_WS_sentences, all_WS_clusters, all_poolt_tarind_sentences, \
-        all_olema_kesksona_sentences, all_maarus_saavas_sentences, all_nominalisatsioon_mine_vormis_sentences \
-        = 1, 1, [], [], [], [], [], [], [], [], [], []
+        all_olema_kesksona_sentences, all_maarus_saavas_sentences, all_nominalisatsioon_mine_vormis_sentences, \
+        missing_comma_sentences \
+        = 1, 1, [], [], [], [], [], [], [], [], [], [], []
 
     elapsed_time = result["elapsed_time"]
     if config.ANALYZE_OVERUSED_WORDS:
@@ -69,6 +73,10 @@ def format_data(text, result):
     if config.ANALYZE_SENTENCES:
         long_sentence_object_list = result["sentences_summary"]["long_sentences"]
         long_sentences = [s["text"] for s in long_sentence_object_list]
+
+        missing_comma_sentence_object_list = result["sentences_summary"]["sentences_with_missing_commas"]
+        missing_comma_sentences = [[s["text"], s["clause_after_missing_comma"]]
+                                   for s in missing_comma_sentence_object_list]
 
     # Overused words
     if config.ANALYZE_OVERUSED_WORDS:
@@ -135,7 +143,8 @@ def format_data(text, result):
                     all_poolt_tarind_sentences,
                     all_olema_kesksona_sentences,
                     all_maarus_saavas_sentences,
-                    all_nominalisatsioon_mine_vormis_sentences
+                    all_nominalisatsioon_mine_vormis_sentences,
+                    missing_comma_sentences
                     )
 
 

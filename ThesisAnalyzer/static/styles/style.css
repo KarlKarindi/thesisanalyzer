@@ -158,3 +158,13 @@ footer {
 #showMoreButton {
   margin-bottom: 20px;
 }
+
+.missingCommaParagraph {
+  margin-bottom: 0;
+}
+
+#collapseFiveExtra {
+  border-bottom: 1px solid;
+  border-color: #dcdcdc;
+  margin-bottom: 25px;
+}

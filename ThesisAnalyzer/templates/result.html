@@ -85,6 +85,45 @@
         </div>
       </div>
 
+      <div class="card">
+        <div class="card-header">
+          <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseFive" href="#"
+            aria-expanded="false">
+            <div class="imageContainer">
+              <div class="left">
+                <img class="image" src="{{ url_for('static', filename='images/puppy.png') }}" />
+              </div>
+              <div class="analysisHeader">
+                Puuduvate komade analüüs
+              </div>
+            </div>
+          </button>
+        </div>
+        <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordion">
+          <div class="card-body">
+            {% if missing_comma_sentences|length == 0 %}
+            <h5>Analüüs ei tuvastanud üheski lauses puuduvat koma.</h5>
+            {% else %}
+            <button id="showMoreButton" class="btn btn-primary btn-sm" data-toggle="collapse"
+              data-target="#collapseFiveExtra" aria-controls="collapseFiveExtra" aria-expanded="false">Analüüsi info
+            </button>
+            {% endif %}
+            <div id="collapseFiveExtra" class="collapse" aria-labelledby="headingFiveExtra" data-parent="#accordion">
+              <h5>Analüüsi tulemused on kujul:</h5>
+              <p class="missingCommaParagraph"><b>Osalause, mille ette läheb koma</b></p>
+              <p>Originaallause</p>
+            </div>
+            <h5>Järgnevates lausetes võib olla puuduv koma:</h5>
+            {%- for sentence in missing_comma_sentences %}
+            <br />
+            <p class="missingCommaParagraph"><b>{{sentence[1]}}</b></p>
+            <p>{{sentence[0]}}</p>
+            {%- endfor %}
+          </div>
+        </div>
+      </div>
+
+
       <!-- Kantseliit -->
       <div class="card">
         <div class="card-header">
