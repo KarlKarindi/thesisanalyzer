@@ -253,10 +253,6 @@ def find_if_sentence_is_missing_commas(cleaned_sentence_copy, clause_segmenter_t
     clause_and_verb_chain_index_with_missing_commas = create_clause_and_verb_chain_index(
         clauses_using_missing_commas_segmenter, vc_detector)
 
-    # pprint(clause_and_verb_chain_index)
-    # pprint(clause_and_verb_chain_index_with_missing_commas)
-    # print("\n======\n")
-
     if len(clause_and_verb_chain_index_with_missing_commas) > len(clause_and_verb_chain_index):
         # There is a potentially missing comma in the sentence.
         # We make copies so as to not add an empty row into the original clause_and_verb_chain index.
@@ -265,7 +261,7 @@ def find_if_sentence_is_missing_commas(cleaned_sentence_copy, clause_segmenter_t
         fixed = dict(copy(clause_and_verb_chain_index_with_missing_commas))
 
         clause_needing_comma = find_clause_needing_comma(original, fixed)
-        
+        word_DTO_list = create_word_DTO_list_for_sentence(preprocessed_text_sentence_words)
 
     return sentences_missing_commas
 
@@ -294,6 +290,19 @@ def find_clause_needing_comma(original, fixed):
             # This clause didn't exist in the original index.
             # It should not get to this exception, but it's added for extra safety.
             return fixed_clause
+
+
+def create_word_DTO_list_for_sentence(sentence_words):
+    """ Creates a DTO list of words in a sentence.
+        DTO has attributes 'text' and 'position_in_sentence'
+    """
+    word_DTO_list = []
+    for w in sentence_words:
+        position_in_sentence_start = w["position"][0] - w["sentence_position"][0]
+        position_in_sentence_end = position_in_sentence_start + len(w["text"])
+        position_in_sentence = [position_in_sentence_start, position_in_sentence_end]
+        word_DTO_list.append({"text": w["text"], "position_in_sentence": position_in_sentence})
+    return word_DTO_list
 
 
 def is_sentence_too_long(clause_and_verb_chain_index):
