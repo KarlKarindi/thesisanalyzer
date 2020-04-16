@@ -61,7 +61,8 @@ def analyze(text, preprocessed_text, sentences_layer):
             # Create a copy of the cleaned sentence before it's tagged by the clause segmenter
             cleaned_sentence_copy = copy(cleaned_sentence)
 
-            clauses = find_clauses_in_sentence(cleaned_sentence, clause_segmenter)
+            clause_segmenter.tag(cleaned_sentence)
+            clauses = cleaned_sentence.clauses
 
             clause_and_verb_chain_index = create_clause_and_verb_chain_index(clauses, vc_detector)
 
@@ -248,8 +249,9 @@ def find_if_sentence_is_missing_commas(cleaned_sentence_copy, clause_segmenter_t
     """
 
     sentences_missing_commas = []
-    clauses_using_missing_commas_segmenter = find_clauses_in_sentence(
-        cleaned_sentence_copy, clause_segmenter_that_ignores_missing_commas)
+    clause_segmenter_that_ignores_missing_commas.tag(cleaned_sentence_copy)
+    clauses_using_missing_commas_segmenter = cleaned_sentence_copy.clauses
+
     clause_and_verb_chain_index_with_missing_commas = create_clause_and_verb_chain_index(
         clauses_using_missing_commas_segmenter, vc_detector)
 
@@ -262,6 +264,8 @@ def find_if_sentence_is_missing_commas(cleaned_sentence_copy, clause_segmenter_t
 
         clause_needing_comma = find_clause_needing_comma(original, fixed)
         word_DTO_list = create_word_DTO_list_for_sentence(preprocessed_text_sentence_words)
+        clause_positions = cleaned_sentence_copy.clauses[["start"], ["end"]]
+        print(clause_positions)
 
     return sentences_missing_commas
 
