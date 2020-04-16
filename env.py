@@ -14,4 +14,4 @@ def get_vislcg3_path():
 
 
 INDEX_PAGE = "/"
-LOG_TO_DATABASE = False
+LOG_TO_DATABASE = True

@@ -105,9 +105,9 @@
             <h5>Analüüs ei tuvastanud üheski lauses puuduvat koma.</h5>
             {% else %}
             <button id="showMoreButton" class="btn btn-primary btn-sm" data-toggle="collapse"
-              data-target="#collapseFiveExtra" aria-controls="collapseFiveExtra" aria-expanded="false">Analüüsi info
+              data-target="#collapseFiveExtra" aria-controls="collapseFiveExtra" aria-expanded="false">Info
             </button>
-            {% endif %}
+
             <div id="collapseFiveExtra" class="collapse" aria-labelledby="headingFiveExtra" data-parent="#accordion">
               <h5>Analüüsi tulemused on kujul:</h5>
               <p class="missingCommaParagraph"><b>Osalause, mille ette läheb koma</b></p>
@@ -119,6 +119,7 @@
             <p class="missingCommaParagraph"><b>{{sentence[1]}}</b></p>
             <p>{{sentence[0]}}</p>
             {%- endfor %}
+            {% endif %}
           </div>
         </div>
       </div>

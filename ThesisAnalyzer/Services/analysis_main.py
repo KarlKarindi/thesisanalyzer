@@ -87,7 +87,7 @@ def analyze(text, user_form=False):
             summary.sentences_summary = sentences_analyzer.analyze(text, preprocessed_text, sentences_layer)
             if log_to_database:
                 for sentence in summary.sentences_summary.long_sentences:
-                    db.session.add(LongSentence(summary.id, sentence))
+                    db.session.add(LongSentence(summary.id, sentence["text"]))
 
         # Tag analysis
         if config.ANALYZE_TAGS and summary.text_summary is not None:

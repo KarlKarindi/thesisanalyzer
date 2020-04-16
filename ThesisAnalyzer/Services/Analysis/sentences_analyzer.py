@@ -301,19 +301,6 @@ def find_index_of_clause_needing_comma(original, fixed):
             return k
 
 
-def create_word_DTO_list_for_sentence(sentence_words):
-    """ Creates a DTO list of words in a sentence.
-        DTO has attributes 'text' and 'position_in_sentence'
-    """
-    word_DTO_list = []
-    for w in sentence_words:
-        position_in_sentence_start = w["position"][0] - w["sentence_position"][0]
-        position_in_sentence_end = position_in_sentence_start + len(w["text"])
-        position_in_sentence = [position_in_sentence_start, position_in_sentence_end]
-        word_DTO_list.append({"text": w["text"], "position_in_sentence": position_in_sentence})
-    return word_DTO_list
-
-
 def is_sentence_too_long(clause_and_verb_chain_index):
     """ Analyzes the clauses in a sentence.
         Looks at clause word length, sentence word length, clause amount,
