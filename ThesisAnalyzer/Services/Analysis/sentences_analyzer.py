@@ -2,7 +2,7 @@ from ThesisAnalyzer.Config import analysis as config
 from ThesisAnalyzer.Services.Analysis.TextAnalyzers.analyzers import QuoteAnalyzer, CitationAnalyzer
 from ThesisAnalyzer.Services import utils
 from ThesisAnalyzer.Constants import constants
-from ThesisAnalyzer.Models.Analysis import SentencesSummary
+from ThesisAnalyzer.Models.Analysis import SentencesSummary, MissingComma, SentenceWithMissingComma
 
 from estnltk.taggers import ClauseSegmenter, VerbChainDetector
 from estnltk import Text, Layer
@@ -66,13 +66,14 @@ def analyze(text, preprocessed_text, sentences_layer):
 
             clause_and_verb_chain_index = create_clause_and_verb_chain_index(clauses, vc_detector)
 
-            missing_commas = find_if_sentence_is_missing_commas(
+            missing_comma = find_missing_comma_in_sentence(
                 cleaned_sentence_copy, clause_segmenter_that_ignores_missing_commas,
                 vc_detector, clause_and_verb_chain_index, preprocessed_text.sentences[i],
                 preprocessed_text.sentence_words[i])
 
-            if len(missing_commas) > 0:
-                print(missing_commas)
+            if missing_comma is not None:
+                sentence_missing_comma = SentenceWithMissingComma(preprocessed_text.sentences[i], missing_comma)
+                sentencesSummary.sentences_with_missing_commas.append(sentence_missing_comma)
 
             sentence_is_long = is_sentence_too_long(clause_and_verb_chain_index)
 
@@ -232,10 +233,10 @@ def remove_quoted_parts_from_sentence(sentence, clusters):
     return clean_sentence.strip()
 
 
-def find_if_sentence_is_missing_commas(cleaned_sentence_copy, clause_segmenter_that_ignores_missing_commas,
-                                       vc_detector, clause_and_verb_chain_index, preprocessed_text_sentence,
-                                       preprocessed_text_sentence_words):
-    """ Finds all the sentences that might potentally be missing some commas.
+def find_missing_comma_in_sentence(cleaned_sentence_copy, clause_segmenter_that_ignores_missing_commas,
+                                   vc_detector, clause_and_verb_chain_index, preprocessed_text_sentence,
+                                   preprocessed_text_sentence_words):
+    """ Finds a missing comma in a sentence, if there is one.
         Compares the original clause segmenter's result with the one that ignores missing commas.
         Parameters:
             cleaned_sentence_copy (string) - Copy of the original cleaned sentence
@@ -245,10 +246,11 @@ def find_if_sentence_is_missing_commas(cleaned_sentence_copy, clause_segmenter_t
             preprocessed_text_sentence (dict) - dictionary value from preprocessed_text.sentences[i]
             preprocessed_text_sentence_words (dict) - dictionary value from preprocessed_text.sentence_words[i]
         Returns:
-            a list of SentenceWithMissingCommas objects.
+            an instance of MissingComma or None, if there isn't one.
     """
+    # Initialize the comma_position as None, in case one isn't found.
+    missing_comma = None
 
-    sentences_missing_commas = []
     clause_segmenter_that_ignores_missing_commas.tag(cleaned_sentence_copy)
     clauses_using_missing_commas_segmenter = cleaned_sentence_copy.clauses
 
@@ -262,21 +264,24 @@ def find_if_sentence_is_missing_commas(cleaned_sentence_copy, clause_segmenter_t
         original = dict(copy(clause_and_verb_chain_index))
         fixed = dict(copy(clause_and_verb_chain_index_with_missing_commas))
 
-        clause_needing_comma = find_clause_needing_comma(original, fixed)
-        word_DTO_list = create_word_DTO_list_for_sentence(preprocessed_text_sentence_words)
-        clause_positions = cleaned_sentence_copy.clauses[["start"], ["end"]]
-        print(clause_positions)
+        index_of_clause_needing_comma = find_index_of_clause_needing_comma(original, fixed)
+        clause_positions = clauses_using_missing_commas_segmenter[["start", "end"]]
+        index_of_missing_comma = clause_positions[index_of_clause_needing_comma][0]
+        clause_that_needs_comma = cleaned_sentence_copy.text[
+            clause_positions[index_of_clause_needing_comma][0]:clause_positions[index_of_clause_needing_comma][1]]
 
-    return sentences_missing_commas
+        missing_comma = MissingComma(index_of_missing_comma, clause_that_needs_comma)
+
+    return missing_comma
 
 
-def find_clause_needing_comma(original, fixed):
-    """ Finds the clause that a comma should be put in front of.
+def find_index_of_clause_needing_comma(original, fixed):
+    """ Finds the index of the clause that a comma should be put in front of.
         Parameters:
             original (dict) - the original clause_to_verb_chain_index
             fixed (dict) - the clause_to_verb_chain_index_with_missing_commas
         Returns:
-            fixed[key] for the clause that should have a comma in front of it
+            index of the clause
     """
     for k, v in fixed.items():
 
@@ -288,12 +293,12 @@ def find_clause_needing_comma(original, fixed):
                 # In the original_clause there is a clause A that should be divided to clauses M and N.
                 # This means that a comma should be put in front of clause N.
                 if k + 1 != len(fixed):
-                    return fixed[k + 1]
+                    return k + 1
 
         except KeyError:
             # This clause didn't exist in the original index.
             # It should not get to this exception, but it's added for extra safety.
-            return fixed_clause
+            return k
 
 
 def create_word_DTO_list_for_sentence(sentence_words):

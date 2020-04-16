@@ -93,31 +93,26 @@ class SentencesSummary():
         """
         self.long_sentences.append(sentence)
 
-    def add_sentence_to_sentences_with_missing_commas(self, sentence):
-        """ Parameters:
-                sentence (SentenceWithMissingCommas) - instance of SentenceWithMissingCommas
-        """
-        self.sentences_with_missing_commas.append(sentence)
-
     def __init__(self):
         self.long_sentences = []
         self.sentences_with_missing_commas = []
 
 
-class SentenceWithMissingCommas():
+class SentenceWithMissingComma():
 
-    def __init__(self, text, position, comma_positions):
-        """ comma_positions is a list of CommaPosition objects """
-        self.text = text
-        self.sentence_position = position
-        self.comma_positions = comma_positions
+    def __init__(self, sentence_information, missing_comma):
+        # missing_comma is an instance of MissingComma
+        self.text = sentence_information["text"]
+        self.position = sentence_information["position"]
+        self.missing_comma_position_in_sentence = missing_comma.comma_position_in_sentence
+        self.clause_after_missing_comma = missing_comma.following_clause
 
 
-class CommaPositions():
+class MissingComma():
 
-    def __init__(self, comma_position_in_sentence, following_word):
+    def __init__(self, comma_position_in_sentence, following_clause):
         self.comma_position_in_sentence = comma_position_in_sentence
-        self.following_word = following_word
+        self.following_clause = following_clause
 
 # _____________________________________ #
 #           Tag analyzer                #
