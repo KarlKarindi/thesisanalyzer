@@ -107,9 +107,17 @@ class SentencesSummary():
 class SentenceWithMissingCommas():
 
     def __init__(self, text, position, comma_positions):
+        """ comma_positions is a list of CommaPosition objects """
         self.text = text
         self.sentence_position = position
         self.comma_positions = comma_positions
+
+
+class CommaPositions():
+
+    def __init__(self, comma_position_in_sentence, following_word):
+        self.comma_position_in_sentence = comma_position_in_sentence
+        self.following_word = following_word
 
 # _____________________________________ #
 #           Tag analyzer                #

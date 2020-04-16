@@ -65,11 +65,12 @@ def analyze(text, preprocessed_text, sentences_layer):
 
             clause_and_verb_chain_index = create_clause_and_verb_chain_index(clauses, vc_detector)
 
-            sentences_with_missing_commas = find_sentences_with_missing_commas(
+            missing_commas = find_if_sentence_is_missing_commas(
                 cleaned_sentence_copy, clause_segmenter_that_ignores_missing_commas,
-                vc_detector, clause_and_verb_chain_index, preprocessed_text.sentences[i])
+                vc_detector, clause_and_verb_chain_index, preprocessed_text.sentences[i],
+                preprocessed_text.sentence_words[i])
 
-            pprint(sentences_with_missing_commas)
+            if len(missing_commas) > 0:
 
             sentence_is_long = is_sentence_too_long(clause_and_verb_chain_index)
 
@@ -80,10 +81,6 @@ def analyze(text, preprocessed_text, sentences_layer):
     # Terminate the ClauseSegmenter processes
     clause_segmenter.close()
     clause_segmenter_that_ignores_missing_commas.close()
-
-    for i in sentencesSummary.sentences_with_missing_commas:
-        print("MISSING COMMA", i)
-        print()
 
     return sentencesSummary
 
@@ -223,6 +220,9 @@ def remove_quoted_parts_from_sentence(sentence, clusters):
             ending_quote = sentence.words[start - 1].enclosing_text
             if len(ending_quote) == 2 and ending_quote[0] in constants.QUOTE_MARKS_ENDING:
                 clean_sentence += ending_quote[1]
+            # Also check for cases where the ending quote is 3 lettered. Like '",
+            elif len(ending_quote) == 3 and ending_quote[1] in constants.QUOTE_MARKS_ENDING:
+                clean_sentence += ending_quote[2]
 
         # Add to the clean_sentence. Range is until n + 1, as n must be included
         clean_sentence += " " + sentence.words[start:end + 1].enclosing_text
@@ -230,8 +230,9 @@ def remove_quoted_parts_from_sentence(sentence, clusters):
     return clean_sentence.strip()
 
 
-def find_sentences_with_missing_commas(cleaned_sentence_copy, clause_segmenter_that_ignores_missing_commas,
-                                       vc_detector, clause_and_verb_chain_index, preprocessed_text_sentence):
+def find_if_sentence_is_missing_commas(cleaned_sentence_copy, clause_segmenter_that_ignores_missing_commas,
+                                       vc_detector, clause_and_verb_chain_index, preprocessed_text_sentence,
+                                       preprocessed_text_sentence_words):
     """ Finds all the sentences that might potentally be missing some commas.
         Compares the original clause segmenter's result with the one that ignores missing commas.
         Parameters:
@@ -240,9 +241,10 @@ def find_sentences_with_missing_commas(cleaned_sentence_copy, clause_segmenter_t
             vc_detector (VerbChainDetector) - instance of VerbChainDetector
             clause_and_verb_chain_index (dict) - the original clause to verb chain dictionary
             preprocessed_text_sentence (dict) - dictionary value from preprocessed_text.sentences[i]
+            preprocessed_text_sentence_words (dict) - dictionary value from preprocessed_text.sentence_words[i]
         Returns:
             a list of SentenceWithMissingCommas objects.
-        """
+    """
 
     sentences_missing_commas = []
     clauses_using_missing_commas_segmenter = find_clauses_in_sentence(
@@ -250,8 +252,43 @@ def find_sentences_with_missing_commas(cleaned_sentence_copy, clause_segmenter_t
     clause_and_verb_chain_index_with_missing_commas = create_clause_and_verb_chain_index(
         clauses_using_missing_commas_segmenter, vc_detector)
 
+    # pprint(clause_and_verb_chain_index)
+    # pprint(clause_and_verb_chain_index_with_missing_commas)
+    # print("\n======\n")
+
     if len(clause_and_verb_chain_index_with_missing_commas) > len(clause_and_verb_chain_index):
-        sentences_missing_commas.append(preprocessed_text_sentence)
+        # There is a potentially missing comma in the sentence.
+        # We make copies so as to not add an empty row into the original clause_and_verb_chain index.
+        # defaultdict adds a key if the key isn't found, and we don't want that to happen to the original index.
+        original = dict(copy(clause_and_verb_chain_index))
+        fixed = dict(copy(clause_and_verb_chain_index_with_missing_commas))
+
+        pprint(preprocessed_text_sentence["text"])
+
+        found_broken_clause = False
+        for k, v in fixed.items():
+            if found_broken_clause:
+                break
+
+            fixed_clause = fixed[k]["clause"]
+
+            try:
+                original_clause = original[k]["clause"]
+                clauses_are_the_same = all(word in fixed_clause for word in original_clause)
+                if not clauses_are_the_same:
+                    # In the original_clause there is a clause A that should be divided to clauses M and N.
+                    # This means that a comma should be put in front of clause N.
+                    if k + 1 != len(fixed):
+                        print("2, SIIA ETTE KÄIB KOMA")
+                        print(fixed[k + 1]["clause"])
+                        print()
+                        found_broken_clause = True
+            except KeyError:
+                # This clause didn't exist in the original index.
+                # It should not get to this exception, but it's added for extra safety.
+                print("1, SIIA ETTE KÄIB KOMA")
+                pprint(fixed_clause)
+                found_broken_clause = True
 
     return sentences_missing_commas
 
@@ -269,6 +306,7 @@ def is_sentence_too_long(clause_and_verb_chain_index):
 
     total_clause_count = len(clause_and_verb_chain_index)
     verb_chains_count = 0
+
     for i in clause_and_verb_chain_index:
         verb_chains = clause_and_verb_chain_index[i]["verb_chains"]
         if len(verb_chains) > 0:
