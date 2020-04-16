@@ -25,7 +25,8 @@ def analyze(text, preprocessed_text, sentences_layer):
     sentencesSummary = SentencesSummary()
 
     # Initialize a ClauseSegmenter instance
-    clause_segmenter = ClauseSegmenter()
+    clause_segmenter_1 = ClauseSegmenter()
+    clause_segmenter_2 = ClauseSegmenter()
     # Initialize a second ClauseSegmenter instance that ignores missing commas
     mc_clause_segmenter = ClauseSegmenter(ignore_missing_commas=True)
 
@@ -62,7 +63,7 @@ def analyze(text, preprocessed_text, sentences_layer):
             # Create a copy of the cleaned sentence before it's tagged by the clause segmenter
             sentence_copy = copy(sentence)
 
-            clause_segmenter.tag(sentence)
+            clause_segmenter_1.tag(sentence)
             # Use the normal clause segmenter
 
             clauses = sentence.clauses
@@ -77,7 +78,7 @@ def analyze(text, preprocessed_text, sentences_layer):
             if sentence_with_missing_comma is not None:
                 sentencesSummary.sentences_with_missing_commas.append(sentence_with_missing_comma)
 
-            clause_segmenter.tag(cleaned_sentence)
+            clause_segmenter_2.tag(cleaned_sentence)
             cleaned_clauses = cleaned_sentence.clauses
             cleaned_clause_and_verb_chain_index = create_clause_and_verb_chain_index(cleaned_clauses, vc_detector)
 
@@ -89,7 +90,8 @@ def analyze(text, preprocessed_text, sentences_layer):
                 sentencesSummary.long_sentences.append(longSentence)
 
     # Terminate the ClauseSegmenter processes
-    clause_segmenter.close()
+    clause_segmenter_1.close()
+    clause_segmenter_2.close()
     mc_clause_segmenter.close()
 
     return sentencesSummary
