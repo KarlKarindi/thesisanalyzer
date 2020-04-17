@@ -94,6 +94,13 @@ def find_missing_commas_in_sentence(mc_clause_and_verb_chain_index, clause_and_v
 
 def find_indexes_of_clauses_needing_comma(original, fixed):
     """ Finds the indexes of the clauses that a comma should be put in front of.
+
+        Iterate over the original_clause dictionary.
+        If the original and fixed don't match, it should be 2 clauses.
+        Set a counter that, when looking at the original clause, will iterate over
+        all the subclauses that belong to the original clause.
+        Once the subclauses are all found, increment i to take the next original clause.
+
         Parameters:
             original (dict) - the original clause_to_verb_chain_index
             fixed (dict) - the clause_to_verb_chain_index_with_missing_commas
@@ -111,12 +118,12 @@ def find_indexes_of_clauses_needing_comma(original, fixed):
         clauses_are_the_same = all(word in fixed_clause for word in original_clause)
         if not clauses_are_the_same:
             prev = fixed_clause
-            clause_comes_after_comma = False  # Clause comes after comma if it's not the first clause in fixed.
+            can_add_comma = False  # A comma can be added if it's not the first clause in fixed.
             # Start to iterate over the following fixed clauses.
-            # If they are a sublist of the original clause, they need a comma
+            # If they are a sublist of the original clause, they need a comma.
             while counter < len(fixed) and is_sublist(fixed_clause, original_clause):
                 last_clause_ended_with_comma = prev[-1][-1] == ","
-                if clause_comes_after_comma and not last_clause_ended_with_comma:
+                if can_add_comma and not last_clause_ended_with_comma:
                     indexes.append(counter)
 
                 counter += 1
@@ -126,8 +133,7 @@ def find_indexes_of_clauses_needing_comma(original, fixed):
 
                 prev = fixed_clause
                 fixed_clause = fixed[counter]["clause"]
-                clause_comes_after_comma = True  # It's not the first clause anymore, so start adding comas
-
+                can_add_comma = True  # It's not the first clause anymore, so start adding comas
         else:
             counter += 1
 
@@ -135,7 +141,7 @@ def find_indexes_of_clauses_needing_comma(original, fixed):
 
 
 def is_sublist(pattern, bigger_list):
-    """ Checks if a pattern is a sublist of a bigger list 
+    """ Checks if a pattern is a sublist of a bigger list
         Taken from here: https://stackoverflow.com/questions/10106901/elegant-find-sub-list-in-list
     """
 
