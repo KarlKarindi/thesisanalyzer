@@ -73,8 +73,8 @@ def analyze(original_text, preprocessed_text, sentences_layer):
 
     for lemma in lemmas:
 
-        expected_freq = get_lemma_expected_frequency(lemma_to_rank_and_count[lemma][0])
-        actual_freq = get_lemma_actual_frequency(
+        expected_freq = get_lemma_expected_frequency_rating(lemma_to_rank_and_count[lemma][0])
+        actual_freq = get_lemma_actual_frequency_rating(
             len(lemma_to_word[lemma]), user_word_count)
 
         multiplier = math.floor(actual_freq / expected_freq)
@@ -232,12 +232,12 @@ def create_database_lemma_to_rank_and_count(Lemma_list):
     return lemma_to_rank_and_count
 
 
-def get_lemma_expected_frequency(rank):
+def get_lemma_expected_frequency_rating(rank):
     """ We find the expected frequency by dividing 1 with the rank of our lemma """
     return 1 / rank
 
 
-def get_lemma_actual_frequency(lemma_count, total_count):
+def get_lemma_actual_frequency_rating(lemma_count, total_count):
     return lemma_count / total_count
 
 

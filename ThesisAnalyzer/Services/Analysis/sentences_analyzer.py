@@ -10,6 +10,7 @@ from estnltk import Text, Layer
 from collections import defaultdict
 from pprint import pprint
 from copy import copy
+import os
 
 import re
 
@@ -23,8 +24,9 @@ def analyze(text, preprocessed_text, sentences_layer):
     sentences = [Text(sent.enclosing_text) for sent in sentences_layer]
 
     sentencesSummary = SentencesSummary()
+    line_separator = os.linesep
 
-    # Initialize a ClauseSegmenter instance
+    # Initialize ClauseSegmenter instances
     clause_segmenter_1 = ClauseSegmenter()
     clause_segmenter_2 = ClauseSegmenter()
     # Initialize a second ClauseSegmenter instance that ignores missing commas
@@ -55,8 +57,10 @@ def analyze(text, preprocessed_text, sentences_layer):
         sentence_text_without_quotes = quote_remover.remove_quoted_parts_from_sentence(
             sentence, clusters)
 
+        sentence_text_without_noise = remove_noise_from_sentence(sentence_text_without_quotes, line_separator)
+
         cleaned_sentence = citation_analyzer.get_sentence_without_citations(
-            sentence_text_without_quotes)
+            sentence_text_without_noise)
 
         # If sentence_text_without_quotes is empty, it's completely in quotes and shouldn't be analysed further.
         if len(sentence_text_without_quotes) > 0:
@@ -65,7 +69,6 @@ def analyze(text, preprocessed_text, sentences_layer):
 
             clause_segmenter_1.tag(sentence)
             # Use the normal clause segmenter
-
             clauses = sentence.clauses
             clause_and_verb_chain_index = create_clause_and_verb_chain_index(clauses, vc_detector)
             clause_positions_original = clauses[["start", "end"]]
@@ -80,7 +83,8 @@ def analyze(text, preprocessed_text, sentences_layer):
 
             clause_segmenter_2.tag(cleaned_sentence)
             cleaned_clauses = cleaned_sentence.clauses
-            cleaned_clause_and_verb_chain_index = create_clause_and_verb_chain_index(cleaned_clauses, vc_detector)
+            cleaned_clause_and_verb_chain_index = create_clause_and_verb_chain_index(
+                cleaned_clauses, vc_detector, keep_parentheses_without_verb_chains=False)
 
             sentence_is_long = is_sentence_too_long(cleaned_clause_and_verb_chain_index)
             if sentence_is_long:
@@ -97,13 +101,34 @@ def analyze(text, preprocessed_text, sentences_layer):
     return sentencesSummary
 
 
-def create_clause_and_verb_chain_index(clauses, vc_detector):
+def remove_noise_from_sentence(sentence, line_separator):
+    """ Removes any unnecessary noise from the sentence that might trigger a long sentence warning.
+        For example when a picture caption or header doesn't have a period at the end of it,
+        it will join with the next sentence.
+        Parameters:
+            sentence (string) - sentence in string form with quotes removed
+            line_separator (string) - OS specific line separator
+        Returns:
+            string sentence
+    """
+
+    sentence_split_by_new_line = sentence.split(line_separator)
+    if len(sentence_split_by_new_line) > 1:
+        # Check the last char before the linebreak
+        if sentence_split_by_new_line[0][-1] != ".":
+            return sentence_split_by_new_line[-1]
+    return sentence
+
+
+def create_clause_and_verb_chain_index(clauses, vc_detector, keep_parentheses_without_verb_chains=True):
     """ Creates an index of clauses.
         For each sentence, create a dictionary of clauses and
         the verb chains corresponding to those clauses.
         Parameters:
             clauses (Layer) - clauses layer
             vc_detector (VerbChainDetector) - VerbChainDetector instance
+            keep_parentheses_without_verb_chains (boolean) - If set to false, will ignore
+                                                             parentheses without verb chains.
         Returns:
             clause_index_to_words (dict)
     """
@@ -121,7 +146,7 @@ def create_clause_and_verb_chain_index(clauses, vc_detector):
             if len(verb_chains) == 0:
                 do_add = False
 
-        if do_add:
+        if keep_parentheses_without_verb_chains or do_add:
             clause_and_verb_chain_index[i] = {
                 "verb_chains": verb_chains, "clause": clause_text_list}
 

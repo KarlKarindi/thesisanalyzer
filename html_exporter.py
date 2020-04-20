@@ -6,7 +6,7 @@ from html.parser import HTMLParser
 # IMPORT_PATH is the file created from an exported database set.
 # EXPORT_PATH is the folder to save the results to.
 # Run this file separately from the rest of the application, and change paths accordingly.
-IMPORT_PATH = "C:\\users\\Karl\\PythonProjects\\Database_export\\2020_04_16.html"
+IMPORT_PATH = "C:\\users\\Karl\\PythonProjects\\Database_export\\2020_04_19.html"
 EXPORT_PATH = "C:\\users\\Karl\\PythonProjects\\Database_results\\"
 
 
