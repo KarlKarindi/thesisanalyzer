@@ -3,12 +3,10 @@ from ThesisAnalyzer.Config import analysis as config
 from ThesisAnalyzer.Services import utils
 from ThesisAnalyzer.Services.Analysis.TextAnalyzers.analyzers import QuoteAnalyzer
 from ThesisAnalyzer.Models.Analysis import TextSummmary, OverusedWordSummary, WordSummary, ClusterContainer
-from ThesisAnalyzer import cache
 
 from collections import defaultdict
 from estnltk import Text
-from flask import jsonify, Flask
-from timeit import default_timer as timer
+from flask import jsonify
 from pprint import pprint
 import jsonpickle
 import math
@@ -39,7 +37,7 @@ def analyze(original_text, preprocessed_text, sentences_layer):
     """
 
     # Query the database for all lemmas that are known. Get list of model Lemma
-    Lemma_list = get_Lemma_list()
+    Lemma_list = Lemma.query.all()
 
     # Get preprocessed info
     sentences = preprocessed_text.sentences
@@ -76,7 +74,8 @@ def analyze(original_text, preprocessed_text, sentences_layer):
     for lemma in lemmas:
 
         expected_freq = get_lemma_expected_frequency_rating(lemma_to_rank_and_count[lemma][0])
-        actual_freq = get_lemma_actual_frequency_rating(len(lemma_to_word[lemma]), user_word_count)
+        actual_freq = get_lemma_actual_frequency_rating(
+            len(lemma_to_word[lemma]), user_word_count)
 
         multiplier = math.floor(actual_freq / expected_freq)
 
@@ -159,20 +158,10 @@ def analyze(original_text, preprocessed_text, sentences_layer):
     return textSummary
 
 
-def get_Lemma_list():
-    if cache.contains("Lemma_list"):
-        return cache.get("Lemma_list")
-
-    Lemma_list = Lemma.query.all()
-    cache.update("Lemma_list", Lemma_list)
-    return Lemma_list
-
-
 def get_text_word_count(words):
     """ counts the number of words in a text.
         Words are alphabetical.
     """
-    
     count = 0
     for w in words:
         if w["text"].isalpha():
@@ -210,7 +199,6 @@ def find_repeating_lemmas(lemma_to_word):
         Repeating lemmas do not include stopwords and must be alphabetical.
         An overused lemma must be used in the text at least config.MIN_COUNT_OF_LEMMA times.
     """
-
     stop_words = [Lemma_sw.name for Lemma_sw in LemmaStopword.query.all()]
     return [lemma for lemma in lemma_to_word.keys() if len(lemma_to_word[lemma]) >= config.MIN_COUNT_OF_LEMMA and
             lemma not in stop_words and lemma.isalpha()]
