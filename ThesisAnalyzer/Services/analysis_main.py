@@ -100,6 +100,7 @@ def analyze(text, user_form=False):
                                               summary.tag_summary.pronoun_count))
 
         # Officialese analysis
+        # In this analysis, the morph_analysis layer will change for text_obj
         if config.ANALYZE_OFFICIALESE:
             summary.officialese_summary = officialese_analyzer.analyze(
                 text, preprocessed_text, text_obj, sentences_layer)

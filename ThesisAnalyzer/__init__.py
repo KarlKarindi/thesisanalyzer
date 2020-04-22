@@ -1,10 +1,12 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from ThesisAnalyzer.Services.cache import Cache
 from db import DB_PASSWORD, DB_USER, DB_ADDRESS, DB_PORT, DB_NAME
 
 
 # Globally accessible libraries
 db = SQLAlchemy()
+cache = Cache()
 
 
 def create_app():
