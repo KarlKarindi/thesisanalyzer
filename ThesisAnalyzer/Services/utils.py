@@ -57,7 +57,7 @@ def create_dict_of_sentences(text, sentences_layer):
     for i, sentence in enumerate(sentences_layer):
         start = sentence_spans[i][0]
         end = sentence_spans[i][1]
-        values.append({"position": [start, end], "text": sentence.enclosing_text})
+        values.append({"position": [start, end], "text": sentence.enclosing_text, "sentence_index": i})
         keys.append(i)
 
     return dict(zip(keys, values))

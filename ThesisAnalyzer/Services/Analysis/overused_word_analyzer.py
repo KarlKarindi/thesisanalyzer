@@ -288,9 +288,9 @@ def find_sentences_in_clusters(sentences, clusters):
         sentences_in_cluster = []
         # In a cluster, finds the sentence that every word belongs to
         for Word in Word_list:
-            sent = find_sentence_by_word(sentences, Word)
-            if sent not in sentences_in_cluster:
-                sentences_in_cluster.append(sent)
+            sentence = find_sentence_by_word(sentences, Word)
+            if sentence not in sentences_in_cluster:
+                sentences_in_cluster.append(sentence)
         results.append(sentences_in_cluster)
 
     return results
@@ -333,13 +333,18 @@ def format_text(original_text, sentences_in_clusters):
         else:
             # Initialize a string, start appending sentences to it
             text = ""
-            for i in range(len(cluster)):
+            for i in range(len(cluster) - 1):
+
+                curr_sentence = cluster[i]
+                next_sentence = cluster[i + 1]
+
                 # Check if sentences are connected to eachother
-                if i + 2 <= len(cluster) and sentences_are_connected(cluster[i: i + 2]):
+                if sentences_are_connected([curr_sentence, next_sentence]):
                     text += " " + cluster[i]["text"]
                 else:
                     text += " " + cluster[i]["text"] + " [...] "
             # Remove whitespace and unnecessary symbols from the end of a text
+
             text = text.strip().strip("[...] ")
 
         result = ClusterContainer(text, start, end)
@@ -350,15 +355,16 @@ def format_text(original_text, sentences_in_clusters):
 
 def sentences_are_connected(sentences_in_cluster):
     """ Checks whether sentences are connected.
-        Sentences are connected when the indexes are right after each other.
+        Sentences are connected when the sentence indexes are right after each other.
         Returns (boolean) - whether sentences are connected or not.
     """
     connected = True
 
-    prev = None
-    for current_index in range(len(sentences_in_cluster)):
-        if prev is not None and current_index - prev != 1:
-            connected = False
-        prev = current_index
+    previous_index = None
+    for sentence in sentences_in_cluster:
+        current_index = sentence["sentence_index"]
+        if previous_index is not None and current_index - previous_index != 1:
+            return False
+        previous_index = current_index
 
     return connected
