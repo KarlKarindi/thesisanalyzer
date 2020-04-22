@@ -151,7 +151,7 @@ class QuoteRemover():
         return clean_sentence.strip()
 
 
-class CitationAnalyzer():
+class CitationRemover():
     """ Analyzer for citations in text.
         Usage:
             1. Initalize a new instance of CitationAnalyzer.

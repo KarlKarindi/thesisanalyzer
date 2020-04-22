@@ -1,5 +1,5 @@
 from ThesisAnalyzer.Models.Analysis import SentencesSummary, MissingCommas, SentenceWithMissingCommas, LongSentence
-from ThesisAnalyzer.Services.Analysis.TextAnalyzers.analyzers import QuoteAnalyzer, CitationAnalyzer, QuoteRemover
+from ThesisAnalyzer.Services.Analysis.TextAnalyzers.analyzers import QuoteAnalyzer, CitationRemover, QuoteRemover
 from ThesisAnalyzer.Services.Analysis import missing_commas_analyzer
 from ThesisAnalyzer.Config import analysis as config
 from ThesisAnalyzer.Services import utils
@@ -35,11 +35,9 @@ def analyze(text, preprocessed_text, sentences_layer):
     # Initalize a VerbChainDetector instance
     vc_detector = VerbChainDetector()
 
-    # Initialize QuoteAnalyzer and QuoteRemover instances
     quote_analyzer = QuoteAnalyzer()
     quote_remover = QuoteRemover()
-
-    citation_analyzer = CitationAnalyzer()
+    citation_remover = CitationRemover()
 
     # Iterate through the sentences.
     for i, sentence in enumerate(sentences):
@@ -59,7 +57,7 @@ def analyze(text, preprocessed_text, sentences_layer):
 
         sentence_text_without_noise = remove_noise_from_sentence(sentence_text_without_quotes, line_separator)
 
-        cleaned_sentence = citation_analyzer.get_sentence_without_citations(
+        cleaned_sentence = citation_remover.get_sentence_without_citations(
             sentence_text_without_noise)
 
         # If sentence_text_without_quotes is empty, it's completely in quotes and shouldn't be analysed further.
