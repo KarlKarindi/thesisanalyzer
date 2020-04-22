@@ -333,18 +333,22 @@ def format_text(original_text, sentences_in_clusters):
         else:
             # Initialize a string, start appending sentences to it
             text = ""
-            for i in range(len(cluster) - 1):
+            for i in range(len(cluster)):
 
                 curr_sentence = cluster[i]
-                next_sentence = cluster[i + 1]
+                end_of_cluster = False
+                try:
+                    next_sentence = cluster[i + 1]
+                except IndexError:
+                    end_of_cluster = True
 
                 # Check if sentences are connected to eachother
-                if sentences_are_connected([curr_sentence, next_sentence]):
+                if not end_of_cluster and sentences_are_connected([curr_sentence, next_sentence]):
                     text += " " + cluster[i]["text"]
                 else:
                     text += " " + cluster[i]["text"] + " [...] "
-            # Remove whitespace and unnecessary symbols from the end of a text
 
+            # Remove whitespace and unnecessary symbols from the end of a text
             text = text.strip().strip("[...] ")
 
         result = ClusterContainer(text, start, end)
