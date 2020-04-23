@@ -164,8 +164,7 @@ class CitationRemover():
         between_parentheses_with_first_char_uppercase = r"\([A-Z][^\)]*,[^\)]*\)"
         between_brackets = r"\[[0-9]+]"
         ibid = r"\(ibid.+\)"
-        self.regex = re.compile(
-            between_parentheses_with_first_char_uppercase + "|" + between_brackets + "|" + ibid)
+        self.regex = re.compile(between_parentheses_with_first_char_uppercase + "|" + between_brackets + "|" + ibid)
 
     def find_citation_indexes_in_sentence(self, sentence):
         """ Finds the indexes of citations in a sentence.
@@ -189,6 +188,7 @@ class CitationRemover():
                 end += 1
 
             indexes.extend(list(range(start, end)))
+
         return indexes
 
     def get_sentence_without_citations(self, sentence):
@@ -199,7 +199,7 @@ class CitationRemover():
                 Text object of a sentence with tagged layers.
         """
 
-        ref_indexes = self.find_citation_indexes_in_sentence(sentence)
+        citation_indexes = self.find_citation_indexes_in_sentence(sentence)
 
         return Text("".join([char for i, char in enumerate(
-            sentence) if i not in ref_indexes])).tag_layer()
+            sentence) if i not in citation_indexes])).tag_layer()

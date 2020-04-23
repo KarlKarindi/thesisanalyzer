@@ -11,7 +11,7 @@ from ThesisAnalyzer.Models.Analysis import SentencesSummary, ImpersonalitySummar
 from ThesisAnalyzer.Models.Summary import Summary
 from ThesisAnalyzer.Services.Analysis.tag_analyzer import TagSummary
 from ThesisAnalyzer.Config import analysis as config
-from ThesisAnalyzer.Services import profiler, utils
+from ThesisAnalyzer.Services import profiler, utils, preprocessor
 from ThesisAnalyzer import db
 
 from timeit import default_timer as timer
@@ -57,7 +57,7 @@ def analyze(text, user_form=False):
         sentences_layer = text_obj.sentences
 
         # Do the preprocessing. Get a ProcessedText object.
-        preprocessed_text = utils.preprocess_text(text, sentences_layer)
+        preprocessed_text = preprocessor.preprocess_text(text, sentences_layer)
 
         # Impersonality analyzer
         if config.ANALYZE_IMPERSONALITY:

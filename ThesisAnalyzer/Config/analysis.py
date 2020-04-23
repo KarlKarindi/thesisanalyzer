@@ -1,7 +1,7 @@
 # Config file for analysis
-from env import LOG_TO_DATABASE
+import env
 
-LOG_TO_DATABASE = LOG_TO_DATABASE
+LOG_TO_DATABASE = env.LOG_TO_DATABASE
 
 ANALYSIS_MAX_CHAR_COUNT = 150000
 
@@ -14,11 +14,11 @@ ANALYZE_OFFICIALESE = True
 
 
 # Clause analyzer
-MAX_CLAUSE_AMOUNT = 4
+MAX_CLAUSE_AMOUNT = 4  # Max clause amount for the sentence to not even be considered long
 
 # Overused word analyzer
-OUW_NUM_WORDS_TO_ANALYZE = 8
+OUW_NUM_WORDS_TO_ANALYZE = 8  # Number of overused words to return
 OVERUSED_MULTIPLIER = 5
-MIN_COUNT_OF_LEMMA = 7
-MAX_CLUSTER_SIZE = 3
-CLUSTER_DISTANCE = 300
+MIN_COUNT_OF_LEMMA = 7  # Minimum count of lemma in text
+MAX_CLUSTER_SIZE = 3  # If the cluster size is larger than this, show it
+CLUSTER_DISTANCE = 300  # Max distance of words in a cluster
