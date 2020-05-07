@@ -63,9 +63,9 @@ class WordSummary():
         self.position_in_cluster = position_in_cluster
 
     def __repr__(self):
-        return '<Word (id, {}, text: {}, part_of_speech: {}, position: [{}, {}], sentence_index: {}, sentence_position: \
-             [{}, {}])>'.format(self.id, self.text, self.part_of_speech, self.position[0], self.position[1],
-                                self.sentence_index, self.sentence_position[0], self.sentence_position[1])
+        return '<Word (id, {}, text: {}, part_of_speech: {}, position: [{}, {}], sentence_index: {}, sentence_position: [{}, {}])>'.format(
+            self.id, self.text, self.part_of_speech, self.position[0], self.position[1],
+            self.sentence_index, self.sentence_position[0], self.sentence_position[1])
 
 
 class ClusterContainer():

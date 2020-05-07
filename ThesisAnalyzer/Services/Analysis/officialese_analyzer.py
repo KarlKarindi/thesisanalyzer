@@ -178,7 +178,7 @@ def analyze_maarus_saavas(sentence, words):
 
 
 def analyze_nominalisatsioon_mine_vorm(sentence, words):
-    """ Analyzes whether there is a nominalisatsioon in mine vorm officialese error.
+    """ Analyzes whether there is a nominalisatsioon, mine vorm officialese error.
         Example (offending sentence -> what the sentence should be):
             "Teostame kontrollimist" -> "Kontrollime"
         Parameters:

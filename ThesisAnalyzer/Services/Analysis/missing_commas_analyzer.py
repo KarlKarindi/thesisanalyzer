@@ -105,7 +105,7 @@ def find_indexes_of_clauses_needing_comma(original, fixed):
             original (dict) - the original clause_to_verb_chain_index
             fixed (dict) - the clause_to_verb_chain_index_with_missing_commas
         Returns:
-            index of the clause
+            indexes of the clauses needing a comma
     """
     indexes = []
 

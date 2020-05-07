@@ -17,7 +17,6 @@ def index():
 
         text = request.form["user_text"]
 
-
         input_length = len(text)
         if utils.is_text_too_long(input_length):
             return render_template('longtext.html',
