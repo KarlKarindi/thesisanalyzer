@@ -111,7 +111,7 @@ def find_indexes_of_clauses_needing_comma(original, fixed):
 
     counter = 0
     for i, v in original.items():
-
+    
         original_clause = original[i]["clause"]
         fixed_clause = fixed[counter]["clause"]
 
