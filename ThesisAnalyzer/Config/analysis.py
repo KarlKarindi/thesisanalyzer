@@ -1,5 +1,5 @@
 # Config file for analysis
-import env
+import ThesisAnalyzer.env as env
 
 LOG_TO_DATABASE = env.LOG_TO_DATABASE
 

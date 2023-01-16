@@ -4,7 +4,7 @@ from ThesisAnalyzer.Constants import constants
 from estnltk.taggers.syntax.visl_tagger import VISLCG3Pipeline
 from estnltk.taggers import VislTagger, SyntaxDependencyRetagger, VabamorfAnalyzer
 from estnltk.resolve_layer_dag import make_resolver
-from env import get_vislcg3_path
+from ThesisAnalyzer.env import get_vislcg3_path
 from estnltk import Text
 from pprint import pprint
 import jsonpickle

@@ -1,6 +1,6 @@
 from ThesisAnalyzer.Services import analysis_main, utils, user_form, profiler
 from ThesisAnalyzer.Config import analysis as config
-from env import INDEX_PAGE
+from ThesisAnalyzer.env import INDEX_PAGE
 
 from flask import Blueprint, request, render_template
 from pprint import pprint
