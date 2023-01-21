@@ -126,7 +126,9 @@ Now that all the necessary files are in the server, we start to setup the enviro
 2. Install `docker`.
 3. In the `ThesisAnalyzer` folder, add a new file called `db.py`.
 4. Add the variables `DB_PASS` and `DB_USER` with the corresponding database credentials to this file.
-5. Add execute rights to `run_docker.sh` at the project root.
+5. Add execute rights for 2 files with the following commands:
+   1. `chmod +x ./run_docker.sh`
+   2. `chmod +x ./ThesisAnalyzer/run_app.sh`
 6. Run the `./run_docker.sh` file. This will set up and run the project.
 
     
