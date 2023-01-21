@@ -122,11 +122,12 @@ Now that all the necessary files are in the server, we start to setup the enviro
 
 # Docker setup
 
-1. Clone the code repository to your remote server via `git`
-2. Install `docker`
-3. In the `ThesisAnalyzer` folder, add a new file called `db.py`
-4. Add the variables `DB_PASS` and `DB_USER` with the corresponding database credentials to this file
-5. Run the command `docker-compose up -d`
+1. Clone the code repository to your remote server via `git`.
+2. Install `docker`.
+3. In the `ThesisAnalyzer` folder, add a new file called `db.py`.
+4. Add the variables `DB_PASS` and `DB_USER` with the corresponding database credentials to this file.
+5. Add execute rights to `run_docker.sh` at the project root.
+6. Run the `./run_docker.sh` file. This will set up and run the project.
 
     
 

@@ -40,5 +40,5 @@ RUN $HOME/miniconda/bin/conda env create -f thesisenv_latest.yml
 # Activate conda environment on startup
 RUN cd $HOME && chmod +x ~/miniconda/bin/conda
 
-RUN chmod +x /usr/src/app/ThesisAnalyzer/run_app.sh
+RUN chmod +x ./run_app.sh
 CMD ["./ThesisAnalyzer/run_app.sh"]
