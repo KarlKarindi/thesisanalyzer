@@ -23,4 +23,4 @@ DB_URL = "postgres://"+DB_USER+":"+DB_PASS+"@thesisanalyzer-db:5432/analyzer"
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 # silence the deprecation warning
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.run(host='0.0.0.0', port=8080)
+app.run(host='0.0.0.0', port=5000)
