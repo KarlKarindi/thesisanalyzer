@@ -43,4 +43,4 @@ RUN conda --version
 RUN conda env create -f thesisenv_latest.yml
 
 # Start the app with Gunicorn
-CMD ["conda", "run", "-n", "thesis-env-3.6", "gunicorn", "ThesisAnalyzer.wsgi:app", "--name", "thesisanalyzer", "--workers", "10", "--timeout", "900"]
+CMD ["conda", "run", "-n", "thesis-env-3.6", "gunicorn", "ThesisAnalyzer.wsgi:app", "--name", "thesisanalyzer", "--workers", "4", "--timeout", "900"]
