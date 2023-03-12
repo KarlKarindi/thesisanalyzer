@@ -4,7 +4,6 @@ services:
     container_name: thesisanalyzer-app
     image: thesisanalyzer:latest
     build: ./ThesisAnalyzer
-    tty: true
     volumes:
       - .:/usr/src/app
     ports:

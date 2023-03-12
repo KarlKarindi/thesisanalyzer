@@ -31,13 +31,16 @@ RUN apt-get update \
 COPY setup/necessary_files/libcg3.so.1  /usr/lib/x86_64-linux-gnu/
 
 # Install Conda
-RUN cd $HOME && wget https://repo.anaconda.com/miniconda/Miniconda3-py38_4.10.3-Linux-x86_64.sh && bash Miniconda3-py38_4.10.3-Linux-x86_64.sh -b -p $HOME/miniconda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh \
+    && bash miniconda.sh -b -p /opt/conda \
+    && rm miniconda.sh
+
+ENV PATH="/opt/conda/bin:$PATH"
 
 # Create env
-RUN $HOME/miniconda/bin/conda init bash
 COPY setup/necessary_files/thesisenv_latest.yml .
-RUN $HOME/miniconda/bin/conda env create -f thesisenv_latest.yml
-# Activate conda environment on startup
-RUN cd $HOME && chmod +x ~/miniconda/bin/conda
+RUN conda --version
+RUN conda env create -f thesisenv_latest.yml
 
-CMD ["./ThesisAnalyzer/run_app.sh"]
+# Start the app with Gunicorn
+CMD ["conda", "run", "-n", "thesis-env-3.6", "gunicorn", "ThesisAnalyzer.wsgi:app", "--name", "thesisanalyzer", "--workers", "10", "--timeout", "900"]
