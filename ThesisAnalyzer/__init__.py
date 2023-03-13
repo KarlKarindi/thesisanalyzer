@@ -31,7 +31,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # configure logging
 # Set up a file handler for Flask's default logger
-file_handler = RotatingFileHandler('logs/flask.log', maxBytes=10240, backupCount=10)
+file_handler = RotatingFileHandler('logs/flask.log', maxBytes=10000000, backupCount=3)
 file_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'))
 file_handler.setLevel(logging.INFO)
 app.logger.addHandler(file_handler)
