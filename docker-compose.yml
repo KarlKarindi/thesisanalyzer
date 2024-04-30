@@ -2,7 +2,6 @@ version: '3'
 services:
   thesisanalyzer:
     container_name: thesisanalyzer-app
-    image: thesisanalyzer:latest
     build: ./ThesisAnalyzer
     volumes:
       - .:/usr/src/app
